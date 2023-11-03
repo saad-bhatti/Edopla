@@ -3,8 +3,7 @@ import { InferSchemaType, model, Schema } from "mongoose";
 // Define a schema for the 'Order' type
 const orderItemSchema = new Schema({
   buyerId: { type: Schema.Types.ObjectId, ref: "Buyer", required: true },
-  vendorId: { type: Schema.Types.ObjectId, ref: "Vendor", required: true },
-  items: { type: [Schema.Types.ObjectId], ref: "MenuItem", required: true },
+  cartId: { type: Schema.Types.ObjectId, ref: "Cart", required: true },
   totalPrice: { type: Number, required: true },
   date: { type: Date, required: true },
   status: {

@@ -5,11 +5,11 @@ import * as CartsController from "../../controllers/items/carts";
 const router = express.Router();
 
 router.get("/", CartsController.getCarts);
-router.get("/cart/:cartId", CartsController.getCart);
-router.post("/cart", CartsController.createCart);
-// router.put("/:cartId", CartsController.updateCart);
-// router.patch("/:cartId", CartsController.toggleSaveForLater);
-// router.delete("/", CartsController.emptyCarts);
-router.delete("/cart/:cartId", CartsController.emptyCart);
+router.get("/:cartId", CartsController.getCart);
+router.post("/", CartsController.createCart);
+router.patch("/:cartId/items", CartsController.updateCart);
+router.patch("/:cartId/savedForLater", CartsController.toggleSaveForLater);
+router.delete("/", CartsController.emptyCarts);
+router.delete("/:cartId", CartsController.emptyCart);
 
 export default router;

@@ -8,6 +8,7 @@ import { assertIsDefined } from "../../util/assertIsDefined";
 
 /** "Type" of the cart item in the database */
 interface CartItem {
+  _id: Types.ObjectId;
   vendorId: Types.ObjectId;
   items: Map<string, Types.ObjectId>;
   itemsQuantity: Map<string, number>;
@@ -15,7 +16,7 @@ interface CartItem {
 }
 
 /** "Type" of the buyer profile in the database */
-interface Buyer extends Document {
+interface Buyer {
   _id: Types.ObjectId;
   buyerName: string;
   address: string;
@@ -25,9 +26,20 @@ interface Buyer extends Document {
   orders: Types.Array<Types.ObjectId>;
 }
 
-/** "Type" of the HTTP request body when creating/modifying a cart */
-interface CartBody {
+/** "Type" of the HTTP request parameters when modifying a cart */
+interface CartParams {
+  cartId: string;
+}
+
+/** "Type" of the HTTP request body when creating a cart */
+interface CreateCartBody {
   vendorId?: string;
+  items?: [string];
+  itemsQuantity?: [number];
+}
+
+/** "Type" of the HTTP request body when creating a cart */
+interface UpdateCartBody {
   items?: [string];
   itemsQuantity?: [number];
 }
@@ -41,15 +53,15 @@ export const getCarts: RequestHandler = async (req, res, next) => {
     // Verify the validity of buyer profile
     assertIsDefined(req.session.buyerId);
     const buyer = await BuyerModel.findById(req.session.buyerId)
-    .populate({
-      path: "carts",
-      populate: {
-        path: "vendorId",
-        select: "vendorName",
-        model: "Vendor",
-      },
-    })
-    .populate({
+      .populate({
+        path: "carts",
+        populate: {
+          path: "vendorId",
+          select: "vendorName",
+          model: "Vendor",
+        },
+      })
+      .populate({
         path: "carts",
         populate: {
           path: "items",
@@ -98,12 +110,13 @@ export const getCart: RequestHandler = async (req, res, next) => {
 };
 
 /**
- * Add a new vendor profile to the database and update the buyer's profile.
+ * Add a new cart to the database and update the buyer's profile.
  * Prerequisite:
  *  - Buyer's id must exist in session
  *  - A cart with the same vendor id must not exist in the buyer's carts
+ *  - All items must belong to the specified vendor
  */
-export const createCart: RequestHandler<unknown, unknown, CartBody, unknown> = async (
+export const createCart: RequestHandler<unknown, unknown, CreateCartBody, unknown> = async (
   req,
   res,
   next
@@ -168,6 +181,143 @@ export const createCart: RequestHandler<unknown, unknown, CartBody, unknown> = a
     BuyerModel.findByIdAndUpdate(buyer._id, { $push: { carts: newCart._id } }).exec();
 
     res.status(201).json(newCart);
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Update an existing cart to the database.
+ * Prerequisite:
+ *  - Buyer's id must exist in session
+ *  - The cart must belong to the buyer
+ *  - All items must belong to the existing vendor
+ */
+export const updateCart: RequestHandler<CartParams, unknown, UpdateCartBody, unknown> = async (
+  req,
+  res,
+  next
+) => {
+  const unverifiedCartId = req.params.cartId;
+  const items = req.body.items;
+  const itemsQuantity = req.body.itemsQuantity;
+  try {
+    // Verify the validity of the cart id
+    if (!mongoose.isValidObjectId(unverifiedCartId))
+      throw createHttpError(400, "Invalid cart id: " + unverifiedCartId);
+
+    // Verify the validity of buyer profile
+    assertIsDefined(req.session.buyerId);
+    const buyer: Buyer | null = await BuyerModel.findById(req.session.buyerId)
+      .populate({ path: "carts", match: { _id: unverifiedCartId } })
+      .lean();
+    if (!buyer) throw createHttpError(404, "Buyer profile not found");
+
+    // Verify that the cart belongs to the buyer
+    if (!buyer.carts.length)
+      throw createHttpError(403, "Cart id '" + unverifiedCartId + "' is not owned by the buyer");
+    const verifiedCart = buyer.carts[0];
+
+    // Validate the existance of the provided fields
+    if (!items || !itemsQuantity) throw createHttpError(400, "A required field is missing");
+    if (!items.length || items.length !== itemsQuantity.length)
+      throw createHttpError(400, "items and itemsQuantity must have the same non-empty length");
+    if (items.length !== new Set(items).size)
+      throw createHttpError(400, "Duplicate items are not allowed");
+
+    // Verify validity of each item and its ownership to the vendor
+    const verifiedVendor = await VendorModel.findById(verifiedCart.vendorId).select("menu").exec();
+    if (!verifiedVendor) throw createHttpError(404, "Vendor not found");
+    items.forEach((unverifiedItemId) => {
+      if (!mongoose.isValidObjectId(unverifiedItemId))
+        throw createHttpError(400, "Invalid item id: " + unverifiedItemId);
+      const verifiedItemId = new mongoose.Types.ObjectId(unverifiedItemId);
+      const index = verifiedVendor.menu.indexOf(verifiedItemId);
+      if (index === -1)
+        throw createHttpError(400, "Item '" + verifiedItemId + "' does not belong to the vendor");
+    });
+
+    // Create the maps for the items and their quantities
+    const updatedItemsMap = new Map();
+    const updatedItemsQuantityMap = new Map();
+    let key;
+    for (let i = 0; i < items.length; i++) {
+      key = i.toString();
+      updatedItemsMap.set(key, items[i]);
+      updatedItemsQuantityMap.set(key, itemsQuantity[i]);
+    }
+
+    // Update the cart
+    const updatedCart = await CartModel.findByIdAndUpdate(
+      verifiedCart._id,
+      {
+        items: updatedItemsMap,
+        itemsQuantity: updatedItemsQuantityMap,
+      },
+      { new: true }
+    ).exec();
+
+    res.status(200).json(updatedCart);
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Toggle the savedForLater field of an existing cart.
+ * Prerequisite:
+ *  - Buyer's id must exist in session
+ *  - The cart must belong to the buyer
+ */
+export const toggleSaveForLater: RequestHandler = async (req, res, next) => {
+  const unverifiedCartId = req.params.cartId;
+  try {
+    // Verify the validity of the cart id
+    if (!mongoose.isValidObjectId(unverifiedCartId))
+      throw createHttpError(400, "Invalid cart id: " + unverifiedCartId);
+
+    // Verify the validity of buyer profile
+    assertIsDefined(req.session.buyerId);
+    const buyer: Buyer | null = await BuyerModel.findById(req.session.buyerId)
+      .populate({ path: "carts", match: { _id: unverifiedCartId } })
+      .lean();
+    if (!buyer) throw createHttpError(404, "Buyer profile not found");
+
+    // Verify that the cart belongs to the buyer
+    if (!buyer.carts.length)
+      throw createHttpError(403, "Cart id '" + unverifiedCartId + "' is not owned by the buyer");
+    const verifiedCart = buyer.carts[0];
+
+    // Toggle the savedForLater field of the cart
+    const updatedCart = await CartModel.findByIdAndUpdate(
+      verifiedCart._id,
+      { savedForLater: !verifiedCart.savedForLater },
+      { new: true }
+    ).exec();
+
+    res.status(200).json(updatedCart);
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Delete all existing carts from the database and the buyer's carts.
+ * Prerequisite: Buyer's id must exist in session.
+ */
+export const emptyCarts: RequestHandler = async (req, res, next) => {
+  try {
+    // Verify the validity of buyer profile
+    assertIsDefined(req.session.buyerId);
+    const buyer = await BuyerModel.findById(req.session.buyerId).exec();
+    if (!buyer) throw createHttpError(404, "Buyer profile not found");
+
+    // Delete all carts from the buyer's carts & reset the carts
+    await CartModel.deleteMany({ _id: { $in: buyer.carts } }).exec();
+    buyer.carts = [];
+    await buyer.save();
+
+    res.status(200).json({ message: "Carts successfully deleted" });
   } catch (error) {
     next(error);
   }
