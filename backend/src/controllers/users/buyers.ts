@@ -51,6 +51,7 @@ export const createBuyer: RequestHandler<unknown, unknown, BuyerBody, unknown> =
       address: address,
       phoneNumber: phoneNumber,
       savedVendors: [],
+      carts: [],
       orders: [],
     });
 

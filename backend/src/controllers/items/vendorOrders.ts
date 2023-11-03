@@ -1,7 +1,7 @@
 import { RequestHandler } from "express";
 import createHttpError from "http-errors";
 import mongoose from "mongoose";
-import OrderModel from "../../models/order";
+import OrderModel from "../../models/items/orderItem";
 import VendorModel from "../../models/users/vendor";
 import { assertIsDefined } from "../../util/assertIsDefined";
 
@@ -36,6 +36,8 @@ export const getOrder: RequestHandler = async (req, res, next) => {
       throw createHttpError(400, "Invalid order id");
     const verifiedOrder = await OrderModel.findById(unverifiedOrderId).exec();
     if (!verifiedOrder) throw createHttpError(404, "Menu item not found");
+
+    // TODO
 
     res.status(200).json(vendor.orders);
   } catch (error) {

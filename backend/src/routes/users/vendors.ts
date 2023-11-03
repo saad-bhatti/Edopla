@@ -10,7 +10,4 @@ router.post("/", requiresAuth, VendorsController.createProfile);
 router.patch("/", requiresVendor, VendorsController.updateProfile);
 router.patch("/cuisine", requiresVendor, VendorsController.updatedCuisine);
 
-router.get("/menu", requiresVendor, VendorsController.getMenu);
-router.patch("/menu", requiresVendor, VendorsController.updateMenu);
-
 export default router;

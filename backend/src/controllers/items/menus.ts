@@ -1,19 +1,48 @@
 import { RequestHandler } from "express";
 import createHttpError from "http-errors";
 import mongoose from "mongoose";
-import MenuItemModel from "../models/menuItem";
-import VendorModel from "../models/users/vendor";
-import { assertIsDefined } from "../util/assertIsDefined";
+import MenuItemModel from "../../models/items/menuItem";
+import VendorModel from "../../models/users/vendor";
+import { assertIsDefined } from "../../util/assertIsDefined";
 
-/** Retrieve a menu item from the database. */
-export const getMentItem: RequestHandler = async (req, res, next) => {
+/** "Type" of the HTTP request parameters when modifying a menu item */
+interface MenuItemParams {
+  menuItemId?: string;
+}
+
+/** "Type" of the HTTP request body when creating/modifying a menu item */
+interface MenuItemBody {
+  name?: string;
+  price?: number;
+  category?: string;
+  description?: string;
+  availability?: boolean;
+}
+
+/** Retrieve the specified vendor's menu from the database. */
+export const getMenu: RequestHandler = async (req, res, next) => {
+  const unverifiedVendorId = req.params.vendorId;
+  try {
+    if (!mongoose.isValidObjectId(unverifiedVendorId))
+      throw createHttpError(400, "Invalid vendor id: " + unverifiedVendorId);
+    const vendor = await VendorModel.findById(unverifiedVendorId).populate("menu").exec();
+    if (!vendor) throw createHttpError(404, "Vendor with id: " + unverifiedVendorId + " not found");
+
+    res.status(200).json(vendor.menu);
+  } catch (error) {
+    next(error);
+  }
+};
+
+/** Retrieve a specified menu item from the database. */
+export const getMenuItem: RequestHandler = async (req, res, next) => {
   const unverifiedMenuItemId = req.params.menuItemId;
   try {
-    // Verify the existance of the menu item id
     if (!mongoose.isValidObjectId(unverifiedMenuItemId))
-      throw createHttpError(400, "Invalid menu item id");
+      throw createHttpError(400, "Invalid menu item id: " + unverifiedMenuItemId);
     const verifiedMenuItem = await MenuItemModel.findById(unverifiedMenuItemId).exec();
-    if (!verifiedMenuItem) throw createHttpError(404, "Menu item not found");
+    if (!verifiedMenuItem)
+      throw createHttpError(404, "Menu item with id: " + unverifiedMenuItemId + " not found");
 
     res.status(201).json(verifiedMenuItem);
   } catch (error) {
@@ -21,16 +50,10 @@ export const getMentItem: RequestHandler = async (req, res, next) => {
   }
 };
 
-// "Type" of the HTTP request body when creating/modifying a menu item
-interface MenuItemBody {
-  name?: string;
-  price?: number;
-  category?: string;
-  description?: string;
-}
-
-/** Add a new menu item to the database. Note that the item is initialized to
- * be unavailable by default. */
+/**
+ * Add a new menu item to the database and to the vendor's menu.
+ * Prerequisite: Vendor's id must exist in session.
+ */
 export const createMenuItem: RequestHandler<unknown, unknown, MenuItemBody, unknown> = async (
   req,
   res,
@@ -40,20 +63,22 @@ export const createMenuItem: RequestHandler<unknown, unknown, MenuItemBody, unkn
   const price = req.body.price;
   const category = req.body.category;
   const description = req.body.description;
+  const availablility = req.body.availability;
   try {
-    // Validate the existance of the required fields
-    if (!name || !price || !category) throw createHttpError(400, "A required field is missing");
-
     // Verify the validity of vendor profile
     assertIsDefined(req.session.vendorId);
-    const vendor = await VendorModel.findById(req.session.vendorId).exec();
+    const vendor = await VendorModel.findById(req.session.vendorId).select("menu").exec();
     if (!vendor) throw createHttpError(404, "Vendor profile not found");
+
+    // Validate the existance of the required fields
+    if (!name || !price || !category || availablility === undefined)
+      throw createHttpError(400, "A required field is missing");
 
     // Send the request to create the new menu item
     const newMenuItem = await MenuItemModel.create({
       name: name,
       price: price,
-      available: false,
+      available: availablility,
       category: category,
       description: description,
       expireAt: undefined,
@@ -69,12 +94,10 @@ export const createMenuItem: RequestHandler<unknown, unknown, MenuItemBody, unkn
   }
 };
 
-// "Type" of the HTTP request parameters when modifying a menu item
-interface MenuItemParams {
-  menuItemId?: string;
-}
-
-/** Update an existing menu item in the database. */
+/**
+ * Replace an existing menu item in the database.
+ * Prerequisite: Vendor's id must exist in session.
+ */
 export const updateMenuItem: RequestHandler<
   MenuItemParams,
   unknown,
@@ -86,20 +109,23 @@ export const updateMenuItem: RequestHandler<
   const price = req.body.price;
   const category = req.body.category;
   const description = req.body.description;
+  const availablility = req.body.availability;
   try {
+    // Verify the validity of vendor profile
+    assertIsDefined(req.session.vendorId);
+    const vendor = await VendorModel.findById(req.session.vendorId).select("menu").exec();
+    if (!vendor) throw createHttpError(404, "Vendor profile not found");
+
     // Verify the existance of the required fields
-    if (!name || !price || !category) throw createHttpError(400, "A required field is missing");
+    if (!name || !price || !category || availablility === undefined)
+      throw createHttpError(400, "A required field is missing");
 
     // Verify the existance of the menu item id
     if (!mongoose.isValidObjectId(unverifiedMenuItemId))
-      throw createHttpError(400, "Invalid menu item id");
+      throw createHttpError(400, "Invalid menu item id: " + unverifiedMenuItemId);
     const verifiedMenuItem = await MenuItemModel.findById(unverifiedMenuItemId).exec();
-    if (!verifiedMenuItem) throw createHttpError(404, "Menu item not found");
-
-    // Verify the validity of vendor profile
-    assertIsDefined(req.session.vendorId);
-    const vendor = await VendorModel.findById(req.session.vendorId).exec();
-    if (!vendor) throw createHttpError(404, "Vendor profile not found");
+    if (!verifiedMenuItem)
+      throw createHttpError(404, "Menu item with id:" + unverifiedMenuItemId + " not found");
 
     // Verify that the menu item belongs to the vendor
     if (!vendor.menu.includes(verifiedMenuItem._id))
@@ -108,6 +134,7 @@ export const updateMenuItem: RequestHandler<
     // Update the menu item
     (verifiedMenuItem.name = name), (verifiedMenuItem.price = price);
     (verifiedMenuItem.category = category), (verifiedMenuItem.description = description);
+    verifiedMenuItem.available = availablility;
     const updatedMenuItem = await verifiedMenuItem.save();
 
     res.status(200).json(updatedMenuItem);
@@ -116,20 +143,23 @@ export const updateMenuItem: RequestHandler<
   }
 };
 
-/** Toggle the availability of an existing menu item from the database. */
-export const toggleMenuItemAvailability: RequestHandler = async (req, res, next) => {
+/**
+ * Toggle the availability of an existing menu item from the database.
+ * Prerequisite: Vendor's id must exist in session.
+ */
+export const toggleAvailability: RequestHandler = async (req, res, next) => {
   const unverifiedMenuItemId = req.params.menuItemId;
   try {
+    // Verify the validity of vendor profile
+    assertIsDefined(req.session.vendorId);
+    const vendor = await VendorModel.findById(req.session.vendorId).select("menu").exec();
+    if (!vendor) throw createHttpError(404, "Vendor profile not found");
+
     // Verify the existance of the menu item id
     if (!mongoose.isValidObjectId(unverifiedMenuItemId))
       throw createHttpError(400, "Invalid menu item id");
     const verifiedMenuItem = await MenuItemModel.findById(unverifiedMenuItemId).exec();
     if (!verifiedMenuItem) throw createHttpError(404, "Menu item not found");
-
-    // Verify the validity of vendor profile
-    assertIsDefined(req.session.vendorId);
-    const vendor = await VendorModel.findById(req.session.vendorId).exec();
-    if (!vendor) throw createHttpError(404, "Vendor profile not found");
 
     // Verify that the menu item belongs to the vendor
     const index = vendor.menu.indexOf(verifiedMenuItem._id);
@@ -137,28 +167,31 @@ export const toggleMenuItemAvailability: RequestHandler = async (req, res, next)
 
     // Toggle the availability of the menu item
     verifiedMenuItem.available = !verifiedMenuItem.available;
-    await verifiedMenuItem.save();
+    const updatedMenuItem = await verifiedMenuItem.save();
 
-    res.status(200).json({ message: "Menu item's availability successfully toggled" });
+    res.status(200).json(updatedMenuItem);
   } catch (error) {
     next(error);
   }
 };
 
-/** Delete an existing menu item from the database. */
+/**
+ * Delete an existing menu item from the database and the vendor's menu.
+ * Prerequisite: Vendor's id must exist in session.
+ */
 export const deleteMenuItem: RequestHandler = async (req, res, next) => {
   const unverifiedMenuItemId = req.params.menuItemId;
   try {
+    // Verify the validity of vendor profile
+    assertIsDefined(req.session.vendorId);
+    const vendor = await VendorModel.findById(req.session.vendorId).select("menu").exec();
+    if (!vendor) throw createHttpError(404, "Vendor profile not found");
+
     // Verify the existance of the menu item id
     if (!mongoose.isValidObjectId(unverifiedMenuItemId))
       throw createHttpError(400, "Invalid menu item id");
     const verifiedMenuItem = await MenuItemModel.findById(unverifiedMenuItemId).exec();
     if (!verifiedMenuItem) throw createHttpError(404, "Menu item not found");
-
-    // Verify the validity of vendor profile
-    assertIsDefined(req.session.vendorId);
-    const vendor = await VendorModel.findById(req.session.vendorId).exec();
-    if (!vendor) throw createHttpError(404, "Vendor profile not found");
 
     // Verify that the menu item belongs to the vendor
     const index = vendor.menu.indexOf(verifiedMenuItem._id);

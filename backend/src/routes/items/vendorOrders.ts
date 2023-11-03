@@ -1,5 +1,5 @@
 import express from "express";
-import * as VendorOrdersController from "../../controllers/orders/vendorOrders";
+import * as VendorOrdersController from "../../controllers/items/vendorOrders";
 
 // Create the router for the server
 const router = express.Router();

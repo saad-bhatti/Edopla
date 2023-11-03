@@ -1,7 +1,5 @@
 import { RequestHandler } from "express";
 import createHttpError from "http-errors";
-import mongoose from "mongoose";
-import MenuItemModel from "../../models/menuItem";
 import UserModel from "../../models/users/user";
 import VendorModel from "../../models/users/vendor";
 import { assertIsDefined } from "../../util/assertIsDefined";
@@ -140,58 +138,6 @@ export const updatedCuisine: RequestHandler<unknown, unknown, CuisineBody, unkno
     const index = vendor.cuisineTypes.indexOf(cuisine);
     if (index === -1) vendor.cuisineTypes.push(cuisine);
     else vendor.cuisineTypes.splice(index, 1);
-    const updatedVendor = await vendor.save();
-
-    res.status(200).json(updatedVendor);
-  } catch (error) {
-    next(error);
-  }
-};
-
-/** Retrieve a vendor's menu from the database. */
-export const getMenu: RequestHandler = async (req, res, next) => {
-  try {
-    assertIsDefined(req.session.vendorId);
-    const vendor = await VendorModel.findById(req.session.vendorId).populate("menu").exec();
-    if (!vendor) throw createHttpError(404, "Vendor profile not found");
-
-    res.status(200).json(vendor.menu);
-  } catch (error) {
-    next(error);
-  }
-}
-
-// "Type" of the HTTP request body when modifying a vendor's menu
-interface MenuBody {
-  menuItemId: string;
-}
-
-/** If the provided menu item already exists in the vendor's menu, the item is
- * removed from the vendor's menu. Otherwise, the item is added to the menu. */
-export const updateMenu: RequestHandler<unknown, unknown, MenuBody, unknown> = async (
-  req,
-  res,
-  next
-) => {
-  const unvalidatedMenuItemId = req.body.menuItemId;
-  try {
-    // Validate the existance of the required field
-    if (!unvalidatedMenuItemId) throw createHttpError(400, "A required field is missing");
-    if (!mongoose.isValidObjectId(unvalidatedMenuItemId))
-      throw createHttpError(400, "Invalid menu item id");
-    const menuItem = await MenuItemModel.findById(unvalidatedMenuItemId).exec();
-    if (!menuItem) throw createHttpError(404, "Menu item not found");
-
-    // Retrieve the vendor from the database
-    assertIsDefined(req.session.vendorId);
-    const vendor = await VendorModel.findById(req.session.vendorId).exec();
-    if (!vendor) throw createHttpError(404, "Vendor profile not found");
-
-    // Search the vendor's stored cuisine types & update as necessary
-    const validMenuItemId = menuItem._id;
-    const index = vendor.menu.indexOf(validMenuItemId);
-    if (index === -1) vendor.menu.push(validMenuItemId);
-    else vendor.menu.splice(index, 1);
     const updatedVendor = await vendor.save();
 
     res.status(200).json(updatedVendor);
