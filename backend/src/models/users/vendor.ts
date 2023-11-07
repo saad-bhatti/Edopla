@@ -9,7 +9,7 @@ const vendorSchema = new Schema({
   description: { type: String },
   cuisineTypes: { type: [String] },
   menu: { type: [Schema.Types.ObjectId], ref: "MenuItem", required: true, select: false },
-  orders: { type: [Schema.Types.ObjectId], ref: "Order", required: true, select: false },
+  orders: { type: [Schema.Types.ObjectId], ref: "OrderItem", required: true, select: false },
 });
 
 // Create a 'VendorCredentials' type from the schema

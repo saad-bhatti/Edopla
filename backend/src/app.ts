@@ -4,11 +4,10 @@ import express, { NextFunction, Request, Response } from "express";
 import session from "express-session";
 import createHttpError, { isHttpError } from "http-errors";
 import morgan from "morgan";
-import { requiresBuyer, requiresVendor } from "./middleware/auth";
-import buyerOrdersRoutes from "./routes/items/buyerOrders";
+import { requiresBuyer } from "./middleware/auth";
 import cartsRoutes from "./routes/items/carts";
 import menusRoutes from "./routes/items/menus";
-import vendorOrdersRoutes from "./routes/items/vendorOrders";
+import ordersRoutes from "./routes/items/orders";
 import buyersRoutes from "./routes/users/buyers";
 import usersRoutes from "./routes/users/users";
 import vendorsRoutes from "./routes/users/vendors";
@@ -42,12 +41,11 @@ app.use(
 
 // Add middleware to handle routes
 app.use("/api/users", usersRoutes);
-app.use("/api/buyers", buyersRoutes);
-app.use("/api/buyers/orders", requiresBuyer, buyerOrdersRoutes);
-app.use("/api/carts", requiresBuyer, cartsRoutes);
 app.use("/api/vendors", vendorsRoutes);
-app.use("/api/vendors/orders", requiresVendor, vendorOrdersRoutes);
 app.use("/api/menus", menusRoutes);
+app.use("/api/buyers", buyersRoutes);
+app.use("/api/carts", requiresBuyer, cartsRoutes);
+app.use("/api/orders", ordersRoutes);
 
 // Catch invalid routes
 app.use((req, res, next) => {

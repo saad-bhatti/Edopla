@@ -7,10 +7,12 @@ const cartItemSchema = new Schema({
     type: Map,
     of: Schema.Types.ObjectId,
     ref: "MenuItem",
+    required: true,
   },
   itemsQuantity: {
     type: Map,
     of: Number,
+    required: true,
   },
   savedForLater: { type: Boolean, required: true },
 });
@@ -19,4 +21,4 @@ const cartItemSchema = new Schema({
 type CartItem = InferSchemaType<typeof cartItemSchema>;
 
 // Export the 'Order' collection
-export default model<CartItem>("Cart", cartItemSchema);
+export default model<CartItem>("CartItem", cartItemSchema);
