@@ -102,3 +102,16 @@ export interface V_OP1 {
   phoneNumber?: string;
   orders: Types.Array<OI_U>;
 }
+
+/**
+ * "Type" of the vendor profile in the database with the menus array populated
+ * one level deep.
+ */
+export interface V_MP1 {
+  _id: Types.ObjectId;
+  vendorName: string;
+  address: string;
+  phoneNumber?: string;
+  orders: Types.Array<Types.ObjectId>;
+  menu: Types.Array<MI>;
+}

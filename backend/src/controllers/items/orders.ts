@@ -1,6 +1,6 @@
 import { RequestHandler } from "express";
-import createHttpError from "http-errors";
 import mongoose from "mongoose";
+import * as Http_Errors from "../../errors/http_errors";
 import CartModel from "../../models/items/cartItem";
 import OrderModel from "../../models/items/orderItem";
 import BuyerModel from "../../models/users/buyer";
@@ -8,30 +8,32 @@ import VendorModel from "../../models/users/vendor";
 import { assertIsDefined } from "../../util/assertIsDefined";
 import * as Interfaces from "../../util/interfaces";
 
-/** "Type" of the HTTP request parameters when interacting with an order */
+/** "Type" of the HTTP request parameters when interacting with an order. */
 interface OrderParams {
   orderId?: string;
 }
 
-/** "Type" of the HTTP request body when creating a cart */
+/** "Type" of the HTTP request body when creating a cart. */
 interface OrderBody {
   cartId?: string;
 }
 
-/** "Type" of the HTTP request body when processing an order */
+/** "Type" of the HTTP request body when processing an order. */
 interface ProcessOrderBody {
   isAccept?: boolean;
 }
 
-/** "Type" of the HTTP request body when updating an order's status */
+/** "Type" of the HTTP request body when updating an order's status. */
 interface StatusOrderBody {
   status?: number;
 }
 
-/* Buyer-Related Requests */
 /**
  * Retrieve all orders of the buyer from the database.
- * Prerequisite: Buyer's id must exist in session.
+ *  - Prerequisite: Buyer's id must exist in session.
+ *  - Params: None
+ *  - Body: None
+ *  - Return: [OrderItem]
  */
 export const getBuyerOrders: RequestHandler<unknown, unknown, unknown, unknown> = async (
   req,
@@ -50,7 +52,7 @@ export const getBuyerOrders: RequestHandler<unknown, unknown, unknown, unknown> 
         },
       })
       .exec();
-    if (!buyer) throw createHttpError(404, "Buyer profile not found");
+    if (!buyer) throw new Http_Errors.NotFound("Buyer");
 
     res.status(200).json(buyer.orders);
   } catch (error) {
@@ -60,9 +62,12 @@ export const getBuyerOrders: RequestHandler<unknown, unknown, unknown, unknown> 
 
 /**
  * Retrieve an order specified by its id from the database.
- * Prerequisites:
- *  - Buyer's id must exist in session
- *  - The order must belong to the buyer
+ *  - Prerequisites:
+ *    - Buyer's id must exist in session
+ *    - The order must belong to the buyer
+ *  - Params: orderId
+ *  - Body: None
+ *  - Return: OrderItem
  */
 export const getBuyerOrder: RequestHandler<OrderParams, unknown, unknown, unknown> = async (
   req,
@@ -73,7 +78,7 @@ export const getBuyerOrder: RequestHandler<OrderParams, unknown, unknown, unknow
   try {
     // Verify the validity of the order id
     if (!mongoose.isValidObjectId(unverifiedOrderId))
-      throw createHttpError(400, "Invalid order id: " + unverifiedOrderId);
+      throw new Http_Errors.InvalidField("order id");
 
     // Verify the validity of buyer profile
     assertIsDefined(req.session.buyerId);
@@ -84,11 +89,10 @@ export const getBuyerOrder: RequestHandler<OrderParams, unknown, unknown, unknow
         populate: { path: "cartId", model: "CartItem" },
       })
       .exec();
-    if (!buyer) throw createHttpError(404, "Buyer profile not found");
+    if (!buyer) throw new Http_Errors.NotFound("Buyer");
 
     // Verify that the order belongs to the buyer
-    if (!buyer.orders.length)
-      throw createHttpError(403, "Order id '" + unverifiedOrderId + "' is not owned by the buyer");
+    if (!buyer.orders.length) throw new Http_Errors.Unauthorized("Buyer", "order");
     const verifiedOrder = buyer.orders[0];
 
     res.status(200).json(verifiedOrder);
@@ -99,9 +103,12 @@ export const getBuyerOrder: RequestHandler<OrderParams, unknown, unknown, unknow
 
 /**
  * Place an order for the buyer.
- * Prerequisites:
- *  - Buyer's id must exist in session
- *  - The cart must belong to the buyer
+ *  - Prerequisites:
+ *    - Buyer's id must exist in session
+ *    - The cart must belong to the buyer
+ *  - Params: None
+ *  - Body: cartId
+ *  - Return: OrderItem
  */
 export const placeOrder: RequestHandler<unknown, unknown, OrderBody, unknown> = async (
   req,
@@ -111,8 +118,7 @@ export const placeOrder: RequestHandler<unknown, unknown, OrderBody, unknown> = 
   const unverifiedCartId = req.body.cartId;
   try {
     // Verify the validity of the cart id
-    if (!mongoose.isValidObjectId(unverifiedCartId))
-      throw createHttpError(400, "Invalid cart id: " + unverifiedCartId);
+    if (!mongoose.isValidObjectId(unverifiedCartId)) throw new Http_Errors.InvalidField("cart id");
 
     // Verify the validity of buyer profile
     assertIsDefined(req.session.buyerId);
@@ -123,11 +129,10 @@ export const placeOrder: RequestHandler<unknown, unknown, OrderBody, unknown> = 
         populate: { path: "items", model: "MenuItem" },
       })
       .lean();
-    if (!buyer) throw createHttpError(404, "Buyer profile not found");
+    if (!buyer) throw new Http_Errors.NotFound("Buyer");
 
     // Verify that the cart belongs to the buyer & retrieve the necessary data
-    if (!buyer.carts.length)
-      throw createHttpError(403, "Cart id '" + unverifiedCartId + "' is not owned by the buyer");
+    if (!buyer.carts.length) throw new Http_Errors.Unauthorized("Buyer", "cart");
     const verifiedCart: Interfaces.CI_IP = buyer.carts[0];
     const itemsMap = verifiedCart.items;
     const itemsQuantityObject = verifiedCart.itemsQuantity;
@@ -167,10 +172,13 @@ export const placeOrder: RequestHandler<unknown, unknown, OrderBody, unknown> = 
 
 /**
  * Cancel an order for the buyer.
- * Prerequisites:
- *  - Buyer's id must exist in session
- *  - The order must belong to the buyer
- *  - The order must be in the "pending" status (status 0)
+ *  - Prerequisites:
+ *    - Buyer's id must exist in session
+ *    - The order must belong to the buyer
+ *    - The order must be in the "pending" status (status 0)
+ *  - Params: orderId
+ *  - Body: None
+ *  - Return: String
  */
 export const cancelOrder: RequestHandler<OrderParams, unknown, unknown, unknown> = async (
   req,
@@ -181,7 +189,7 @@ export const cancelOrder: RequestHandler<OrderParams, unknown, unknown, unknown>
   try {
     // Verify the validity of the order id
     if (!mongoose.isValidObjectId(unverifiedOrderId))
-      throw createHttpError(400, "Invalid order id: " + unverifiedOrderId);
+      throw new Http_Errors.InvalidField("order id");
 
     // Verify the validity of buyer profile
     assertIsDefined(req.session.buyerId);
@@ -191,16 +199,15 @@ export const cancelOrder: RequestHandler<OrderParams, unknown, unknown, unknown>
         match: { _id: unverifiedOrderId },
       })
       .lean();
-    if (!buyer) throw createHttpError(404, "Buyer profile not found");
+    if (!buyer) throw new Http_Errors.NotFound("Buyer");
 
     // Verify that the order belongs to the buyer
-    if (!buyer.orders.length)
-      throw createHttpError(403, "Order id '" + unverifiedOrderId + "' is not owned by the buyer");
+    if (!buyer.orders.length) throw new Http_Errors.Unauthorized("Buyer", "order");
     const verifiedOrder: Interfaces.OI_U = buyer.orders[0];
 
     // Verify that the order is in the "pending" status
     if (verifiedOrder.status !== 0)
-      throw createHttpError(403, "Order id '" + verifiedOrder._id + "' is not in 'pending' status");
+      throw new Http_Errors.CustomError("Order is not in 'pending' status", 403);
 
     // Remove the order from the buyer's orders and delete the cart & order from the database
     await BuyerModel.findByIdAndUpdate(buyer._id, {
@@ -218,7 +225,10 @@ export const cancelOrder: RequestHandler<OrderParams, unknown, unknown, unknown>
 /* Vendor-Related Requests */
 /**
  * Retrieve all orders of the vendor from the database.
- * Prerequisite: Vendor's id must exist in session.
+ *  - Prerequisite: Vendor's id must exist in session.
+ *  - Params: None
+ *  - Body: None
+ *  - Return: [OrderItem]
  */
 export const getVendorOrders: RequestHandler<unknown, unknown, unknown, unknown> = async (
   req,
@@ -237,7 +247,7 @@ export const getVendorOrders: RequestHandler<unknown, unknown, unknown, unknown>
         },
       })
       .exec();
-    if (!vendor) throw createHttpError(404, "Vendor profile not found");
+    if (!vendor) throw new Http_Errors.NotFound("Vendor");
 
     res.status(200).json(vendor.orders);
   } catch (error) {
@@ -247,9 +257,12 @@ export const getVendorOrders: RequestHandler<unknown, unknown, unknown, unknown>
 
 /**
  * Retrieve an order specified by its id from the database.
- * Prerequisites:
- *  - Vendor's id must exist in session
- *  - The order must belong to the vendor
+ *  - Prerequisites:
+ *    - Vendor's id must exist in session
+ *    - The order must belong to the vendor
+ *  - Params: orderId
+ *  - Body: None
+ *  - Return: OrderItem
  */
 export const getVendorOrder: RequestHandler<OrderParams, unknown, unknown, unknown> = async (
   req,
@@ -260,7 +273,7 @@ export const getVendorOrder: RequestHandler<OrderParams, unknown, unknown, unkno
   try {
     // Verify the validity of the order id
     if (!mongoose.isValidObjectId(unverifiedOrderId))
-      throw createHttpError(400, "Invalid order id: " + unverifiedOrderId);
+      throw new Http_Errors.InvalidField("order id");
 
     // Verify the validity of vendor profile
     assertIsDefined(req.session.vendorId);
@@ -271,11 +284,10 @@ export const getVendorOrder: RequestHandler<OrderParams, unknown, unknown, unkno
         populate: { path: "cartId", model: "CartItem" },
       })
       .exec();
-    if (!vendor) throw createHttpError(404, "Vendor profile not found");
+    if (!vendor) throw new Http_Errors.NotFound("Vendor");
 
     // Verify that the order belongs to the buyer
-    if (!vendor.orders.length)
-      throw createHttpError(403, "The order does not belong to the vendor");
+    if (!vendor.orders.length) throw new Http_Errors.Unauthorized("Vendor", "order");
     const verifiedOrder = vendor.orders[0];
 
     res.status(200).json(verifiedOrder);
@@ -286,10 +298,13 @@ export const getVendorOrder: RequestHandler<OrderParams, unknown, unknown, unkno
 
 /**
  * Process an order from the buyer by either accepting or rejecting it.
- * Prerequisites:
- *  - Vendor's id must exist in session
- *  - The order must belong to the vendor
- *  - The order must be in the "pending" status (status 0)
+ *  - Prerequisites:
+ *    - Vendor's id must exist in session
+ *    - The order must belong to the vendor
+ *    - The order must be in the "pending" status (status 0)
+ *  - Params: orderId
+ *  - Body: isAccept
+ *  - Return: String
  */
 export const processOrder: RequestHandler<OrderParams, unknown, ProcessOrderBody, unknown> = async (
   req,
@@ -302,25 +317,26 @@ export const processOrder: RequestHandler<OrderParams, unknown, ProcessOrderBody
     // Verify the validity of vendor profile
     assertIsDefined(req.session.vendorId);
     const vendor = await VendorModel.findById(req.session.vendorId);
-    if (!vendor) throw createHttpError(404, "Vendor profile not found");
+    if (!vendor) throw new Http_Errors.NotFound("Vendor");
 
     // Verify the existance of the required field
-    if (isAccepted === undefined) throw createHttpError(400, "Missing required field: isAccepted");
+    if (isAccepted === undefined) throw new Http_Errors.MissingField();
 
     // Verify the validity of the order id and retrieve the order
     if (!mongoose.isValidObjectId(unverifiedOrderId))
-      throw createHttpError(400, "Invalid order id: " + unverifiedOrderId);
+      throw new Http_Errors.InvalidField("order id");
     const verifiedOrder: Interfaces.OI_CP | null = await OrderModel.findById(unverifiedOrderId)
       .populate({ path: "cartId", select: "vendorId" })
       .lean();
-    if (!verifiedOrder) throw createHttpError(404, "Order not found");
+    if (!verifiedOrder) throw new Http_Errors.NotFound("Order");
 
     // Verify that the order (from the cart) belongs to the vendor
     if (!vendor._id.equals(verifiedOrder.cartId.vendorId))
-      throw createHttpError(403, "The order does not belong to this vendor");
+      throw new Http_Errors.Unauthorized("Vendor", "order");
 
     // Verify the order status is pending
-    if (verifiedOrder.status !== 0) throw createHttpError(403, "The order's status is not pending");
+    if (verifiedOrder.status !== 0)
+      throw new Http_Errors.CustomError("Order is not in 'pending' status", 403);
 
     // If accepting the order, update the order status to in-progress & add it to the vendor's orders
     if (isAccepted) {
@@ -340,10 +356,13 @@ export const processOrder: RequestHandler<OrderParams, unknown, ProcessOrderBody
 
 /**
  * Update the status of the specified order.
- * Prerequisites:
- *  - Vendor's id must exist in session
- *  - The order must belong to the vendor
- *  - The new status must be greater than the current status
+ *  - Prerequisites:
+ *    - Vendor's id must exist in session
+ *    - The order must belong to the vendor
+ *    - The new status must be greater than the current status
+ *  - Params: orderId
+ *  - Body: status
+ *  - Return: OrderItem
  */
 export const updateOrderStatus: RequestHandler<
   OrderParams,
@@ -355,11 +374,11 @@ export const updateOrderStatus: RequestHandler<
   const status = req.body.status;
   try {
     // Verify the existance of the required field
-    if (!status) throw createHttpError(400, "A required field is missing");
+    if (!status) throw new Http_Errors.MissingField();
 
     // Verify the validity of the order id and retrieve the order
     if (!mongoose.isValidObjectId(unverifiedOrderId))
-      throw createHttpError(400, "Invalid order id: " + unverifiedOrderId);
+      throw new Http_Errors.InvalidField("order id");
 
     // Verify the validity of vendor profile
     assertIsDefined(req.session.vendorId);
@@ -369,15 +388,13 @@ export const updateOrderStatus: RequestHandler<
         match: { _id: unverifiedOrderId },
       })
       .lean();
-    if (!vendor) throw createHttpError(404, "Vendor profile not found");
+    if (!vendor) throw new Http_Errors.NotFound("Vendor");
 
-    if (!vendor.orders.length)
-      throw createHttpError(403, "The order does not belong to the vendor");
+    if (!vendor.orders.length) throw new Http_Errors.Unauthorized("Vendor", "order");
     const verifiedOrder: Interfaces.OI_U = vendor.orders[0];
 
     // Verify the current order status is less than the new status
-    if (verifiedOrder.status >= status)
-      throw createHttpError(403, "Invalid update to order status");
+    if (verifiedOrder.status >= status) throw new Http_Errors.InvalidField("order status");
 
     // Update the order status
     const updatedOrder = await OrderModel.findByIdAndUpdate(

@@ -2,12 +2,12 @@ import express from "express";
 import * as VendorsController from "../../controllers/users/vendors";
 import { requiresAuth, requiresVendor } from "../../middleware/auth";
 
-// Create the router for the server
+/** Router for all vendor-related endpoints. */
 const router = express.Router();
 
-router.get("/", requiresVendor, VendorsController.getProfile);
-router.post("/", requiresAuth, VendorsController.createProfile);
-router.patch("/", requiresVendor, VendorsController.updateProfile);
-router.patch("/cuisine", requiresVendor, VendorsController.updatedCuisine);
+router.get("/", requiresVendor, VendorsController.getVendor);
+router.post("/", requiresAuth, VendorsController.createVendor);
+router.patch("/", requiresVendor, VendorsController.updateVendor);
+router.patch("/cuisine", requiresVendor, VendorsController.toggleCuisine);
 
 export default router;

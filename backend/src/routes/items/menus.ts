@@ -2,13 +2,13 @@ import express from "express";
 import * as MenuItemsController from "../../controllers/items/menus";
 import { requiresVendor } from "../../middleware/auth";
 
-// Create the router for the server
+/** Router for all menu-related endpoints. */
 const router = express.Router();
 
 router.get("/:vendorId", MenuItemsController.getMenu);
 router.get("/item/:menuItemId", MenuItemsController.getMenuItem);
 router.post("/item/", requiresVendor, MenuItemsController.createMenuItem);
-router.put("/item/:menuItemId", requiresVendor, MenuItemsController.updateMenuItem);
+router.patch("/item/:menuItemId", requiresVendor, MenuItemsController.updateMenuItem);
 router.patch(
   "/item/:menuItemId/availability",
   requiresVendor,

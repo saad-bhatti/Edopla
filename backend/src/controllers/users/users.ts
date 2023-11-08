@@ -1,13 +1,37 @@
 import bcrypt from "bcrypt";
 import { RequestHandler } from "express";
-import createHttpError from "http-errors";
+import * as Http_Errors from "../../errors/http_errors";
 import UserModel from "../../models/users/user";
+import { assertIsDefined } from "../../util/assertIsDefined";
 
-/** Retrieve an authenticated user from the database. */
-export const getAuthenticatedUser: RequestHandler = async (req, res, next) => {
+/** "Type" of the HTTP request body when signing up. */
+interface SignUpBody {
+  email?: string;
+  password?: string;
+}
+
+/** "Type" of the HTTP request body when logging in. */
+interface LogInBody {
+  email?: string;
+  password?: string;
+}
+
+/**
+ * Retrieve an authenticated user from the database.
+ *  - Prerequisite: User's id must exist in session.
+ *  - Params: None
+ *  - Body: None
+ *  - Return: User
+ */
+export const getAuthenticatedUser: RequestHandler<unknown, unknown, unknown, unknown> = async (
+  req,
+  res,
+  next
+) => {
   try {
+    assertIsDefined(req.session.userId);
     const user = await UserModel.findById(req.session.userId).exec();
-    if (!user) throw createHttpError(404, "User not found");
+    if (!user) throw new Http_Errors.NotFound("User");
 
     res.status(200).json(user);
   } catch (error) {
@@ -15,13 +39,13 @@ export const getAuthenticatedUser: RequestHandler = async (req, res, next) => {
   }
 };
 
-// "Type" of the HTTP request body when signing up
-interface SignUpBody {
-  email?: string;
-  password?: string;
-}
-
-/** Add a new user to the database and log them in. */
+/**
+ * Add a new user to the database and log them in.
+ *  - Prerequisite: An existing user with the same email must not exist in the database.
+ *  - Params: None
+ *  - Body: email, password
+ *  - Return: User
+ */
 export const signUp: RequestHandler<unknown, unknown, SignUpBody, unknown> = async (
   req,
   res,
@@ -31,12 +55,11 @@ export const signUp: RequestHandler<unknown, unknown, SignUpBody, unknown> = asy
   const passwordRaw = req.body.password;
   try {
     // Validate the existance of the credentials
-    if (!email || !passwordRaw)
-      throw createHttpError(400, "A required credential is missing");
+    if (!email || !passwordRaw) throw new Http_Errors.MissingField();
 
     // Check if the email is already in use
     const existingEmail = await UserModel.findOne({ email: email });
-    if (existingEmail) throw createHttpError(409, "Email already in use");
+    if (existingEmail) throw new Http_Errors.AlreadyExists("User with this email");
 
     // Hash the password
     const hashedPassword = await bcrypt.hash(passwordRaw, 10);
@@ -60,13 +83,13 @@ export const signUp: RequestHandler<unknown, unknown, SignUpBody, unknown> = asy
   }
 };
 
-// "Type" of the HTTP request body when logging in
-interface LogInBody {
-  email?: string;
-  password?: string;
-}
-
-/** Login an existing user by creating a new session. */
+/** 
+ * Login an existing user by creating a new session.
+ *  - Prerequisite: None
+ *  - Params: None
+ *  - Body: email, password
+ *  - Return: User
+ */
 export const login: RequestHandler<unknown, unknown, LogInBody, unknown> = async (
   req,
   res,
@@ -76,15 +99,15 @@ export const login: RequestHandler<unknown, unknown, LogInBody, unknown> = async
   const passwordRaw = req.body.password;
   try {
     // Validate the existance of the credentials
-    if (!email || !passwordRaw) throw createHttpError(400, "A required credential is missing");
+    if (!email || !passwordRaw) throw new Http_Errors.MissingField();
 
     // Check if the user exists
     const user = await UserModel.findOne({ email: email }).select("+password").exec();
-    if (!user) throw createHttpError(401, "Invalid credentials");
+    if (!user) throw new Http_Errors.InvalidField("credentials");
 
     // Check if the password is correct
     const isValidPassword = await bcrypt.compare(passwordRaw, user.password);
-    if (!isValidPassword) throw createHttpError(401, "Invalid credentials");
+    if (!isValidPassword) throw new Http_Errors.InvalidField("credentials");
 
     // Set up a session
     req.session.userId = user._id;
@@ -97,8 +120,18 @@ export const login: RequestHandler<unknown, unknown, LogInBody, unknown> = async
   }
 };
 
-/** Logout an existing user by destroying the current session. */
-export const logout: RequestHandler = async (req, res, next) => {
+/**
+ * Logout an existing user by destroying the current session.
+ *  - Prerequisite: User's id must exist in session.
+ *  - Params: None
+ *  - Body: None
+ *  - Return: String
+ */
+export const logout: RequestHandler<unknown, unknown, unknown, unknown> = async (
+  req,
+  res,
+  next
+) => {
   try {
     // Destroy the session
     req.session.destroy((error) => {

@@ -2,7 +2,7 @@ import { requiresBuyer, requiresVendor } from "./../../middleware/auth";
 import express from "express";
 import * as OrdersController from "../../controllers/items/orders";
 
-// Create the router for the server
+/** Router for all order-related endpoints. */
 const router = express.Router();
 
 router.get("/buyer", requiresBuyer, OrdersController.getBuyerOrders);

@@ -1,24 +1,11 @@
 import { RequestHandler } from "express";
-import createHttpError from "http-errors";
+import * as Http_Errors from "../../errors/http_errors";
 import UserModel from "../../models/users/user";
 import VendorModel from "../../models/users/vendor";
 import { assertIsDefined } from "../../util/assertIsDefined";
 import { assertIsPriceRange } from "../../util/assertIsPriceRange";
 
-/** Retrieve a vendor's profile from the database. */
-export const getProfile: RequestHandler = async (req, res, next) => {
-  try {
-    assertIsDefined(req.session.vendorId);
-    const vendor = await VendorModel.findById(req.session.vendorId).exec();
-    if (!vendor) throw createHttpError(404, "Vendor profile not found");
-
-    res.status(200).json(vendor);
-  } catch (error) {
-    next(error);
-  }
-};
-
-// "Type" of the HTTP request body when creating/modifying a vendor profile
+/** "Type" of the HTTP request body when creating/modifying a vendor profile. */
 interface ProfileBody {
   vendorName?: string;
   address?: string;
@@ -27,8 +14,44 @@ interface ProfileBody {
   description?: string;
 }
 
-/** Add a new vendor profile to the database and update the user's profile. */
-export const createProfile: RequestHandler<unknown, unknown, ProfileBody, unknown> = async (
+/** "Type" of the HTTP request body when modifying a vendor's cuisine types. */
+interface CuisineBody {
+  cuisine: string;
+}
+
+/**
+ * Retrieve a vendor's profile from the database.
+ *  - Prerequisite: Vendor's id must exist in session.
+ *  - Params: None
+ *  - Body: None
+ *  - Return: Vendor
+ */
+export const getVendor: RequestHandler<unknown, unknown, unknown, unknown> = async (
+  req,
+  res,
+  next
+) => {
+  try {
+    assertIsDefined(req.session.vendorId);
+    const vendor = await VendorModel.findById(req.session.vendorId).exec();
+    if (!vendor) throw new Http_Errors.NotFound("Vendor profile");
+
+    res.status(200).json(vendor);
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Add a new vendor profile to the database and update the user's profile.
+ *  - Prerequisites:
+ *    - User's id must exist in session.
+ *    - User must not already have a vendor profile.
+ *  - Params: None
+ *  - Body: vendorName, address, priceRange, phoneNumber, description
+ *  - Return: Vendor
+ */
+export const createVendor: RequestHandler<unknown, unknown, ProfileBody, unknown> = async (
   req,
   res,
   next
@@ -39,16 +62,15 @@ export const createProfile: RequestHandler<unknown, unknown, ProfileBody, unknow
   const phoneNumber = req.body.phoneNumber;
   const description = req.body.description;
   try {
-    // Validate the provided fields
-    if (!vendorName || !address || !priceRange)
-      throw createHttpError(400, "A required field is missing");
-    assertIsPriceRange(priceRange);
-
     // Verify the validity of the user with no pre-existing vendor's profile
     assertIsDefined(req.session.userId);
     const user = await UserModel.findById(req.session.userId).exec();
-    if (!user) throw createHttpError(404, "User not found");
-    if (user._vendor) throw createHttpError(409, "User already has a vendor profile");
+    if (!user) throw new Http_Errors.NotFound("User");
+    if (user._vendor) throw new Http_Errors.AlreadyExists("User's vendor profile");
+
+    // Validate the provided fields
+    if (!vendorName || !address || !priceRange) throw new Http_Errors.MissingField();
+    assertIsPriceRange(priceRange);
 
     // Send the request to create the new vendor profile
     const newVendor = await VendorModel.create({
@@ -75,8 +97,14 @@ export const createProfile: RequestHandler<unknown, unknown, ProfileBody, unknow
   }
 };
 
-/** Update an existing vendor's profile. */
-export const updateProfile: RequestHandler<unknown, unknown, ProfileBody, unknown> = async (
+/**
+ * Update an existing vendor's profile.
+ *  - Prerequisite: Vendor's id must exist in session.
+ *  - Params: None
+ *  - Body: vendorName, address, priceRange, phoneNumber, description
+ *  - Return: Vendor
+ */
+export const updateVendor: RequestHandler<unknown, unknown, ProfileBody, unknown> = async (
   req,
   res,
   next
@@ -87,15 +115,14 @@ export const updateProfile: RequestHandler<unknown, unknown, ProfileBody, unknow
   const phoneNumber = req.body.phoneNumber;
   const description = req.body.description;
   try {
-    // Validate the existance of the required fields
-    if (!vendorName || !address || !priceRange)
-      throw createHttpError(400, "A required field is missing");
-    assertIsPriceRange(priceRange);
-
     // Retrieve the existing vendor's profile
     assertIsDefined(req.session.vendorId);
     const vendor = await VendorModel.findById(req.session.vendorId).exec();
-    if (!vendor) throw createHttpError(404, "Vendor profile not found");
+    if (!vendor) throw new Http_Errors.NotFound("Vendor profile");
+
+    // Validate the existance of the required fields
+    if (!vendorName || !address || !priceRange) throw new Http_Errors.MissingField();
+    assertIsPriceRange(priceRange);
 
     // Update & save the vendor profile
     vendor.vendorName = vendorName;
@@ -111,28 +138,28 @@ export const updateProfile: RequestHandler<unknown, unknown, ProfileBody, unknow
   }
 };
 
-// "Type" of the HTTP request body when modifying a vendor's cuisine types
-interface CuisineBody {
-  cuisine: string;
-}
-
-/** If the provided cuisine already exists for the vendor, the type is
- * removed from the vendor's stored cuisine types. Otherwise, the cuisine is
- * added to the vendor's stored cuisine types. */
-export const updatedCuisine: RequestHandler<unknown, unknown, CuisineBody, unknown> = async (
+/**
+ * Add the provided cuisine to the vendor's list of cuisine type if it doesn't already exist in
+ * the list. Otherwise remove it.
+ *  - Prerequisite: Vendor's id must exist in session.
+ *  - Params: None
+ *  - Body: cuisine
+ *  - Return: [String]
+ */
+export const toggleCuisine: RequestHandler<unknown, unknown, CuisineBody, unknown> = async (
   req,
   res,
   next
 ) => {
   const cuisine = req.body.cuisine;
   try {
-    // Validate the existance of the required field
-    if (!cuisine) throw createHttpError(400, "A required field is missing");
-
     // Retrieve the vendor from the database
     assertIsDefined(req.session.vendorId);
     const vendor = await VendorModel.findById(req.session.vendorId).exec();
-    if (!vendor) throw createHttpError(404, "Vendor profile not found");
+    if (!vendor) throw new Http_Errors.NotFound("Vendor profile");
+
+    // Validate the existance of the required field
+    if (!cuisine) throw new Http_Errors.MissingField();
 
     // Search the vendor's stored cuisine types & update as necessary
     const index = vendor.cuisineTypes.indexOf(cuisine);
@@ -140,7 +167,7 @@ export const updatedCuisine: RequestHandler<unknown, unknown, CuisineBody, unkno
     else vendor.cuisineTypes.splice(index, 1);
     const updatedVendor = await vendor.save();
 
-    res.status(200).json(updatedVendor);
+    res.status(200).json(updatedVendor.cuisineTypes);
   } catch (error) {
     next(error);
   }

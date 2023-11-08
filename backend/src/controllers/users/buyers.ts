@@ -1,17 +1,39 @@
 import { RequestHandler } from "express";
-import createHttpError from "http-errors";
 import mongoose from "mongoose";
+import * as Http_Errors from "../../errors/http_errors";
 import BuyerModel from "../../models/users/buyer";
 import UserModel from "../../models/users/user";
 import VendorModel from "../../models/users/vendor";
 import { assertIsDefined } from "../../util/assertIsDefined";
 
-/** Retrieve a buyer's profile from the database. */
-export const getBuyer: RequestHandler = async (req, res, next) => {
+/** "Type" of the HTTP request body when creating/modifying a buyer profile. */
+interface BuyerBody {
+  buyerName?: string;
+  address?: string;
+  phoneNumber?: string;
+}
+
+/** "Type" of the HTTP request body when updating a buyer's saved vendors list. */
+interface SavedVendorBody {
+  vendorId: string;
+}
+
+/**
+ * Retrieve a buyer's profile from the database.
+ *  - Prerequisite: Buyer's id must exist in session.
+ *  - Params: None
+ *  - Body: None
+ *  - Return: Buyer
+ */
+export const getBuyer: RequestHandler<unknown, unknown, unknown, unknown> = async (
+  req,
+  res,
+  next
+) => {
   try {
     assertIsDefined(req.session.buyerId);
     const buyer = await BuyerModel.findById(req.session.buyerId).exec();
-    if (!buyer) throw createHttpError(404, "Buyer profile not found");
+    if (!buyer) throw new Http_Errors.NotFound("Buyer profile");
 
     res.status(200).json(buyer);
   } catch (error) {
@@ -19,14 +41,15 @@ export const getBuyer: RequestHandler = async (req, res, next) => {
   }
 };
 
-// "Type" of the HTTP request body when creating/modifying a buyer profile
-interface BuyerBody {
-  buyerName?: string;
-  address?: string;
-  phoneNumber?: string;
-}
-
-/** Add a new buyer profile to the database and update the user's profile. */
+/**
+ * Add a new buyer profile to the database and update the user's profile.
+ *  - Prerequisites:
+ *    - User's id must exist in session.
+ *    - User must not already have a buyer profile.
+ *  - Params: None
+ *  - Body: buyerName, address, phoneNumber
+ *  - Return: Buyer
+ */
 export const createBuyer: RequestHandler<unknown, unknown, BuyerBody, unknown> = async (
   req,
   res,
@@ -37,13 +60,13 @@ export const createBuyer: RequestHandler<unknown, unknown, BuyerBody, unknown> =
   const phoneNumber = req.body.phoneNumber;
   try {
     // Validate the existance of the required fields
-    if (!buyerName || !address) throw createHttpError(400, "A required field is missing");
+    if (!buyerName || !address) throw new Http_Errors.MissingField();
 
     // Verify the validity of the user with no pre-existing buyer's profile
     assertIsDefined(req.session.userId);
     const user = await UserModel.findById(req.session.userId).exec();
-    if (!user) throw createHttpError(404, "User not found");
-    if (user._buyer) throw createHttpError(409, "User already has a buyer profile");
+    if (!user) throw new Http_Errors.NotFound("User");
+    if (user._buyer) throw new Http_Errors.AlreadyExists("User's buyer profile");
 
     // Send the request to create the new buyer profile
     const newBuyer = await BuyerModel.create({
@@ -68,7 +91,13 @@ export const createBuyer: RequestHandler<unknown, unknown, BuyerBody, unknown> =
   }
 };
 
-/** Update an existing buyer's profile. */
+/**
+ * Update an existing buyer's profile.
+ *  - Prerequisite: Buyer's id must exist in session.
+ *  - Params: None
+ *  - Body: buyerName, address, phoneNumber
+ *  - Return: Buyer
+ */
 export const updateBuyer: RequestHandler<unknown, unknown, BuyerBody, unknown> = async (
   req,
   res,
@@ -79,12 +108,12 @@ export const updateBuyer: RequestHandler<unknown, unknown, BuyerBody, unknown> =
   const phoneNumber = req.body.phoneNumber;
   try {
     // Validate the existance of the required fields
-    if (!buyerName || !address) throw createHttpError(400, "A required field is missing");
+    if (!buyerName || !address) throw new Http_Errors.MissingField();
 
     // Retrieve the existing buyer's profile
     assertIsDefined(req.session.buyerId);
     const buyer = await BuyerModel.findById(req.session.buyerId).exec();
-    if (!buyer) throw createHttpError(404, "Buyer profile not found");
+    if (!buyer) throw new Http_Errors.NotFound("Buyer profile");
 
     // Update & save the buyer profile
     (buyer.buyerName = buyerName), (buyer.address = address), (buyer.phoneNumber = phoneNumber);
@@ -96,12 +125,23 @@ export const updateBuyer: RequestHandler<unknown, unknown, BuyerBody, unknown> =
   }
 };
 
-/** Get the buyer's list of saved vendors. */
-export const getSavedVendors: RequestHandler = async (req, res, next) => {
+/**
+ * Retrieve a buyer's list of saved vendors.
+ *  - Prerequisite: Buyer's id must exist in session.
+ *  - Params: None
+ *  - Body: None
+ *  - Return: [Vendor]
+ */
+export const getSavedVendors: RequestHandler<unknown, unknown, unknown, unknown> = async (
+  req,
+  res,
+  next
+) => {
   try {
+    // Retrieve the existing buyer's profile
     assertIsDefined(req.session.buyerId);
     const buyer = await BuyerModel.findById(req.session.buyerId).populate("savedVendors").exec();
-    if (!buyer) throw createHttpError(404, "Buyer profile not found");
+    if (!buyer) throw new Http_Errors.NotFound("Buyer profile");
 
     res.status(200).json(buyer.savedVendors);
   } catch (error) {
@@ -109,14 +149,15 @@ export const getSavedVendors: RequestHandler = async (req, res, next) => {
   }
 };
 
-// "Type" of the HTTP request body when updating a buyer's saved vendors list
-interface SavedVendorBody {
-  vendorId: string;
-}
-
-/** If the provided vendor already exists in the saved vendor's list, the item
- * is removed from the list. Otherwise, the vendor is added to the list. */
-export const updateSavedVendor: RequestHandler<unknown, unknown, SavedVendorBody, unknown> = async (
+/**
+ * Add the provided vendor's id to the buyer's list of saved vendors if it doesn't already exist in
+ * the list. Otherwise remove it.
+ *  - Prerequisite: Buyer's id must exist in session.
+ *  - Params: None
+ *  - Body: vendorId
+ *  - Return: [Vendor]
+ */
+export const toggleSavedVendor: RequestHandler<unknown, unknown, SavedVendorBody, unknown> = async (
   req,
   res,
   next
@@ -125,23 +166,28 @@ export const updateSavedVendor: RequestHandler<unknown, unknown, SavedVendorBody
     const unverifiedVendorId = req.body.vendorId;
     // Verify the existance of the vendor id
     if (!mongoose.isValidObjectId(unverifiedVendorId))
-      throw createHttpError(400, "Invalid vendor id");
+      throw new Http_Errors.InvalidField("vendor id");
+
+    // Retrieve the existing vendor's profile
     const verifiedVendor = await VendorModel.findById(unverifiedVendorId).exec();
-    if (!verifiedVendor) throw createHttpError(404, "Vendor id is not valid");
+    if (!verifiedVendor) throw new Http_Errors.NotFound("Vendor");
 
     // Retrieve the existing buyer's profile
     assertIsDefined(req.session.buyerId);
-    const buyer = await BuyerModel.findById(req.session.buyerId).exec();
-    if (!buyer) throw createHttpError(404, "Buyer profile not found");
+    const buyer = await BuyerModel.findById(req.session.buyerId).select("savedVendors").exec();
+    if (!buyer) throw new Http_Errors.NotFound("Buyer profile");
 
-    // Update & save the buyer profile
+    // Update the buyer's saved vendors list
     const verifiedVendorId = verifiedVendor._id;
     const index = buyer.savedVendors.indexOf(verifiedVendorId);
     if (index === -1) buyer.savedVendors.push(verifiedVendorId);
     else buyer.savedVendors.splice(index, 1);
-    const updatedBuyer = await buyer.save();
 
-    res.status(200).json(updatedBuyer);
+    // Save the updated buyer's profile & populate the saved vendors list
+    const updatedBuyer = await buyer.save();
+    await updatedBuyer.populate("savedVendors");
+
+    res.status(200).json(updatedBuyer.savedVendors);
   } catch (error) {
     next(error);
   }

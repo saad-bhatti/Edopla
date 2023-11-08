@@ -1,7 +1,7 @@
 import express from "express";
 import * as CartsController from "../../controllers/items/carts";
 
-// Create the router for the server
+/** Router for all cart-related endpoints. */
 const router = express.Router();
 
 router.get("/", CartsController.getCarts);

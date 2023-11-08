@@ -2,7 +2,7 @@ import express from "express";
 import * as UsersController from "../../controllers/users/users";
 import { requiresAuth } from "../../middleware/auth";
 
-// Create the router for the server
+/** Router for all user-related endpoints. */
 const router = express.Router();
 
 // Routing for retrieving an authenticated user
