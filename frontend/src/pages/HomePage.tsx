@@ -1,6 +1,6 @@
 import { Container } from "react-bootstrap";
-import HomePageLoggedInView from "../components/HomePageLoggedInView";
-import HomePageLoggedOutView from "../components/HomePageLoggedOutView";
+import HomePageLoggedInView from "../components/view/HomePageLoggedInView";
+import HomePageLoggedOutView from "../components/view/HomePageLoggedOutView";
 import { User } from "../models/users/user";
 
 /** "Type" for the props of the home page. */

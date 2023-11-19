@@ -19,9 +19,21 @@ export interface CuisineDetails {
 }
 
 /**
+ * Function to retrieve the all the vendor profiles.
+ * @param None
+ * @returns A promise that resolves to all the vendor objects.
+ */
+export async function getAllVendors(): Promise<Vendor[]> {
+  const response = await fetchData(`${endpoint}/all`, {
+    method: "GET",
+  });
+  return response.json();
+}
+
+/**
  * Function to retrieve the currently authenticated user's vendor profile.
  * @param None
- * @returns A promise that resolves to the buyer object.
+ * @returns A promise that resolves to the vendor object.
  */
 export async function getVendor(): Promise<Vendor> {
   const response = await fetchData(`${endpoint}/`, {

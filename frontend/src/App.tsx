@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { Container } from "react-bootstrap";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import LoginModal from "./components/LoginModal";
-import SignUpModal from "./components/SignUpModal";
+import LoginModal from "./components/modal/LoginModal";
+import SignUpModal from "./components/modal/SignUpModal";
 import NavBar from "./components/navigation/NavBar";
 import { User } from "./models/users/user";
 import * as UsersAPI from "./network/users/users_api";

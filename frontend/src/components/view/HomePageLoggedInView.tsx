@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Spinner } from "react-bootstrap";
-import { Buyer } from "../models/users/buyer";
-import { getBuyer } from "../network/users/buyers_api";
+import { Buyer } from "../../models/users/buyer";
+import { getBuyer } from "../../network/users/buyers_api";
 
 /* TODO: Finish up the logged in version of the home page. */
 const HomePageLoggedInView = () => {
