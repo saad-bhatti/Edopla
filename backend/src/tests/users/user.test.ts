@@ -10,7 +10,7 @@ import * as Database from "../mockDB/mongodbMemoryServer";
 /** The server instance. */
 let server: Server<typeof IncomingMessage, typeof ServerResponse> | undefined;
 /** The users initialized in the database. */
-let users: Interfaces.U[];
+let users: Interfaces.User[];
 /** The cookie to be used for authentication. */
 let cookie: string;
 
@@ -164,7 +164,7 @@ describe("POST /api/users/logout", () => {
  * @param expectedUser The expected user.
  * @returns Nothing.
  */
-function compareUsers(actualUser: Interfaces.U, expectedUser: Interfaces.U): void {
+function compareUsers(actualUser: Interfaces.User, expectedUser: Interfaces.User): void {
   expect(actualUser._id.toString()).toEqual(expectedUser._id.toString());
   expect(actualUser.email).toBe(expectedUser.email);
   if (actualUser.password) expect(actualUser.password).toBe(expectedUser.password);

@@ -4,7 +4,8 @@ import * as Http_Errors from "../../errors/http_errors";
 import MenuItemModel from "../../models/items/menuItem";
 import VendorModel from "../../models/users/vendor";
 import { assertIsDefined } from "../../util/assertIsDefined";
-import { V_MP1 } from "../../util/interfaces";
+import { MenuItem, Vendor } from "../../util/interfaces";
+import { isMenuItem } from "../../util/typeGuard";
 
 /** "Type" of the HTTP request parameters when retrieving a menu. */
 interface MenuParams {
@@ -206,7 +207,7 @@ export const toggleAvailability: RequestHandler<MenuItemParams, unknown, unknown
 
     // Verify the validity of vendor profile
     assertIsDefined(req.session.vendorId);
-    const vendor: V_MP1 | null = await VendorModel.findById(req.session.vendorId)
+    const vendor: Vendor | null = await VendorModel.findById(req.session.vendorId)
       .populate({
         path: "menu",
         match: { _id: unverifiedMenuItemId },
@@ -217,11 +218,16 @@ export const toggleAvailability: RequestHandler<MenuItemParams, unknown, unknown
     // Verify that the menu item belongs to the vendor
     if (!vendor.menu.length) throw new Http_Errors.Unauthorized("Vendor", "menu item");
 
+    // Retrieve the menu item
+    let existingMenuItem: MenuItem | null = null;
+    if (!isMenuItem(vendor.menu[0])) throw new Error("Menu item is not a valid MenuItem");
+    else existingMenuItem = vendor.menu[0] as MenuItem;
+
     // Update the menu item
     const updatedMenuItem = await MenuItemModel.findByIdAndUpdate(
       unverifiedMenuItemId,
       {
-        available: !vendor.menu[0].available,
+        available: !existingMenuItem.available,
       },
       { new: true }
     ).exec();

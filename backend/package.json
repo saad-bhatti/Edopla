@@ -6,7 +6,7 @@
   "scripts": {
     "start": "nodemon src/server.ts",
     "lint": "eslint . --ext .ts",
-    "test": "jest"
+    "test": "jest --watchAll --verbose --silent --runInBand --detectOpenHandles"
   },
   "keywords": [],
   "author": "",

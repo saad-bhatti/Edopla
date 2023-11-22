@@ -16,9 +16,9 @@ afterAll(async () => {
 
 /** Test data. */
 const emails = ["user001@test.com", "user002@test.com"];
-let users: Interfaces.U[];
-let buyers: Interfaces.B_U[];
-let vendors: Interfaces.V_U[];
+let users: Interfaces.User[];
+let buyers: Interfaces.Buyer[];
+let vendors: Interfaces.Vendor[];
 
 /** Tests for the addUsers function. */
 it("should add users to the database", async () => {
