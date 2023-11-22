@@ -49,6 +49,17 @@ export interface OI_CP {
   status: number;
 }
 
+/** "Type" of the unpopulated buyer in the database. */
+export interface B_U {
+  _id: Types.ObjectId;
+  buyerName: string;
+  address: string;
+  phoneNumber?: string;
+  carts: Types.ObjectId[];
+  savedVendors: Types.ObjectId[];
+  orders: Types.ObjectId[];
+}
+
 /**
  * "Type" of the buyer profile in the database with the carts array populated
  * one level deep.
@@ -58,9 +69,9 @@ export interface B_CP1 {
   buyerName: string;
   address: string;
   phoneNumber?: string;
-  carts: Types.Array<CI_U>;
-  savedVendors: Types.Array<Types.ObjectId>;
-  orders: Types.Array<Types.ObjectId>;
+  carts: CI_U[];
+  savedVendors: Types.ObjectId[];
+  orders: Types.ObjectId[];
 }
 
 /**
@@ -72,9 +83,9 @@ export interface B_CP2 {
   buyerName: string;
   address: string;
   phoneNumber?: string;
-  carts: Types.Array<CI_IP>;
-  savedVendors: Types.Array<Types.ObjectId>;
-  orders: Types.Array<Types.ObjectId>;
+  carts: CI_IP[];
+  savedVendors: Types.ObjectId[];
+  orders: Types.ObjectId[];
 }
 
 /**
@@ -86,9 +97,19 @@ export interface B_OP1 {
   buyerName: string;
   address: string;
   phoneNumber?: string;
-  carts: Types.Array<Types.ObjectId>;
-  savedVendors: Types.Array<Types.ObjectId>;
-  orders: Types.Array<OI_U>;
+  carts: Types.ObjectId[];
+  savedVendors: Types.ObjectId[];
+  orders: OI_U[];
+}
+
+/** "Type" of the unpopulated vendor in the database. */
+export interface V_U {
+  _id: Types.ObjectId;
+  vendorName: string;
+  address: string;
+  phoneNumber?: string;
+  orders: Types.ObjectId[];
+  menu: Types.ObjectId[];
 }
 
 /**
@@ -100,7 +121,7 @@ export interface V_OP1 {
   vendorName: string;
   address: string;
   phoneNumber?: string;
-  orders: Types.Array<OI_U>;
+  orders: OI_U[];
 }
 
 /**
@@ -112,6 +133,15 @@ export interface V_MP1 {
   vendorName: string;
   address: string;
   phoneNumber?: string;
-  orders: Types.Array<Types.ObjectId>;
-  menu: Types.Array<MI>;
+  orders: Types.ObjectId[];
+  menu: MI[];
+}
+
+/** "Type" of the user in the database. */
+export interface U {
+  _id: Types.ObjectId;
+  email: string;
+  password: string;
+  _buyer?: Types.ObjectId;
+  _vendor?: Types.ObjectId;
 }
