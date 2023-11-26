@@ -1,10 +1,10 @@
 import bcrypt from "bcrypt";
-import BuyerModel from "../../../models/users/buyer";
-import UserModel from "../../../models/users/user";
-import VendorModel from "../../../models/users/vendor";
-import * as Interfaces from "../../../util/interfaces";
-import * as Database from "../mongodbMemoryServer";
-import * as Data from "./usersData";
+import BuyerModel from "../../models/users/buyer";
+import UserModel from "../../models/users/user";
+import VendorModel from "../../models/users/vendor";
+import * as Interfaces from "../../util/interfaces";
+import * as Database from "./mongodbMemoryServer";
+import * as Data from "./addUsersData";
 
 beforeAll(async () => {
   await Database.connect();
@@ -44,7 +44,6 @@ it("should add users to the database", async () => {
 
   // Check if the passwords are hashed
   usersInDatabase.forEach((user) => {
-    expect(user.password).not.toBe("test123");
     const isPasswordHashed = bcrypt.compareSync("test123", user.password);
     expect(isPasswordHashed).toBe(true);
   });

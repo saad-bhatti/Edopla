@@ -1,13 +1,40 @@
 import { ObjectId } from "mongoose";
-import { CartItem, MenuItem, OrderItem } from "./interfaces";
+import * as Interfaces from "./interfaces";
+
+/**
+ * Function to check if an item is a User object.
+ * @param item - Item to check.
+ * @returns True if item is a User, false otherwise.
+ */
+export function isUser(item: Interfaces.User | null): item is Interfaces.User {
+  return (item as Interfaces.User)._id !== undefined;
+}
+
+/**
+ * Function to check if an item is a Buyer object.
+ * @param item - Item to check.
+ * @returns True if item is a Buyer, false otherwise.
+ */
+export function isBuyer(item: Interfaces.Buyer | null): item is Interfaces.Buyer {
+  return (item as Interfaces.Buyer)._id !== undefined;
+}
+
+/**
+ * Function to check if an item is a Vendor object.
+ * @param item - Item to check.
+ * @returns True if item is a Vendor, false otherwise.
+ */
+export function isVendor(item: Interfaces.Vendor | null): item is Interfaces.Vendor {
+  return (item as Interfaces.Vendor)._id !== undefined;
+}
 
 /**
  * Function to check if an item is a MenuItem.
  * @param item - Item to check.
  * @returns True if item is a MenuItem, false otherwise.
  */
-export function isMenuItem(item: ObjectId | MenuItem): item is MenuItem {
-  return (item as MenuItem)._id !== undefined;
+export function isMenuItem(item: ObjectId | Interfaces.MenuItem): item is Interfaces.MenuItem {
+  return (item as Interfaces.MenuItem)._id !== undefined;
 }
 
 /**
@@ -15,8 +42,8 @@ export function isMenuItem(item: ObjectId | MenuItem): item is MenuItem {
  * @param item - Item to check.
  * @returns True if item is a CartItem, false otherwise.
  */
-export function isCartItem(item: ObjectId | CartItem): item is CartItem {
-  return (item as CartItem)._id !== undefined;
+export function isCartItem(item: ObjectId | Interfaces.CartItem): item is Interfaces.CartItem {
+  return (item as Interfaces.CartItem)._id !== undefined;
 }
 
 /**
@@ -24,6 +51,6 @@ export function isCartItem(item: ObjectId | CartItem): item is CartItem {
  * @param item - Item to check.
  * @returns True if item is a OrderItem, false otherwise.
  */
-export function isOrderItem(item: ObjectId | OrderItem): item is OrderItem {
-  return (item as OrderItem)._id !== undefined;
+export function isOrderItem(item: ObjectId | Interfaces.OrderItem): item is Interfaces.OrderItem {
+  return (item as Interfaces.OrderItem)._id !== undefined;
 }

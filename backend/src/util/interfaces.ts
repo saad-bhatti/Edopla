@@ -25,7 +25,10 @@ export interface Vendor {
   _id: ObjectId;
   vendorName: string;
   address: string;
+  priceRange: PriceRange;
   phoneNumber?: string;
+  description?: string;
+  cuisineTypes: string[];
   orders: ObjectId[] | OrderItem[];
   menu: ObjectId[] | MenuItem[];
 }

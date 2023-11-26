@@ -1,9 +1,10 @@
 import bcrypt from "bcrypt";
 import mongoose from "mongoose";
-import BuyerModel from "../../../models/users/buyer";
-import UserModel from "../../../models/users/user";
-import VendorModel from "../../../models/users/vendor";
-import * as Interfaces from "../../../util/interfaces";
+import BuyerModel from "../../models/users/buyer";
+import UserModel from "../../models/users/user";
+import VendorModel from "../../models/users/vendor";
+import * as Interfaces from "../../util/interfaces";
+import { prepareUserDetails, prepareBuyerDetails, prepareVendorDetails } from "../util/usersHelper";
 
 /**
  * Function to add users to the database, with the specified emails.
@@ -17,14 +18,13 @@ export const addUsers = async (emails: string[]): Promise<Interfaces.User[]> => 
 
     // Create the users in the database
     const userCreationPromises = emails.map(async (email) => {
+      // Prepare the user details with all details for creation
+      const preparedDetails = prepareUserDetails(email);
+      preparedDetails.password = hashPassword;
+      const userDetails = {...preparedDetails, _id: new mongoose.Types.ObjectId()};
+
       // Create the user in the database
-      const userDoc = await UserModel.create({
-        _id: new mongoose.Types.ObjectId(),
-        email: email,
-        password: hashPassword,
-        _buyer: null,
-        _vendor: null,
-      });
+      const userDoc = await UserModel.create(userDetails);
 
       // Convert the user document to a user object
       const user: Interfaces.User = userDoc.toObject() as Interfaces.User;
@@ -48,16 +48,12 @@ export const addUsers = async (emails: string[]): Promise<Interfaces.User[]> => 
 export const addBuyers = async (users: Interfaces.User[]): Promise<Interfaces.Buyer[]> => {
   try {
     const buyerCreationPromises = users.map(async (user) => {
+      // Prepare the buyer details with all details for creation
+      const preparedDetails = prepareBuyerDetails(user.email, true);
+      const buyerDetails = {...preparedDetails, _id: new mongoose.Types.ObjectId()};
+      
       // Create the buyers in the database
-      const buyerDoc = await BuyerModel.create({
-        _id: new mongoose.Types.ObjectId(),
-        buyerName: user.email,
-        address: "123 Main Street",
-        phoneNumber: "1234567890",
-        carts: [],
-        savedVendors: [],
-        orders: [],
-      });
+      const buyerDoc = await BuyerModel.create(buyerDetails);
 
       // Add the buyer profile to the user
       await UserModel.findByIdAndUpdate(user._id, { _buyer: buyerDoc._id });
@@ -84,18 +80,12 @@ export const addBuyers = async (users: Interfaces.User[]): Promise<Interfaces.Bu
 export const addVendors = async (users: Interfaces.User[]): Promise<Interfaces.Vendor[]> => {
   try {
     const vendorCreationPromises = users.map(async (user) => {
+      // Prepare the vendor details with all details for creation
+      const preparedDetails = prepareVendorDetails(user.email, true);
+      const vendorDetails = {...preparedDetails, _id: new mongoose.Types.ObjectId()};
+      
       // Create the vendors in the database
-      const vendorDoc = await VendorModel.create({
-        _id: new mongoose.Types.ObjectId(),
-        vendorName: user.email,
-        address: "123 Main Street",
-        priceRange: "$$",
-        phoneNumber: "1234567890",
-        description: `This is ${user.email}'s vendor description.}`,
-        cuisineTypes: [],
-        menu: [],
-        orders: [],
-      });
+      const vendorDoc = await VendorModel.create(vendorDetails);
 
       // Add the vendor profile to the user
       await UserModel.findByIdAndUpdate(user._id, { _vendor: vendorDoc._id });

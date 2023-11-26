@@ -1,12 +1,12 @@
 {
-  "name": "Edopla",
+  "name": "edopla",
   "version": "1.0.0",
   "description": "",
   "main": "dist/server.js",
   "scripts": {
     "start": "nodemon src/server.ts",
     "lint": "eslint . --ext .ts",
-    "test": "jest --watchAll --verbose --silent --runInBand --detectOpenHandles"
+    "test": "jest --watchAll --verbose --silent --runInBand --bail --detectOpenHandles"
   },
   "keywords": [],
   "author": "",
