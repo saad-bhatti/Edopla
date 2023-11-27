@@ -1,0 +1,41 @@
+.vendorCard {
+  margin-bottom: 2px;
+}
+
+.vendorCardInfo {
+  border: 1px solid dark;
+  background-color: #0dcaf0;
+  color: white;
+}
+
+.vendorCardLight {
+  border: 1px solid dark;
+  background-color: light;
+  color: black;
+}
+
+.vendorCardBody {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+}
+
+.listItem {
+  background-color: transparent;
+}
+
+.listItemInfo {
+  color: white;
+}
+
+.listItemLight {
+  color: black;
+}
+
+.bottomButtonsContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-top: auto; /* Push the buttons to the bottom of the container */
+}

@@ -7,8 +7,8 @@ const endpoint = "/api/buyers";
 
 /** Interface for the input to create or modify a buyer profile. */
 export interface BuyerDetails {
-  buyerName: string; 
-  address: string; 
+  buyerName: string;
+  address: string;
   phoneNumber?: string;
 }
 
@@ -80,12 +80,21 @@ export async function getSavedVendors(): Promise<Vendor[]> {
  * @returns A promise that resolves to the updated array of saved vendor objects.
  */
 export async function toggleSavedVendor(details: SavedVendorDetails): Promise<Vendor[]> {
-  const response = await fetchData(`${endpoint}/savedVendors`, {
-    method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
+  const errorOptions = new Map<number, string>().set(
+    401,
+    "Please sign up or log in to save a vendor."
+  );
+
+  const response = await fetchData(
+    `${endpoint}/savedVendor`,
+    {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(details),
     },
-    body: JSON.stringify(details),
-  });
+    errorOptions
+  );
   return response.json();
 }

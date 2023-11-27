@@ -25,7 +25,7 @@ const VendorInfoModal = ({ vendor, onDismissed }: VendorInfoModalProps) => {
         <p>{`Address: ${address}`}</p>
         <p>{`Phone Number: ${phoneNumber}`}</p>
         <p>{`Price Range: ${priceRange}`}</p>
-        <p>{`Cuisine Types: ${cuisineTypes.toString()}`}</p>
+        <p>{`Cuisine Types: ${cuisineTypes.join(", ")}`}</p>
       </Modal.Body>
 
       {/* View Menu Button */}
