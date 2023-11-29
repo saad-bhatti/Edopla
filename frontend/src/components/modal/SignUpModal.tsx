@@ -78,6 +78,10 @@ const SignUpModal = ({ onDismissed, onSignUpSuccessful }: SignUpModalProps) => {
           </Button>
         </Form>
       </Modal.Body>
+
+      <Modal.Footer className={StyleUtils.blockCenter}>
+        <p>1/3</p>
+      </Modal.Footer>
     </Modal>
   );
 };

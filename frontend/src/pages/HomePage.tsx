@@ -33,9 +33,12 @@ const NotesPage = ({ loggedInUser }: HomePageProps) => {
    */
   async function toggleVendor(vendorToToggle: Vendor) {
     try {
+      if (!loggedInUser || !loggedInUser._buyer)
+        throw new Error("You must create a buyer profile prior to saving a vendor.");
+
       const updatedSavedVendors = await toggleSavedVendor({ vendorId: vendorToToggle._id });
-      const initialLength = savedVendors.length,
-        updatedLength = updatedSavedVendors.length;
+      const initialLength = savedVendors.length;
+      const updatedLength = updatedSavedVendors.length;
 
       setSavedVendors(updatedSavedVendors);
       if (updatedLength > initialLength)
@@ -87,7 +90,7 @@ const NotesPage = ({ loggedInUser }: HomePageProps) => {
             vendor={vendor}
             onVendorClicked={setVendorToView}
             isSaved={true}
-            onVendorSaved={toggleVendor}
+            onVendorToggled={toggleVendor}
             className={styles.vendor}
             isInfoTheme={index % 2 === 0} // Alternate the theme of the card
           />
@@ -108,7 +111,7 @@ const NotesPage = ({ loggedInUser }: HomePageProps) => {
               vendor={vendor}
               onVendorClicked={setVendorToView}
               isSaved={false}
-              onVendorSaved={toggleVendor}
+              onVendorToggled={toggleVendor}
               className={styles.vendor}
               isInfoTheme={index % 2 === 0} // Alternate the theme of the card
             />
