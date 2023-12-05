@@ -53,7 +53,7 @@ const LoginModal = ({ onDismissed, onLoginSuccessful }: LoginModalProps) => {
           {/* Dialog for the username field */}
           <TextInputField
             name="email"
-            label="email"
+            label="Email"
             type="text"
             placeholder="Enter email"
             register={register}

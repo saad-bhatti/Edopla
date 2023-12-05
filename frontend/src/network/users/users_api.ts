@@ -2,7 +2,8 @@ import { User } from "../../models/users/user";
 import { fetchData } from "../../utils/fetchData";
 
 /** The initial segment of the endpoints. */
-const endpoint = "/api/users";
+const apiUrl = process.env.REACT_APP_API_URL;
+const endpoint = `${apiUrl}/api/users`;
 
 /** Interface for the input to sign up or login. */
 export interface UserCredentials {

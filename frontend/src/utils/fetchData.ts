@@ -13,7 +13,10 @@ export async function fetchData(
   init?: RequestInit,
   errorOptions?: Map<number, string>
 ) {
-  const response = await fetch(input, init);
+  const requestInit: RequestInit = init
+    ? { ...init, credentials: "include" }
+    : { credentials: "include" };
+  const response = await fetch(input, requestInit);
   if (response.ok) return response;
   else {
     const statusCode = response.status;

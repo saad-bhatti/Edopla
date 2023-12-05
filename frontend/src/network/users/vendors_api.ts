@@ -2,7 +2,8 @@ import { Vendor } from "../../models/users/vendor";
 import { fetchData } from "../../utils/fetchData";
 
 /** The initial segment of the endpoints. */
-const endpoint = "/api/vendors";
+const apiUrl = process.env.REACT_APP_API_URL;
+const endpoint = `${apiUrl}/api/vendors`;
 
 /** Interface for the input to create or modify a buyer profile. */
 export interface VendorDetails {

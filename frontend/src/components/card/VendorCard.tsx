@@ -9,7 +9,7 @@ interface VendorProps {
   vendor: VendorModel;
   onVendorClicked: (vendor: VendorModel) => void;
   isSaved: boolean;
-  onVendorSaved: (vendor: VendorModel) => void;
+  onVendorToggled: (vendor: VendorModel) => void;
   className?: string;
   isInfoTheme?: boolean;
 }
@@ -19,7 +19,7 @@ const Vendor = ({
   vendor,
   onVendorClicked,
   isSaved,
-  onVendorSaved,
+  onVendorToggled,
   className,
   isInfoTheme,
 }: VendorProps) => {
@@ -67,7 +67,7 @@ const Vendor = ({
                 className="text-muted"
                 size={25}
                 onClick={(event) => {
-                  onVendorSaved(vendor);
+                  onVendorToggled(vendor);
                   event.stopPropagation(); // Prevent the vendor info modal from being opened
                 }}
               />
@@ -76,7 +76,7 @@ const Vendor = ({
                 className="text-muted"
                 size={25}
                 onClick={(event) => {
-                  onVendorSaved(vendor);
+                  onVendorToggled(vendor);
                   event.stopPropagation(); // Prevent the vendor info modal from being opened
                 }}
               />

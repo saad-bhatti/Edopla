@@ -2,7 +2,8 @@ import { CartItem } from "../../models/items/cartItem";
 import { fetchData } from "../../utils/fetchData";
 
 /** The initial segment of the endpoints. */
-const endpoint = "/api/carts";
+const apiUrl = process.env.REACT_APP_API_URL;
+const endpoint = `${apiUrl}/api/carts`;
 
 /** Interface for the input to create a cart item. */
 export interface CreateCartDetails {

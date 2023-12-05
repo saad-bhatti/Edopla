@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { Container } from "react-bootstrap";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
+import BuyerCreationModal from "./components/modal/BuyerCreationModal";
 import LoginModal from "./components/modal/LoginModal";
 import SignUpModal from "./components/modal/SignUpModal";
+import VendorCreationModal from "./components/modal/VendorCreationModal";
 import NavBar from "./components/navigation/NavBar";
 import { User } from "./models/users/user";
 import * as UsersAPI from "./network/users/users_api";
@@ -13,10 +15,14 @@ import styles from "./styles/App.module.css";
 function App() {
   // State to track the logged in user
   const [loggedInUser, setLoggedInUser] = useState<User | null>(null);
-  // State to control whether the sign up dialog is shown
+  // State to control whether the sign up modal is shown
   const [showSignUpModal, setShowSignUpModal] = useState(false);
-  // State to control whether the login dialog is shown
+  // State to control whether the login modal is shown
   const [showLoginModal, setShowLogInModal] = useState(false);
+  // State to control whether the buyer modal is shown
+  const [showBuyerModal, setShowBuyerModal] = useState(false);
+  // State to control whether the vendor modal is shown
+  const [showVendorModal, setShowVendorModal] = useState(false);
 
   // Retrieve the logged in user only once before rendering the page
   useEffect(() => {
@@ -55,7 +61,7 @@ function App() {
           </Routes>
         </Container>
 
-        {/* Sign up dialog */}
+        {/* Sign up modal */}
         {showSignUpModal && (
           <SignUpModal
             onDismissed={() => {
@@ -64,11 +70,39 @@ function App() {
             onSignUpSuccessful={(user) => {
               setLoggedInUser(user);
               setShowSignUpModal(false);
+              setShowBuyerModal(true);
             }}
           />
         )}
 
-        {/* Login dialog */}
+        {/* Buyer profile creation modal */}
+        {showBuyerModal && (
+          <BuyerCreationModal
+            onCreateSuccessful={(buyer) => {
+              setShowBuyerModal(false);
+              setShowVendorModal(true);
+            }}
+            onSkipClicked={() => {
+              setShowBuyerModal(false);
+              setShowVendorModal(true);
+            }}
+          />
+        )}
+
+        {/* Vendor profile creation modal */}
+        {showVendorModal && (
+          <VendorCreationModal
+            onCreateSuccessful={(vendor) => {
+              setShowVendorModal(false);
+            }}
+            onSkipClicked={() => {
+              setShowVendorModal(false);
+            }}
+          />
+        )
+        }
+
+        {/* Login modal */}
         {showLoginModal && (
           <LoginModal
             onDismissed={() => {
