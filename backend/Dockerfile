@@ -20,4 +20,4 @@ COPY . .
 EXPOSE 5000
 
 # Layer 7: Telling Docker to run the `npm start` command when the container is started.
-CMD ["npm", "start"]
+CMD ["sh", "-c", "npm start -- --node_env=NODE_ENV --debug=$DEBUG"]

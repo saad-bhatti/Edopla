@@ -24,7 +24,14 @@ app.use(morgan("dev"));
 app.use(express.json());
 
 // Add middleware to enable CORS
-app.use(cors({ credentials: true, origin: env.FRONTEND_URL }));
+app.use(
+  cors({
+    origin: env.FRONTEND_URL,
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
 
 // Add middleware to set-up & handle sessions
 app.use(
@@ -59,7 +66,8 @@ app.use((req, res, next) => {
 // Error handler
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 app.use((error: unknown, req: Request, res: Response, next: NextFunction) => {
-  console.error(error);
+  const isDebug = process.env.DEBUG === "true";
+  if (isDebug) console.error(error);
   // Initialize to internal server error
   let errorMessage = "An unknown error occurred";
   let statusCode = 500;

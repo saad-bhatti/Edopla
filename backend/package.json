@@ -1,10 +1,10 @@
 {
-  "name": "Edopla",
+  "name": "edopla",
   "version": "1.0.0",
   "description": "",
   "main": "dist/server.js",
   "scripts": {
-    "start": "nodemon src/server.ts",
+    "start": "nodemon src/server.ts --node_env=NODE_ENV --debug=$DEBUG",
     "lint": "eslint . --ext .ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

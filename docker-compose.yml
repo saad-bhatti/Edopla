@@ -18,3 +18,6 @@ services:
     volumes:
       - ./backend:/app
       - /app/node_modules
+    environment:
+      - NODE_ENV=${NODE_ENV}
+      - DEBUG=${DEBUG}
