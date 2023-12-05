@@ -2,8 +2,9 @@ import { OrderItem } from "../../models/items/orderItem";
 import { fetchData } from "../../utils/fetchData";
 
 /** The initial segment of the endpoints. */
-const buyerEndpoint = "/api/orders/buyer";
-const vendorEndpoint = "/api/orders/vendor";
+const apiUrl = process.env.REACT_APP_API_URL;
+const buyerEndpoint = `${apiUrl}/api/orders/buyer`;
+const vendorEndpoint = `${apiUrl}/api/orders/vendor`;
 
 /** Interface for the input to create an order item. */
 export interface OrderItemDetails {

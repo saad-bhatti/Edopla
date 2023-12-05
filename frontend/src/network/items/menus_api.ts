@@ -2,7 +2,8 @@ import { MenuItem } from "../../models/items/menuItem";
 import { fetchData } from "../../utils/fetchData";
 
 /** The initial segment of the endpoints. */
-const endpoint = "/api/menus";
+const apiUrl = process.env.REACT_APP_API_URL;
+const endpoint = `${apiUrl}/api/menus`;
 
 /** Interface for the input to create or modify a menu item. */
 export interface MenuItemDetails {

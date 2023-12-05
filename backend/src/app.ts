@@ -1,4 +1,5 @@
 import MongoStore from "connect-mongo";
+import cors from "cors";
 import "dotenv/config";
 import express, { NextFunction, Request, Response } from "express";
 import session from "express-session";
@@ -21,6 +22,9 @@ app.use(morgan("dev"));
 
 // Add middleware to parse JSON bodies of requests
 app.use(express.json());
+
+// Add middleware to enable CORS
+app.use(cors({ credentials: true, origin: env.FRONTEND_URL }));
 
 // Add middleware to set-up & handle sessions
 app.use(
