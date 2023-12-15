@@ -1,4 +1,5 @@
-import { Button, Navbar } from "react-bootstrap";
+import { Nav, NavDropdown } from "react-bootstrap";
+import { Link } from "react-router-dom";
 import { User } from "../../models/users/user";
 import { logout } from "../../network/users/users_api";
 
@@ -6,10 +7,11 @@ import { logout } from "../../network/users/users_api";
 interface NavBarLoggedInViewProps {
   user: User;
   onLogoutSuccessful: () => void;
+  variant: string;
 }
 
 /** Logged in view of the navigation bar. */
-const NavBarLoggedInView = ({ user, onLogoutSuccessful }: NavBarLoggedInViewProps) => {
+const NavBarLoggedInView = ({ user, onLogoutSuccessful, variant }: NavBarLoggedInViewProps) => {
   /** Function to handle logging out request. */
   async function logOut() {
     try {
@@ -24,8 +26,19 @@ const NavBarLoggedInView = ({ user, onLogoutSuccessful }: NavBarLoggedInViewProp
   /** UI layout for the navigation bar when logged in. */
   return (
     <>
-      <Navbar.Text className="me-2">Signed in as: {user.email}</Navbar.Text>
-      <Button onClick={logOut}>Log out</Button>
+      <Nav className="me-auto">
+        <Nav.Link>Buy</Nav.Link>
+        <Nav.Link>Sell</Nav.Link>
+      </Nav>
+
+      <Nav className="ms-auto">
+        <NavDropdown title="Account" id="collapsible-nav-dropdown">
+          <NavDropdown.Item as={Link} to="/profiles">Profiles</NavDropdown.Item>
+          <NavDropdown.Item>Orders</NavDropdown.Item>
+          <NavDropdown.Divider />
+          <NavDropdown.Item onClick={logOut}>Logout</NavDropdown.Item>
+        </NavDropdown>
+      </Nav>
     </>
   );
 };

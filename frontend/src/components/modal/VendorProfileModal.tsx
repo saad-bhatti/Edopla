@@ -3,18 +3,19 @@ import { Alert, Button, Form, Modal } from "react-bootstrap";
 import { useForm } from "react-hook-form";
 import { ConflictError } from "../../errors/http_errors";
 import { Vendor } from "../../models/users/vendor";
-import { VendorDetails, createVendor } from "../../network/users/vendors_api";
+import { VendorDetails, createVendor, updateVendor } from "../../network/users/vendors_api";
 import StyleUtils from "../../styles/utils.module.css";
 import TextInputField from "../form/TextInputField";
 
 /** "Type" for the props of the vendor creation dialog component. */
 interface VendorModalProps {
-  onCreateSuccessful: (vendor: Vendor) => void;
-  onSkipClicked: () => void;
+  vendor: Vendor | null;
+  onSaveSuccessful: (vendor: Vendor) => void;
+  onDismissed: () => void;
 }
 
-/** Vendor creation modal component. */
-const VendorCreationModal = ({ onCreateSuccessful, onSkipClicked }: VendorModalProps) => {
+/** Vendor profile modal component. */
+const VendorProfileModal = ({ vendor, onSaveSuccessful, onDismissed }: VendorModalProps) => {
   /** State to track the error text. */
   const [errorText, setErrorText] = useState<string | null>(null);
 
@@ -27,9 +28,11 @@ const VendorCreationModal = ({ onCreateSuccessful, onSkipClicked }: VendorModalP
 
   /** Function to handle the form submission. */
   async function onSubmit(details: VendorDetails) {
+    let savedVendor;
     try {
-      const newVendor = await createVendor(details);
-      onCreateSuccessful(newVendor); // Passes the vendor back to the caller
+      if (!vendor) savedVendor = await createVendor(details); // Creating a new vendor
+      else savedVendor = await updateVendor(details); // Updating an existing vendor
+      onSaveSuccessful(savedVendor); // Passes the vendor back to the caller
     } catch (error) {
       if (error instanceof ConflictError) setErrorText(error.message);
       else alert(error);
@@ -45,9 +48,9 @@ const VendorCreationModal = ({ onCreateSuccessful, onSkipClicked }: VendorModalP
 
   /** UI layout for the vendor creation modal. */
   return (
-    <Modal show>
+    <Modal show onHide={onDismissed}>
       <Modal.Header style={{ display: "flex", flexDirection: "column" }}>
-        <Modal.Title>Create a Vendor Profile</Modal.Title>
+        <Modal.Title>{!vendor ? "Create a Vendor Profile" : "Update Vendor Profile"}</Modal.Title>
         <p style={{ marginBottom: "0px" }}>
           With a vendor profile, you can sell to others and more!
         </p>
@@ -65,6 +68,7 @@ const VendorCreationModal = ({ onCreateSuccessful, onSkipClicked }: VendorModalP
             label="Name *"
             type="text"
             placeholder="Enter your name"
+            value={vendor?.vendorName || ""}
             register={register}
             registerOptions={{ required: "Required" }}
             error={errors.vendorName}
@@ -76,6 +80,7 @@ const VendorCreationModal = ({ onCreateSuccessful, onSkipClicked }: VendorModalP
             label="Address *"
             type="address"
             placeholder="Enter your address"
+            value={vendor?.address || ""}
             register={register}
             registerOptions={{ required: "Required" }}
             error={errors.address}
@@ -87,6 +92,7 @@ const VendorCreationModal = ({ onCreateSuccessful, onSkipClicked }: VendorModalP
             label="Price Range *"
             type="text"
             placeholder="Enter your price range (Either $, $$, or $$$)"
+            value={vendor?.priceRange || ""}
             register={register}
             registerOptions={{
               required: "Required",
@@ -101,6 +107,7 @@ const VendorCreationModal = ({ onCreateSuccessful, onSkipClicked }: VendorModalP
             label="Phone Number"
             type="tel"
             placeholder="Enter your phone number"
+            value={vendor?.phoneNumber || ""}
             register={register}
             error={errors.phoneNumber}
           />
@@ -112,25 +119,25 @@ const VendorCreationModal = ({ onCreateSuccessful, onSkipClicked }: VendorModalP
             as="textarea"
             rows={5}
             placeholder="Enter description"
+            value={vendor?.description || ""}
             register={register}
             error={errors.phoneNumber}
           />
 
           {/* Dialog for the register button */}
           <Button type="submit" disabled={isSubmitting} className={StyleUtils.width100}>
-            Create Vendor Profile
+            {!vendor ? "Create Vendor Profile" : "Update Vendor Profile"}
           </Button>
         </Form>
       </Modal.Body>
 
-      <Modal.Footer>
-        <p style={{ position: "absolute", left: "50%" }}>3/3</p>
-        <Button variant="primary" style={{ marginLeft: "auto" }} onClick={onSkipClicked}>
-          Skip
-        </Button>
-      </Modal.Footer>
+      {!vendor && (
+        <Modal.Footer>
+          <p style={{ position: "absolute", left: "50%" }}>3/3</p>
+        </Modal.Footer>
+      )}
     </Modal>
   );
 };
 
-export default VendorCreationModal;
+export default VendorProfileModal;
