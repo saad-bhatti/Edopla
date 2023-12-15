@@ -11,7 +11,7 @@ interface VendorProps {
   isSaved: boolean;
   onVendorToggled: (vendor: VendorModel) => void;
   className?: string;
-  isInfoTheme?: boolean;
+  isDarkTheme?: boolean;
 }
 
 /** UI component for a vendor. */
@@ -21,14 +21,14 @@ const Vendor = ({
   isSaved,
   onVendorToggled,
   className,
-  isInfoTheme,
+  isDarkTheme,
 }: VendorProps) => {
   const { vendorName, description, priceRange, cuisineTypes } = vendor;
   const cardClass = `${styles.vendorCard} ${
-    isInfoTheme ? styles.vendorCardInfo : styles.vendorCardLight
+    isDarkTheme ? styles.vendorCardDark : styles.vendorCardLight
   } ${className}`;
   const listItemClass = `${styles.listItem} ${
-    isInfoTheme ? styles.listItemInfo : styles.listItemLight
+    isDarkTheme ? styles.listItemDark : styles.listItemLight
   }`;
 
   /** UI layout for the vendor card. */
@@ -85,7 +85,7 @@ const Vendor = ({
 
           {/* Button to directly order from the vendor. */}
           <Button
-            variant={isInfoTheme ? "light" : "info"}
+            variant={isDarkTheme ? "light" : "dark"}
             // @ts-ignore
             as={Link as React.ElementType}
             to={`/vendor/${vendor._id}`}

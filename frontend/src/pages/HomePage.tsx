@@ -92,7 +92,7 @@ const NotesPage = ({ loggedInUser }: HomePageProps) => {
             isSaved={true}
             onVendorToggled={toggleVendor}
             className={styles.vendor}
-            isInfoTheme={index % 2 === 0} // Alternate the theme of the card
+            isDarkTheme={index % 2 === 0} // Alternate the theme of the card
           />
         </Col>
       ))}
@@ -113,7 +113,7 @@ const NotesPage = ({ loggedInUser }: HomePageProps) => {
               isSaved={false}
               onVendorToggled={toggleVendor}
               className={styles.vendor}
-              isInfoTheme={index % 2 === 0} // Alternate the theme of the card
+              isDarkTheme={index % 2 === 0} // Alternate the theme of the card
             />
           </Col>
         )

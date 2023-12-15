@@ -1,15 +1,16 @@
 import { useEffect, useState } from "react";
 import { Container } from "react-bootstrap";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import BuyerCreationModal from "./components/modal/BuyerCreationModal";
+import BuyerProfileModal from "./components/modal/BuyerProfileModal";
 import LoginModal from "./components/modal/LoginModal";
 import SignUpModal from "./components/modal/SignUpModal";
-import VendorCreationModal from "./components/modal/VendorCreationModal";
+import VendorProfileModal from "./components/modal/VendorProfileModal";
 import NavBar from "./components/navigation/NavBar";
 import { User } from "./models/users/user";
 import * as UsersAPI from "./network/users/users_api";
 import HomePage from "./pages/HomePage";
 import NotFoundPage from "./pages/NotFoundPage";
+import ProfilesPage from "./pages/ProfilesPage";
 import styles from "./styles/App.module.css";
 
 function App() {
@@ -57,6 +58,7 @@ function App() {
         <Container className={styles.pageContainer}>
           <Routes>
             <Route path="/" element={<HomePage loggedInUser={loggedInUser} />} />
+            <Route path="/profiles" element={<ProfilesPage loggedInUser={loggedInUser} />} />
             <Route path="/*" element={<NotFoundPage />} />
           </Routes>
         </Container>
@@ -77,30 +79,26 @@ function App() {
 
         {/* Buyer profile creation modal */}
         {showBuyerModal && (
-          <BuyerCreationModal
-            onCreateSuccessful={(buyer) => {
+          <BuyerProfileModal
+            buyer={null}
+            onSaveSuccessful={(buyer) => {
               setShowBuyerModal(false);
               setShowVendorModal(true);
             }}
-            onSkipClicked={() => {
-              setShowBuyerModal(false);
-              setShowVendorModal(true);
-            }}
+            onDismissed={() => {}}
           />
         )}
 
         {/* Vendor profile creation modal */}
         {showVendorModal && (
-          <VendorCreationModal
-            onCreateSuccessful={(vendor) => {
+          <VendorProfileModal
+            vendor={null}
+            onSaveSuccessful={(vendor) => {
               setShowVendorModal(false);
             }}
-            onSkipClicked={() => {
-              setShowVendorModal(false);
-            }}
+            onDismissed={() => {}}
           />
-        )
-        }
+        )}
 
         {/* Login modal */}
         {showLoginModal && (

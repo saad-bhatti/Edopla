@@ -51,7 +51,7 @@ export async function createBuyer(details: BuyerDetails): Promise<Buyer> {
  * @param details the updated buyer's name, address, and phone number.
  * @returns A promise that resolves to the updated buyer object.
  */
-export async function logIn(details: BuyerDetails): Promise<Buyer> {
+export async function updateBuyer(details: BuyerDetails): Promise<Buyer> {
   const response = await fetchData(`${endpoint}/`, {
     method: "PATCH",
     headers: {

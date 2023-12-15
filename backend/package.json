@@ -4,7 +4,7 @@
   "description": "",
   "main": "dist/server.js",
   "scripts": {
-    "start": "nodemon src/server.ts --node_env=NODE_ENV --debug=$DEBUG",
+    "start": "nodemon src/server.ts --node_env=$NODE_ENV --debug=$DEBUG",
     "lint": "eslint . --ext .ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
