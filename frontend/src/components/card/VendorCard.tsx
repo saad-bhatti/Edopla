@@ -88,7 +88,7 @@ const Vendor = ({
             variant={isDarkTheme ? "light" : "dark"}
             // @ts-ignore
             as={Link as React.ElementType}
-            to={`/vendor/${vendor._id}`}
+            to={`/menu/${vendor._id}`}
             onClick={(event) => {
               event.stopPropagation(); // Prevent the vendor info modal from being opened
             }}

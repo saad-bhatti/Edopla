@@ -9,6 +9,7 @@ import NavBar from "./components/navigation/NavBar";
 import { User } from "./models/users/user";
 import * as UsersAPI from "./network/users/users_api";
 import HomePage from "./pages/HomePage";
+import MenuPage from "./pages/MenuPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import ProfilesPage from "./pages/ProfilesPage";
 import styles from "./styles/App.module.css";
@@ -59,6 +60,7 @@ function App() {
           <Routes>
             <Route path="/" element={<HomePage loggedInUser={loggedInUser} />} />
             <Route path="/profiles" element={<ProfilesPage loggedInUser={loggedInUser} />} />
+            <Route path="/menu/:vendorId" element={<MenuPage />} />
             <Route path="/*" element={<NotFoundPage />} />
           </Routes>
         </Container>
