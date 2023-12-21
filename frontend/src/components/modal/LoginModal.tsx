@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Alert, Button, Form, Modal } from "react-bootstrap";
 import { useForm } from "react-hook-form";
+import { displayError } from "../../errors/displayError";
 import { UnauthorizedError } from "../../errors/http_errors";
 import { User } from "../../models/users/user";
 import { UserCredentials, logIn } from "../../network/users/users_api";
@@ -33,7 +34,7 @@ const LoginModal = ({ onDismissed, onLoginSuccessful }: LoginModalProps) => {
     } catch (error) {
       if (error instanceof UnauthorizedError) setErrorText(error.message);
       else alert(error);
-      console.error(error);
+      displayError(error);
     }
   }
 

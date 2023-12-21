@@ -1,23 +1,21 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Spinner } from "react-bootstrap";
+import { LoggedInUserContext, UserContextProps } from "../App";
 import BuyerProfileAccordion from "../components/accordion/BuyerProfileAccordion";
 import VendorProfileAccordion from "../components/accordion/VendorProfileAccordion";
 import BuyerProfileModal from "../components/modal/BuyerProfileModal";
 import VendorProfileModal from "../components/modal/VendorProfileModal";
+import { displayError } from "../errors/displayError";
 import { Buyer } from "../models/users/buyer";
-import { User } from "../models/users/user";
 import { Vendor } from "../models/users/vendor";
 import { getBuyer } from "../network/users/buyers_api";
 import { getVendor } from "../network/users/vendors_api";
 import styleUtils from "../styles/utils.module.css";
 
-/** "Type" for the props of the profile page. */
-interface ProfilesPageProps {
-  loggedInUser: User | null;
-}
-
 /** UI for the profiles page, depending on user's login status. */
-const ProfilesPage = ({ loggedInUser }: ProfilesPageProps) => {
+const ProfilesPage = () => {
+  // Retrieve the logged in user from the context
+  const { loggedInUser } = useContext<UserContextProps | undefined>(LoggedInUserContext) || {};
   // State to track whether the page data is being loaded.
   const [isLoading, setIsLoading] = useState(true);
   // State to show an error message if the vendors fail to load.
@@ -50,7 +48,7 @@ const ProfilesPage = ({ loggedInUser }: ProfilesPageProps) => {
           }
         }
       } catch (error) {
-        console.error(error);
+        displayError(error);
         setShowLoadingError(true); // Show the loading error
       } finally {
         setIsLoading(false); // Hide the loading indicator

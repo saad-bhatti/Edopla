@@ -1,5 +1,6 @@
 import { Nav, NavDropdown } from "react-bootstrap";
 import { Link } from "react-router-dom";
+import { displayError } from "../../errors/displayError";
 import { User } from "../../models/users/user";
 import { logout } from "../../network/users/users_api";
 
@@ -19,7 +20,7 @@ const NavBarLoggedInView = ({ user, onLogoutSuccessful, variant }: NavBarLoggedI
       onLogoutSuccessful();
     } catch (error) {
       alert(error);
-      console.error(error);
+      displayError(error);
     }
   }
 

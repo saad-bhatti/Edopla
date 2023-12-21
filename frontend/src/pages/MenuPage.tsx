@@ -8,6 +8,7 @@ import CustomDropdown from "../components/custom/CustomDropdown";
 import CustomFilter from "../components/custom/CustomFilter";
 import CustomSearch from "../components/custom/CustomSearch";
 import CustomSlider from "../components/custom/CustomSlider";
+import { displayError } from "../errors/displayError";
 import { MenuItem } from "../models/items/menuItem";
 import { getMenu } from "../network/items/menus_api";
 import styleUtils from "../styles/utils.module.css";
@@ -43,7 +44,7 @@ const MenuPage = () => {
         setCompleteMenu(menu);
         setActiveMenu(menu);
       } catch (error) {
-        console.error(error);
+        displayError(error);
         setShowLoadingError(true); // Show the loading error
       } finally {
         setIsLoading(false); // Hide the loading indicator
@@ -86,7 +87,7 @@ const MenuPage = () => {
       options={categories}
       placeholder="Choose a category"
       defaultValue={""}
-      isOptionEqual={(option, value) => value === ""  || option === value}
+      isOptionEqual={(option, value) => value === "" || option === value}
     />,
   ];
 

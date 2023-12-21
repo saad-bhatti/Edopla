@@ -1,20 +1,18 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Col, Row, Spinner } from "react-bootstrap";
+import { LoggedInUserContext, UserContextProps } from "../App";
 import VendorCard from "../components/card/VendorCard";
 import VendorInfoModal from "../components/modal/VendorInfoModal";
-import { User } from "../models/users/user";
+import { displayError } from "../errors/displayError";
 import { Vendor } from "../models/users/vendor";
 import { getSavedVendors, toggleSavedVendor } from "../network/users/buyers_api";
 import { getAllVendors } from "../network/users/vendors_api";
 import styles from "../styles/pages/HomePage.module.css";
 
-/** "Type" for the props of the home page. */
-interface HomePageProps {
-  loggedInUser: User | null;
-}
-
 /** UI for the home page, depending on user's login status. */
-const NotesPage = ({ loggedInUser }: HomePageProps) => {
+const NotesPage = () => {
+  // Retrieve the logged in user from the context
+  const { loggedInUser } = useContext<UserContextProps | undefined>(LoggedInUserContext) || {};
   // State to track whether the page data is being loaded.
   const [isLoading, setIsLoading] = useState(true);
   // State to show an error message if the vendors fail to load.
@@ -45,7 +43,7 @@ const NotesPage = ({ loggedInUser }: HomePageProps) => {
         setUnsavedVendors(unsavedVendors.filter((vendor) => vendor._id !== vendorToToggle._id));
       else setUnsavedVendors([...unsavedVendors, vendorToToggle]);
     } catch (error) {
-      console.error(error);
+      displayError(error);
       alert(error);
     }
   }
@@ -72,7 +70,7 @@ const NotesPage = ({ loggedInUser }: HomePageProps) => {
           })
         );
       } catch (error) {
-        console.error(error);
+        displayError(error);
         setShowLoadingError(true); // Show the loading error
       } finally {
         setIsLoading(false); // Hide the loading indicator
