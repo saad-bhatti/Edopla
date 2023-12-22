@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Alert, Button, Form, Modal } from "react-bootstrap";
 import { useForm } from "react-hook-form";
+import { displayError } from "../../errors/displayError";
 import { ConflictError } from "../../errors/http_errors";
 import { Vendor } from "../../models/users/vendor";
 import { VendorDetails, createVendor, updateVendor } from "../../network/users/vendors_api";
@@ -36,7 +37,7 @@ const VendorProfileModal = ({ vendor, onSaveSuccessful, onDismissed }: VendorMod
     } catch (error) {
       if (error instanceof ConflictError) setErrorText(error.message);
       else alert(error);
-      console.error(error);
+      displayError(error);
     }
   }
 

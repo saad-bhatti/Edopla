@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Alert, Button, Form, Modal } from "react-bootstrap";
 import { useForm } from "react-hook-form";
+import { displayError } from "../../errors/displayError";
 import { ConflictError } from "../../errors/http_errors";
 import { Buyer } from "../../models/users/buyer";
 import { BuyerDetails, createBuyer, updateBuyer } from "../../network/users/buyers_api";
@@ -36,7 +37,7 @@ const BuyerProfileModal = ({ buyer, onSaveSuccessful, onDismissed }: BuyerModalP
     } catch (error) {
       if (error instanceof ConflictError) setErrorText(error.message);
       else alert(error);
-      console.error(error);
+      displayError(error);
     }
   }
 

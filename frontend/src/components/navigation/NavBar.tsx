@@ -1,24 +1,21 @@
+import { useContext } from "react";
 import { Container, Navbar } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import { User } from "../../models/users/user";
+import { LoggedInUserContext, UserContextProps } from "../../App";
 import NavBarLoggedInView from "./NavBarLoggedInView";
 import NavBarLoggedOutView from "./NavBarLoggedOutView";
 
 /** "Type" for the props of the navigation bar dialog component. */
 interface NavBarProps {
-  loggedInUser: User | null;
   onSignUpClicked: () => void;
   onLoginClicked: () => void;
   onLogoutSuccessful: () => void;
 }
 
 /** Navigation bar dialog component. */
-const NavBar = ({
-  loggedInUser,
-  onSignUpClicked,
-  onLoginClicked,
-  onLogoutSuccessful,
-}: NavBarProps) => {
+const NavBar = ({ onSignUpClicked, onLoginClicked, onLogoutSuccessful }: NavBarProps) => {
+  // Retrieve the logged in user from the context
+  const { loggedInUser } = useContext<UserContextProps | undefined>(LoggedInUserContext) || {};
   const theme = "dark";
 
   /** UI layout for the navigation bar. */
