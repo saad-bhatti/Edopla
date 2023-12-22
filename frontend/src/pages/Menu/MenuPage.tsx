@@ -2,23 +2,22 @@ import { Stack } from "@mui/joy";
 import { useEffect, useState } from "react";
 import { Spinner } from "react-bootstrap";
 import { useParams } from "react-router-dom";
-import MenuItemCard from "../components/card/MenuItemCard";
-import CustomAutoComplete from "../components/custom/CustomAutoComplete";
-import CustomDropdown from "../components/custom/CustomDropdown";
-import CustomFilter from "../components/custom/CustomFilter";
-import CustomSearch from "../components/custom/CustomSearch";
-import CustomSlider from "../components/custom/CustomSlider";
-import { displayError } from "../errors/displayError";
-import { MenuItem } from "../models/items/menuItem";
-import { getMenu } from "../network/items/menus_api";
-import styleUtils from "../styles/utils.module.css";
-import * as MenuManipulation from "../utils/menuManipulation";
+import MenuItemCard from "../../components/card/MenuItemCard";
+import CustomDropdown from "../../components/custom/CustomDropdown";
+import CustomFilter from "../../components/custom/CustomFilter";
+import CustomSearch from "../../components/custom/CustomSearch";
+import { displayError } from "../../errors/displayError";
+import { MenuItem } from "../../models/items/menuItem";
+import { getMenu } from "../../network/items/menus_api";
+import styleUtils from "../../styles/utils.module.css";
+import * as MenuManipulation from "./MenuManipulation";
+import * as MenuPageHelper from "./MenuPageHelper";
 
-/* 
-Remaining:
-- Add node environment variables to the frontend.
-- Filter functionality
-*/
+/**************************************************************************************************                                                                      *
+ * This file contains the UI for the menu page.                                                    *
+ * The menu page displays all the menu items of a vendor.                                          *
+ * The menu items can be searched, filtered, and sorted.                                           *
+ **************************************************************************************************/
 
 /** UI for the menu page. */
 const MenuPage = () => {
@@ -53,6 +52,35 @@ const MenuPage = () => {
     loadMenu();
   }, [vendorId]);
 
+  /** Function to search the menu by its name or category. */
+  const handleMenuSearch = (searchValue: string): void => {
+    MenuPageHelper.handleSearch(completeMenu, searchValue, setActiveMenu);
+  };
+  /** Array containing the price range of the menu. */
+  const priceRange: number[] = MenuManipulation.getPriceRange(completeMenu);
+  /** Array containing the categories of the menu. */
+  const categories: string[] = MenuManipulation.getCategories(completeMenu);
+  /** State to track the slider values. */
+  const [priceFilter, setPriceFilter] = useState<number[]>([priceRange[0], priceRange[1]]);
+  /** State to track the category filter. */
+  const [categoryFilter, setCategoryFilter] = useState<string>("");
+  // Callback function to be invoked when the "Apply" button is clicked in the filter
+  const handleFilterApply = () => {
+    MenuPageHelper.applyFilter(completeMenu, priceFilter, categoryFilter, setActiveMenu);
+  };
+  /** Array of filter options. */
+  const filterOptions = MenuPageHelper.generateFilterOptions(
+    priceRange,
+    setPriceFilter,
+    categories,
+    setCategoryFilter
+  );
+  /** Array of functions to execute for each sort option when clicked. */
+  const sortFunctions: (() => void)[] = MenuPageHelper.generateSortFunctions(
+    activeMenu,
+    setActiveMenu
+  );
+
   /** Variable containing the display for all menu items. */
   const menuItemsStack = (
     <Stack spacing={2} sx={{ overflow: "auto" }}>
@@ -60,46 +88,6 @@ const MenuPage = () => {
         <MenuItemCard key={index} menuItem={menuItem} />
       ))}
     </Stack>
-  );
-
-  /** */
-  const priceRange: number[] = MenuManipulation.getPriceRange(completeMenu);
-  const categories: string[] = MenuManipulation.getCategories(completeMenu);
-
-  /** Array of filter options. */
-  const filterOptions = [
-    // Price filter.
-    <CustomSlider
-      label="Price range"
-      defaultValue={[priceRange[0], priceRange[2]]}
-      step={1}
-      min={priceRange[0]}
-      max={priceRange[2]}
-      marks={[
-        { value: priceRange[0], label: `$${priceRange[0]}` },
-        { value: priceRange[1], label: `$${priceRange[1]}` },
-        { value: priceRange[2], label: `$${priceRange[2]}` },
-      ]}
-    />,
-    // Category filter.
-    <CustomAutoComplete
-      label="Category"
-      options={categories}
-      placeholder="Choose a category"
-      defaultValue={""}
-      isOptionEqual={(option, value) => value === "" || option === value}
-    />,
-  ];
-
-  /** Function to search the menu by its name or category. */
-  const handleSearch = (searchValue: string): void => {
-    const filteredMenu = MenuManipulation.handleSearch(completeMenu, searchValue);
-    setActiveMenu(filteredMenu);
-  };
-
-  /** Array of functions to execute for each sort option when clicked. */
-  const sortFunctions: (() => void)[] = MenuManipulation.sortFunctions.map(
-    (sortFn: (menuToSort: MenuItem[]) => MenuItem[]) => () => setActiveMenu(sortFn(activeMenu))
   );
 
   /** UI layout for the profiles page. */
@@ -124,10 +112,9 @@ const MenuPage = () => {
             placeholder="Search"
             initialValue=""
             activeSearch={true}
-            onSearch={handleSearch}
+            onSearch={handleMenuSearch}
           />
 
-          {/* TODO for the filter options. */}
           <Stack
             useFlexGap
             direction="row"
@@ -138,7 +125,15 @@ const MenuPage = () => {
             margin={{ xs: "0 0 5px 0" }}
           >
             {/* Drawer for the filter options. */}
-            <CustomFilter filterOptions={filterOptions} variant="outlined" color="neutral" />
+            <CustomFilter
+              filterOptions={filterOptions}
+              onApply={handleFilterApply}
+              onRemove={() => {
+                setActiveMenu(completeMenu);
+              }}
+              variant="outlined"
+              color="neutral"
+            />
 
             {/* Dropdown for the sort options. */}
             <CustomDropdown

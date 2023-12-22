@@ -1,4 +1,4 @@
-import { MenuItem } from "../models/items/menuItem";
+import { MenuItem } from "../../models/items/menuItem";
 
 /**************************************************************************************************                                                                      *
  * This file contains the manipulation options for the menu.                                      *
@@ -25,14 +25,11 @@ export const handleSearch = (completeMenu: MenuItem[], searchValue: string): Men
 /**
  * Function to retrieve the range of prices within a menu.
  * @param menu The menu to retrieve the price range from.
- * @returns The array of price range [min, mid, max].
+ * @returns The array of price range [min, max].
  */
 export function getPriceRange(menu: MenuItem[]): number[] {
   const prices = menu.map((menuItem) => menuItem.price);
-  const min = Math.min(...prices);
-  const max = Math.max(...prices);
-  const mid = (min + max) / 2;
-  return [min, mid, max];
+  return [Math.min(...prices), Math.max(...prices)];
 }
 
 /**
@@ -44,6 +41,38 @@ export function getCategories(menu: MenuItem[]): string[] {
   const categorySet = new Set<string>();
   menu.forEach((menuItem) => categorySet.add(menuItem.category));
   return Array.from(categorySet).sort();
+}
+
+/**
+ * Function to filter the menu by price and category.
+ * @param menu The menu to filter.
+ * @param priceRange The price range to filter by. [min, max]
+ * @param category The category to filter by.
+ * @returns The filtered menu.
+ */
+export function filterByPriceAndCategory(
+  menu: MenuItem[],
+  priceRange: number[],
+  category: string
+): MenuItem[] {
+  const isCategoryFilter: boolean = category !== "";
+  const isPriceFilter: boolean = priceRange !== getPriceRange(menu);
+  // Filtering by both price and category
+  if (isCategoryFilter && isPriceFilter)
+    return menu.filter(
+      (menuItem) =>
+        menuItem.price >= priceRange[0] &&
+        menuItem.price <= priceRange[1] &&
+        menuItem.category === category
+    );
+  // Filtering by category only
+  else if (isCategoryFilter) return menu.filter((menuItem) => menuItem.category === category);
+  // Filtering by price only
+  else if (isPriceFilter)
+    return menu.filter(
+      (menuItem) => menuItem.price >= priceRange[0] && menuItem.price <= priceRange[1]
+    );
+  else return menu;
 }
 
 ///////////////////////////////////////////// SORTING //////////////////////////////////////////////

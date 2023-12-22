@@ -8,14 +8,17 @@ import { useState } from "react";
 /** Props of the custom filter component. */
 interface CustomFilterProps {
   filterOptions: any[];
+  onApply: any;
+  onRemove: any;
   variant: "outlined" | "plain" | "soft" | "solid";
   color: "primary" | "success" | "warning" | "neutral";
 }
 
 /** UI component for a custom filter. */
-const CustomFilter = ({ filterOptions, variant, color }: CustomFilterProps) => {
+const CustomFilter = ({ filterOptions, onApply, onRemove,variant, color }: CustomFilterProps) => {
   // State to control whether the filter options are visible or not.
   const [isVisible, setIsVisible] = useState<boolean>(false);
+  const [isActive, setIsActive] = useState<boolean>(false);
 
   /** UI layout for the custom filter. */
   return (
@@ -40,16 +43,18 @@ const CustomFilter = ({ filterOptions, variant, color }: CustomFilterProps) => {
           ))}
         </Stack>
 
-        {/* Apply button. */}
+        {/* Button to apply or remove filters. */}
         <Button
-          variant="solid"
-          color="primary"
-          onClick={() => {
-            /*TODO*/
-          }}
-          sx={{ alignSelf: "flex-end", marginRight: "2%", minWidth: "fit-content" }}
+        variant="solid"
+        color="primary"
+        onClick={() => {
+          !isActive ? onApply() : onRemove();
+          setIsActive(!isActive);
+          setIsVisible(false);
+        }}
+        sx={{ alignSelf: "flex-end", marginRight: "2%", minWidth: "fit-content" }}
         >
-          Apply
+          {!isActive ? "Apply" : "Remove"}
         </Button>
       </Drawer>
     </>

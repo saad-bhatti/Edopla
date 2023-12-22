@@ -10,10 +10,19 @@ interface CustomSliderProps {
   min: number;
   max: number;
   marks: { value: number; label: string }[];
+  onChange: (value: number[]) => void; // Function to execute when the slider value changes.
 }
 
 /** UI component for a custom slider. */
-const CustomSlider = ({ label, defaultValue, step, min, max, marks }: CustomSliderProps) => {
+const CustomSlider = ({
+  label,
+  defaultValue,
+  step,
+  min,
+  max,
+  marks,
+  onChange,
+}: CustomSliderProps) => {
   /**
    * Function to format the price value for the slider.
    * @param price The value of the slider.
@@ -37,6 +46,9 @@ const CustomSlider = ({ label, defaultValue, step, min, max, marks }: CustomSlid
           valueLabelDisplay="auto"
           valueLabelFormat={formatSliderPrice}
           marks={marks}
+          onChange={(_, values) => {
+            onChange(values as number[]);
+          }}
           sx={{
             [`& .${sliderClasses.markLabel}[data-index="0"]`]: {
               transform: "none",
