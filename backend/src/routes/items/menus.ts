@@ -7,7 +7,7 @@ const router = express.Router();
 
 router.get("/:vendorId", MenuItemsController.getMenu);
 router.get("/item/:menuItemId", MenuItemsController.getMenuItem);
-router.post("/item/", requiresVendor, MenuItemsController.createMenuItem);
+router.post("/item", requiresVendor, MenuItemsController.createMenuItem);
 router.patch("/item/:menuItemId", requiresVendor, MenuItemsController.updateMenuItem);
 router.patch(
   "/item/:menuItemId/availability",

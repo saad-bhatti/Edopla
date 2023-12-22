@@ -20,6 +20,25 @@ interface CuisineBody {
 }
 
 /**
+ * Retrieve all vendor profiles from the database.
+ *  - Params: None
+ *  - Body: None
+ *  - Return: [Vendor]
+ */
+export const getAllVendors: RequestHandler<unknown, unknown, unknown, unknown> = async (
+  req,
+  res,
+  next
+) => {
+  try {
+    const vendors = await VendorModel.find({}).exec();
+    res.status(200).json(vendors);
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
  * Retrieve a vendor's profile from the database.
  *  - Prerequisite: Vendor's id must exist in session.
  *  - Params: None
@@ -69,7 +88,8 @@ export const createVendor: RequestHandler<unknown, unknown, ProfileBody, unknown
     if (user._vendor) throw new Http_Errors.AlreadyExists("User's vendor profile");
 
     // Validate the provided fields
-    if (!vendorName || !address || !priceRange) throw new Http_Errors.MissingField();
+    if (!vendorName || !address || !priceRange || !description)
+      throw new Http_Errors.MissingField();
     assertIsPriceRange(priceRange);
 
     // Send the request to create the new vendor profile
@@ -121,7 +141,8 @@ export const updateVendor: RequestHandler<unknown, unknown, ProfileBody, unknown
     if (!vendor) throw new Http_Errors.NotFound("Vendor profile");
 
     // Validate the existance of the required fields
-    if (!vendorName || !address || !priceRange) throw new Http_Errors.MissingField();
+    if (!vendorName || !address || !priceRange || !description)
+      throw new Http_Errors.MissingField();
     assertIsPriceRange(priceRange);
 
     // Update & save the vendor profile
