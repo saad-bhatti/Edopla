@@ -6,7 +6,7 @@ const vendorSchema = new Schema({
   address: { type: String, required: true },
   priceRange: { type: String, required: true, enum: ["$", "$$", "$$$"] },
   phoneNumber: { type: String },
-  description: { type: String },
+  description: { type: String, required: true },
   cuisineTypes: { type: [String] },
   menu: { type: [Schema.Types.ObjectId], ref: "MenuItem", required: true, select: false },
   orders: { type: [Schema.Types.ObjectId], ref: "OrderItem", required: true, select: false },
