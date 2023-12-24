@@ -1,18 +1,73 @@
-import { Nav, NavDropdown } from "react-bootstrap";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import DensityMediumIcon from "@mui/icons-material/DensityMedium";
+import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
+import {
+  Dropdown,
+  IconButton,
+  ListDivider,
+  Menu,
+  MenuButton,
+  MenuItem,
+  Typography,
+} from "@mui/joy";
+import Button from "@mui/joy/Button";
+import { useContext, useState } from "react";
 import { Link } from "react-router-dom";
 import { displayError } from "../../errors/displayError";
-import { User } from "../../models/users/user";
 import { logout } from "../../network/users/users_api";
+import { LoggedInUserContext, LoggedInUserContextProps } from "../../utils/contexts";
+
+/** UI component for the logged in view of the navigation bar head. */
+export const NavBarLoggedInHead = () => {
+  /** UI layout for the navigation bar head when logged in. */
+  return (
+    <>
+      {/* Buy button. */}
+      <Button
+        variant="plain"
+        color="neutral"
+        size="sm"
+        sx={{ alignSelf: "center", fontSize: "md" }}
+      >
+        Buy
+      </Button>
+
+      {/* Sell button. */}
+      <Button
+        variant="plain"
+        color="neutral"
+        size="sm"
+        sx={{ alignSelf: "center", fontSize: "md" }}
+      >
+        Sell
+      </Button>
+
+      {/* Orders button. */}
+      <Button
+        variant="plain"
+        color="neutral"
+        size="sm"
+        sx={{ alignSelf: "center", fontSize: "md" }}
+      >
+        Orders
+      </Button>
+    </>
+  );
+};
 
 /** "Type" for the props of the logged in view of the navigation bar. */
 interface NavBarLoggedInViewProps {
-  user: User;
   onLogoutSuccessful: () => void;
-  variant: string;
 }
 
-/** Logged in view of the navigation bar. */
-const NavBarLoggedInView = ({ user, onLogoutSuccessful, variant }: NavBarLoggedInViewProps) => {
+/** UI component for the logged in view of the navigation bar tail. */
+export const NavBarLoggedInTail = ({ onLogoutSuccessful }: NavBarLoggedInViewProps) => {
+  // Retrieve the logged in user from the context
+  const { loggedInUser } =
+    useContext<LoggedInUserContextProps | undefined>(LoggedInUserContext) || {};
+  // State to track whether the dropdown menu is visible.
+  const [isDropdownVisible, setIsDropdownVisible] = useState(false);
+
   /** Function to handle logging out request. */
   async function logOut() {
     try {
@@ -24,24 +79,69 @@ const NavBarLoggedInView = ({ user, onLogoutSuccessful, variant }: NavBarLoggedI
     }
   }
 
-  /** UI layout for the navigation bar when logged in. */
+  /** UI layout for the dropdown menu. */
+  const DropDownMenu = (
+    <Menu
+      placement="bottom-end"
+      size="sm"
+      sx={{
+        p: 1,
+        gap: 1,
+      }}
+    >
+      {/* User email. */}
+      <MenuItem>
+        <Typography level="body-xs">{loggedInUser?.email}</Typography>
+      </MenuItem>
+
+      <ListDivider />
+
+      {/* Profile button. */}
+      <Link to="/profiles">
+        <MenuItem>
+          <AccountCircleIcon />
+          Profiles
+        </MenuItem>
+      </Link>
+
+      <ListDivider />
+
+      {/* Log out button. */}
+      <Link to="/">
+        <MenuItem onClick={logOut}>
+          <LogoutRoundedIcon />
+          Log out
+        </MenuItem>
+      </Link>
+    </Menu>
+  );
+
+  /** UI layout for the navigation bar tail when logged in. */
   return (
     <>
-      <Nav className="me-auto">
-        <Nav.Link>Buy</Nav.Link>
-        <Nav.Link>Sell</Nav.Link>
-      </Nav>
+      <Dropdown>
+        {/* Profile button. */}
+        <MenuButton
+          variant="plain"
+          size="sm"
+          sx={{ maxWidth: "32px", maxHeight: "32px", borderRadius: "9999999px" }}
+          onClick={() => {
+            setIsDropdownVisible(true);
+          }}
+        >
+          <IconButton
+            variant="plain"
+            color="neutral"
+            size="lg"
+            sx={{ alignSelf: "center", fontSize: "large" }}
+          >
+            <DensityMediumIcon />
+          </IconButton>
+        </MenuButton>
 
-      <Nav className="ms-auto">
-        <NavDropdown title="Account" id="collapsible-nav-dropdown">
-          <NavDropdown.Item as={Link} to="/profiles">Profiles</NavDropdown.Item>
-          <NavDropdown.Item>Orders</NavDropdown.Item>
-          <NavDropdown.Divider />
-          <NavDropdown.Item onClick={logOut}>Logout</NavDropdown.Item>
-        </NavDropdown>
-      </Nav>
+        {/* Dropdown menu. */}
+        {isDropdownVisible && DropDownMenu}
+      </Dropdown>
     </>
   );
 };
-
-export default NavBarLoggedInView;

@@ -1,6 +1,5 @@
 import { useContext, useEffect, useState } from "react";
 import { Col, Row, Spinner } from "react-bootstrap";
-import { LoggedInUserContext, UserContextProps } from "../App";
 import VendorCard from "../components/card/VendorCard";
 import VendorInfoModal from "../components/modal/VendorInfoModal";
 import { displayError } from "../errors/displayError";
@@ -8,11 +7,13 @@ import { Vendor } from "../models/users/vendor";
 import { getSavedVendors, toggleSavedVendor } from "../network/users/buyers_api";
 import { getAllVendors } from "../network/users/vendors_api";
 import styles from "../styles/pages/HomePage.module.css";
+import { LoggedInUserContext, LoggedInUserContextProps } from "../utils/contexts";
 
 /** UI for the home page, depending on user's login status. */
 const NotesPage = () => {
   // Retrieve the logged in user from the context
-  const { loggedInUser } = useContext<UserContextProps | undefined>(LoggedInUserContext) || {};
+  const { loggedInUser } =
+    useContext<LoggedInUserContextProps | undefined>(LoggedInUserContext) || {};
   // State to track whether the page data is being loaded.
   const [isLoading, setIsLoading] = useState(true);
   // State to show an error message if the vendors fail to load.

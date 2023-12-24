@@ -109,10 +109,12 @@ const MenuPage = () => {
         <>
           {/* Search bar. */}
           <CustomSearch
-            placeholder="Search"
+            placeholder="Search by name or category"
             initialValue=""
             activeSearch={true}
             onSearch={handleMenuSearch}
+            sx={{ width: "50%", mx: "auto" }}
+
           />
 
           <Stack

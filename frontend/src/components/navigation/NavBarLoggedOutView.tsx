@@ -1,31 +1,45 @@
-import { Button, Nav } from "react-bootstrap";
+import Button from "@mui/joy/Button";
+
+/** UI component for the logged out view of the navigation bar head. */
+export const NavBarLoggedOutHead = () => {
+  return <></>;
+};
 
 /** "Type" for the props of the logged out view of the navigation bar. */
 interface NavBarLoggedOutViewProps {
   onSignUpClicked: () => void;
   onLoginClicked: () => void;
-  variant: string;
 }
 
-/** Logged out view of the navigation bar. */
-const NavBarLoggedOutView = ({
+/** UI component for the logged out view of the navigation bar tail. */
+export const NavBarLoggedOutTail = ({
   onSignUpClicked,
   onLoginClicked,
-  variant,
 }: NavBarLoggedOutViewProps) => {
   /** UI layout for the navigation bar when logged out. */
   return (
     <>
-      <Nav className="ms-auto">
-        <Button variant={variant} onClick={onSignUpClicked}>
-          Sign Up
-        </Button>
-        <Button variant={variant} onClick={onLoginClicked}>
-          Login
-        </Button>
-      </Nav>
+      {/* Sign up button. */}
+      <Button
+        variant="plain"
+        color="neutral"
+        size="sm"
+        sx={{ alignSelf: "center", fontSize: "md" }}
+        onClick={onSignUpClicked}
+      >
+        Sign Up
+      </Button>
+
+      {/* Login button. */}
+      <Button
+        variant="plain"
+        color="neutral"
+        size="sm"
+        sx={{ alignSelf: "center", fontSize: "md" }}
+        onClick={onLoginClicked}
+      >
+        Login
+      </Button>
     </>
   );
 };
-
-export default NavBarLoggedOutView;
