@@ -126,7 +126,7 @@ export const placeOrder: RequestHandler<unknown, unknown, OrderBody, unknown> = 
       .populate({
         path: "carts",
         match: { _id: unverifiedCartId },
-        populate: { path: "items", model: "MenuItem" },
+        populate: { path: "items.item", model: "MenuItem" },
       })
       .lean();
     if (!buyer) throw new Http_Errors.NotFound("Buyer");
@@ -134,21 +134,11 @@ export const placeOrder: RequestHandler<unknown, unknown, OrderBody, unknown> = 
     // Verify that the cart belongs to the buyer & retrieve the necessary data
     if (!buyer.carts.length) throw new Http_Errors.Unauthorized("Buyer", "cart");
     const verifiedCart: Interfaces.CI_IP = buyer.carts[0];
-    const itemsMap = verifiedCart.items;
-    const itemsQuantityObject = verifiedCart.itemsQuantity;
-    const itemsQuantityMap = new Map(Object.entries(itemsQuantityObject));
-    /* Note that the mongoose request actually returns the itemsQuantity field
-       as type Object rather than type Map (as seen in this post facing a similar
-       problem: https://github.com/Automattic/mongoose/issues/9564). This is a
-       workaround the problem. */
+    const items = verifiedCart.items;
 
     // Calculate the total price of the cart
     let totalPrice = 0;
-    for (const key of itemsMap.keys()) {
-      const item = itemsMap.get(key)!;
-      const quantity = itemsQuantityMap.get(key)!;
-      totalPrice += item.price * quantity;
-    }
+    for (const { item, quantity } of items) totalPrice += item.price * quantity;
 
     /* Create the order in the database, add it to the buyer's orders, and remove
        the cart from the buyer's carts */

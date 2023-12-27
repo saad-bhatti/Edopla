@@ -11,19 +11,19 @@ import { CartItem } from "./models/items/cartItem";
 import { User } from "./models/users/user";
 import { getCarts } from "./network/items/carts_api";
 import * as UsersAPI from "./network/users/users_api";
-import CartPage from "./pages/CartPage";
+import CartPage from "./pages/Cart/CartPage";
 import HomePage from "./pages/HomePage";
 import MenuPage from "./pages/Menu/MenuPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import ProfilesPage from "./pages/ProfilesPage";
 import styles from "./styles/App.module.css";
-import { CartContext, LoggedInUserContext } from "./utils/contexts";
+import { CartsContext, LoggedInUserContext } from "./utils/contexts";
 
 function App() {
   // State to track the logged in user
   const [loggedInUser, setLoggedInUser] = useState<User | null>(null);
   // State to track the user's cart
-  const [cart, setCart] = useState<CartItem[]>([]);
+  const [carts, setCarts] = useState<CartItem[]>([]);
   // State to control whether the sign up modal is shown
   const [showSignUpModal, setShowSignUpModal] = useState(false);
   // State to control whether the login modal is shown
@@ -39,7 +39,7 @@ function App() {
       try {
         const user = await UsersAPI.getLoggedInUser();
         setLoggedInUser(user);
-        !user ? setCart([]) : setCart(await getCarts());
+        setCarts(await getCarts());
       } catch (error) {
         displayError(error);
       }
@@ -49,7 +49,7 @@ function App() {
 
   return (
     <LoggedInUserContext.Provider value={{ loggedInUser, setLoggedInUser }}>
-      <CartContext.Provider value={{ cart, setCart }}>
+      <CartsContext.Provider value={{ carts, setCarts }}>
         <BrowserRouter>
           <div>
             {/* Display for the navigation bar */}
@@ -62,7 +62,7 @@ function App() {
               }}
               onLogoutSuccessful={() => {
                 setLoggedInUser(null);
-                setCart([]);
+                setCarts([]);
               }}
             />
 
@@ -85,7 +85,6 @@ function App() {
                 }}
                 onSignUpSuccessful={(user) => {
                   setLoggedInUser(user);
-                  setCart([]);
                   setShowSignUpModal(false);
                   setShowBuyerModal(true);
                 }}
@@ -123,14 +122,14 @@ function App() {
                 }}
                 onLoginSuccessful={async (user) => {
                   setLoggedInUser(user);
-                  setCart(await getCarts());
+                  setCarts(await getCarts());
                   setShowLogInModal(false);
                 }}
               />
             )}
           </div>
         </BrowserRouter>
-      </CartContext.Provider>
+      </CartsContext.Provider>
     </LoggedInUserContext.Provider>
   );
 }

@@ -15,8 +15,7 @@ import styleUtils from "../styles/utils.module.css";
 /** UI for the profiles page, depending on user's login status. */
 const ProfilesPage = () => {
   // Retrieve the logged in user from the context
-  const { loggedInUser } =
-    useContext<LoggedInUserContextProps | undefined>(LoggedInUserContext) || {};
+  const { loggedInUser } = useContext<LoggedInUserContextProps | null>(LoggedInUserContext) || {};
   // State to track whether the page data is being loaded.
   const [isLoading, setIsLoading] = useState(true);
   // State to show an error message if the vendors fail to load.

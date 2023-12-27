@@ -9,13 +9,13 @@ export interface LoggedInUserContextProps {
 }
 
 /** Context to track the logged-in user. */
-export const LoggedInUserContext = createContext<LoggedInUserContextProps | undefined>(undefined);
+export const LoggedInUserContext = createContext<LoggedInUserContextProps | null>(null);
 
 /** Custom type for the cart context. */
-export interface CartContextProps {
-  cart: CartItem[] | null;
-  setCart: React.Dispatch<React.SetStateAction<CartItem[]>>;
+export interface CartsContextProps {
+  carts: CartItem[];
+  setCarts: React.Dispatch<React.SetStateAction<CartItem[]>>;
 }
 
 /** Context to track the cart. */
-export const CartContext = createContext<CartContextProps | undefined>(undefined);
+export const CartsContext = createContext<CartsContextProps | null>(null);

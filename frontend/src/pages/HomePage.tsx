@@ -12,8 +12,7 @@ import { LoggedInUserContext, LoggedInUserContextProps } from "../utils/contexts
 /** UI for the home page, depending on user's login status. */
 const NotesPage = () => {
   // Retrieve the logged in user from the context
-  const { loggedInUser } =
-    useContext<LoggedInUserContextProps | undefined>(LoggedInUserContext) || {};
+  const { loggedInUser } = useContext<LoggedInUserContextProps | null>(LoggedInUserContext) || {};
   // State to track whether the page data is being loaded.
   const [isLoading, setIsLoading] = useState(true);
   // State to show an error message if the vendors fail to load.

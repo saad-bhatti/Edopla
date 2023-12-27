@@ -22,19 +22,20 @@ interface NavBarProps {
 const NavBar = ({ onSignUpClicked, onLoginClicked, onLogoutSuccessful }: NavBarProps) => {
   // Retrieve the logged in user from the context
   const { loggedInUser } =
-    useContext<Context.LoggedInUserContextProps | undefined>(Context.LoggedInUserContext) || {};
-  // Retrieve the logged in user from the context
-  const { cart } = useContext<Context.CartContextProps | undefined>(Context.CartContext) || {};
+    useContext<Context.LoggedInUserContextProps | null>(Context.LoggedInUserContext) || {};
+  // Retrieve the logged in user's cart from the context
+  const { carts } = useContext<Context.CartsContextProps | null>(Context.CartsContext) || {};
 
   /** UI layout for the custom navigation. */
   return (
-    <div style={{ margin: "0.5% 2%" }}>
+    <div style={{ margin: "0.5% 1%" }}>
       {/* Navigation bar head. */}
       <Box
         sx={{
           display: "flex",
           flexGrow: 1,
           justifyContent: "space-between",
+          outline: "2px solid #E0E0E0",
         }}
       >
         <Stack
@@ -78,11 +79,13 @@ const NavBar = ({ onSignUpClicked, onLoginClicked, onLogoutSuccessful }: NavBarP
           />
 
           {/* Cart button. */}
-          <IconButton variant="plain" color="neutral" size="sm" sx={{ alignSelf: "center" }}>
-            <Badge badgeContent={cart?.length} size="sm">
-              <ShoppingCartIcon sx={{ fontSize: "large" }} />
-            </Badge>
-          </IconButton>
+          <Link to="/cart">
+            <IconButton variant="plain" color="neutral" size="sm" sx={{ alignSelf: "center" }}>
+              <Badge badgeContent={carts?.length} size="sm">
+                <ShoppingCartIcon sx={{ fontSize: "large" }} />
+              </Badge>
+            </IconButton>
+          </Link>
 
           {/* Rest of tail depending in authentication status. */}
           {loggedInUser ? (

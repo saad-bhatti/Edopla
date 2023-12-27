@@ -63,8 +63,7 @@ interface NavBarLoggedInViewProps {
 /** UI component for the logged in view of the navigation bar tail. */
 export const NavBarLoggedInTail = ({ onLogoutSuccessful }: NavBarLoggedInViewProps) => {
   // Retrieve the logged in user from the context
-  const { loggedInUser } =
-    useContext<LoggedInUserContextProps | undefined>(LoggedInUserContext) || {};
+  const { loggedInUser } = useContext<LoggedInUserContextProps | null>(LoggedInUserContext) || {};
   // State to track whether the dropdown menu is visible.
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
 

@@ -93,7 +93,7 @@ const MenuPage = () => {
   /** UI layout for the profiles page. */
   return (
     <>
-      {/* Display for the indicator while vendors are loading. */}
+      {/* Display for the indicator while menu is loading. */}
       {isLoading && <Spinner animation="border" variant="primary" />}
 
       {/* Display for when the menu fails to load. */}
