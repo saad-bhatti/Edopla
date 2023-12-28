@@ -1,15 +1,17 @@
-import { Stack } from "@mui/joy";
-import { useEffect, useState } from "react";
-import { LinearProgress } from "@mui/joy";
+import { LinearProgress, Stack } from "@mui/joy";
+import { useContext, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import MenuItemCard from "../../components/card/MenuItemCard";
 import CustomDropdown from "../../components/custom/CustomDropdown";
 import CustomFilter from "../../components/custom/CustomFilter";
 import CustomSearch from "../../components/custom/CustomSearch";
 import { displayError } from "../../errors/displayError";
+import { CartItem } from "../../models/items/cartItem";
 import { MenuItem } from "../../models/items/menuItem";
+import { createCart, updateItem } from "../../network/items/carts_api";
 import { getMenu } from "../../network/items/menus_api";
 import styleUtils from "../../styles/utils.module.css";
+import * as Contexts from "../../utils/contexts";
 import * as MenuManipulation from "./MenuManipulation";
 import * as MenuPageHelper from "./MenuPageHelper";
 
@@ -23,6 +25,12 @@ import * as MenuPageHelper from "./MenuPageHelper";
 const MenuPage = () => {
   // Retrieve the vendor id from the URL path.
   const { vendorId } = useParams();
+  // Retrieve the logged in user.
+  const { loggedInUser } =
+    useContext<Contexts.LoggedInUserContextProps | null>(Contexts.LoggedInUserContext) || {};
+  // Retrieve the logged in user's cart.
+  const { carts, setCarts } =
+    useContext<Contexts.CartsContextProps | null>(Contexts.CartsContext) || {};
   // State to track whether the page data is being loaded.
   const [isLoading, setIsLoading] = useState(true);
   // State to show an error message if the vendors fail to load.
@@ -31,6 +39,8 @@ const MenuPage = () => {
   const [completeMenu, setCompleteMenu] = useState<MenuItem[]>([]);
   // State to track the active menu.
   const [activeMenu, setActiveMenu] = useState<MenuItem[]>([]);
+  // State to track the user's cart for this vendor.
+  const [cart, setCart] = useState<CartItem | null>(null);
 
   /** Retrieve the menu only once before rendering the page. */
   useEffect(() => {
@@ -39,9 +49,16 @@ const MenuPage = () => {
         if (!vendorId) throw new Error("No vendor id provided.");
         setShowLoadingError(false);
         setIsLoading(true); // Show the loading indicator
-        const menu = await getMenu(vendorId);
+
+        // Retrieve the menu and set the respective states.
+        const menu: MenuItem[] = await getMenu(vendorId);
         setCompleteMenu(menu);
         setActiveMenu(menu);
+
+        // Initialzie the user's cart for this vendor, if it exists.
+        const existingCart = carts!.find((cartItem) => cartItem.vendorId._id === vendorId);
+        if (existingCart) setCart(existingCart);
+        else setCart(null);
       } catch (error) {
         displayError(error);
         setShowLoadingError(true); // Show the loading error
@@ -50,7 +67,7 @@ const MenuPage = () => {
       }
     }
     loadMenu();
-  }, [vendorId]);
+  }, [carts, vendorId]);
 
   /** Function to search the menu by its name or category. */
   const handleMenuSearch = (searchValue: string): void => {
@@ -81,12 +98,60 @@ const MenuPage = () => {
     setActiveMenu
   );
 
+  async function onItemUpdate(menuItem: MenuItem, quantity: number): Promise<void> {
+    // If the user is not logged in
+    if (!loggedInUser) {
+      displayError(new Error("You must be logged in to add items to your cart."));
+      return;
+    }
+    // If the user does not have a buyer profile
+    else if (!loggedInUser._buyer) {
+      displayError(new Error("You must have a buyer profile to add items to your cart."));
+      return;
+    }
+
+    // If the user's cart for this vendor already exists
+    if (cart) {
+      // Send request to update the cart
+      const requestDetails = { item: { item: menuItem._id, quantity: quantity } };
+      const updatedCart = await updateItem(cart._id, requestDetails);
+      // Update the cart in the context
+      setCarts!(
+        carts!.map((cartItem) => (cartItem._id === updatedCart._id ? updatedCart : cartItem))
+      );
+    }
+    // If the user's cart for this vendor does not exist
+    else {
+      // Send request to create the cart
+      const requestDetails = {
+        vendorId: vendorId!,
+        items: [{ item: menuItem._id, quantity: quantity }],
+      };
+      const newCart = await createCart(requestDetails);
+      // Update the cart in the context
+      setCarts!([...carts!, newCart]);
+    }
+  }
+
   /** Variable containing the display for all menu items. */
   const menuItemsStack = (
     <Stack spacing={2} sx={{ overflow: "auto" }}>
-      {activeMenu.map((menuItem: MenuItem, index: number) => (
-        <MenuItemCard key={index} menuItem={menuItem} />
-      ))}
+      {activeMenu.map((menuItem: MenuItem) =>
+        cart && cart.items.find((itemInCart) => itemInCart.item._id === menuItem._id) ? (
+          // If the menu item is in the user's cart, set the quantity to the cart's quantity.
+          <MenuItemCard
+            key={menuItem._id}
+            menuItem={menuItem}
+            quantity={
+              cart.items.find((itemInCart) => itemInCart.item._id === menuItem._id)?.quantity
+            }
+            onItemUpdate={onItemUpdate}
+          />
+        ) : (
+          // Otherwise, don't set the quantity.
+          <MenuItemCard key={menuItem._id} menuItem={menuItem} onItemUpdate={onItemUpdate} />
+        )
+      )}
     </Stack>
   );
 

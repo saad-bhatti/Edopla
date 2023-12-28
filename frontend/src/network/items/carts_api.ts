@@ -47,7 +47,7 @@ export async function getCart(cartId: string): Promise<CartItem> {
 
 /**
  * Function to create a cart item for the currently authenticated buyer.
- * @param details vendor ID: Types.ObjectId, items: { item: Types.ObjectId; quantity: number }[]
+ * @param details vendor ID: string, items: { item: string; quantity: number }[]
  * @returns A promise that resolves to the new cart item object.
  */
 export async function createCart(details: CreateCartDetails): Promise<CartItem> {
