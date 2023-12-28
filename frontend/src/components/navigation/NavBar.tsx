@@ -1,48 +1,104 @@
+import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import { IconButton } from "@mui/joy";
+import Badge from "@mui/joy/Badge";
+import Box from "@mui/joy/Box";
+import Button from "@mui/joy/Button";
+import Stack from "@mui/joy/Stack";
 import { useContext } from "react";
-import { Container, Navbar } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import { LoggedInUserContext, UserContextProps } from "../../App";
-import NavBarLoggedInView from "./NavBarLoggedInView";
-import NavBarLoggedOutView from "./NavBarLoggedOutView";
+import * as Context from "../../utils/contexts";
+import CustomSearch from "../custom/CustomSearch";
+import { NavBarLoggedInHead, NavBarLoggedInTail } from "./NavBarLoggedInView";
+import { NavBarLoggedOutHead, NavBarLoggedOutTail } from "./NavBarLoggedOutView";
 
-/** "Type" for the props of the navigation bar dialog component. */
+/** Props of the custom navigation component. */
 interface NavBarProps {
   onSignUpClicked: () => void;
   onLoginClicked: () => void;
   onLogoutSuccessful: () => void;
 }
 
-/** Navigation bar dialog component. */
+/** UI component for a custom navigation. */
 const NavBar = ({ onSignUpClicked, onLoginClicked, onLogoutSuccessful }: NavBarProps) => {
   // Retrieve the logged in user from the context
-  const { loggedInUser } = useContext<UserContextProps | undefined>(LoggedInUserContext) || {};
-  const theme = "dark";
+  const { loggedInUser } =
+    useContext<Context.LoggedInUserContextProps | null>(Context.LoggedInUserContext) || {};
+  // Retrieve the logged in user's cart from the context
+  const { carts } = useContext<Context.CartsContextProps | null>(Context.CartsContext) || {};
 
-  /** UI layout for the navigation bar. */
+  /** UI layout for the custom navigation. */
   return (
-    <Navbar bg={theme} variant="dark" expand="sm" sticky="top">
-      <Container>
-        <Navbar.Brand as={Link} to="/">
-          Edopla
-        </Navbar.Brand>
-        <Navbar.Toggle aria-controls="main-navbar" />
-        <Navbar.Collapse id="main-navbar">
+    <div style={{ margin: "0.5% 1%" }}>
+      {/* Navigation bar head. */}
+      <Box
+        sx={{
+          display: "flex",
+          flexGrow: 1,
+          justifyContent: "space-between",
+          outline: "2px solid #E0E0E0",
+        }}
+      >
+        <Stack
+          direction="row"
+          justifyContent="center"
+          alignItems="center"
+          spacing={1}
+          sx={{ display: { xs: "none", sm: "flex" } }}
+        >
+          {/* Home button. */}
+          <Link to="/">
+            <Button
+              variant="plain"
+              color="neutral"
+              href="/"
+              size="sm"
+              sx={{ alignSelf: "center", fontSize: "md" }}
+            >
+              Edopla
+            </Button>
+          </Link>
+
+          {/* Rest of head depending in authentication status. */}
+          {loggedInUser ? <NavBarLoggedInHead /> : <NavBarLoggedOutHead />}
+        </Stack>
+
+        {/* Navigation bar tail. */}
+        <Stack
+          direction="row"
+          justifyContent="center"
+          alignItems="center"
+          spacing={1}
+          sx={{ display: { xs: "none", sm: "flex" } }}
+        >
+          {/* Search bar. */}
+          <CustomSearch
+            placeholder="Type to search"
+            initialValue=""
+            activeSearch={false}
+            onSearch={() => {}}
+          />
+
+          {/* Cart button. */}
+          <Link to="/carts">
+            <IconButton variant="plain" color="neutral" size="sm" sx={{ alignSelf: "center" }}>
+              <Badge badgeContent={carts?.length} size="sm">
+                <ShoppingCartIcon sx={{ fontSize: "large" }} />
+              </Badge>
+            </IconButton>
+          </Link>
+
+          {/* Rest of tail depending in authentication status. */}
           {loggedInUser ? (
-            <NavBarLoggedInView
-              user={loggedInUser}
-              onLogoutSuccessful={onLogoutSuccessful}
-              variant={theme}
-            />
+            <NavBarLoggedInTail onLogoutSuccessful={onLogoutSuccessful} />
           ) : (
-            <NavBarLoggedOutView
+            <NavBarLoggedOutTail
               onSignUpClicked={onSignUpClicked}
               onLoginClicked={onLoginClicked}
-              variant={theme}
             />
           )}
-        </Navbar.Collapse>
-      </Container>
-    </Navbar>
+        </Stack>
+      </Box>
+    </div>
   );
 };
 

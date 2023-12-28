@@ -15,8 +15,7 @@ export interface MI {
 export interface CI_U {
   _id: Types.ObjectId;
   vendorId: Types.ObjectId;
-  items: Map<string, Types.ObjectId>;
-  itemsQuantity: Map<string, number>;
+  items: { item: Types.ObjectId; quantity: number }[];
   savedForLater: boolean;
 }
 
@@ -24,8 +23,7 @@ export interface CI_U {
 export interface CI_IP {
   _id: Types.ObjectId;
   vendorId: Types.ObjectId;
-  items: Map<string, MI>;
-  itemsQuantity: Map<string, number>;
+  items: { item: MI; quantity: number }[];
   savedForLater: boolean;
 }
 

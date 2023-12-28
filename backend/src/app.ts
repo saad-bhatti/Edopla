@@ -14,6 +14,10 @@ import usersRoutes from "./routes/users/users";
 import vendorsRoutes from "./routes/users/vendors";
 import env from "./util/validateEnv";
 
+// Get necessary flags from the command line
+const isTest = process.argv[2].split("=")[1] === "test";
+const isDebug = process.argv[3].split("=")[1] === "true";
+
 // Initialize the app
 const app = express();
 
@@ -24,14 +28,16 @@ app.use(morgan("dev"));
 app.use(express.json());
 
 // Add middleware to enable CORS
-app.use(
-  cors({
-    origin: env.FRONTEND_URL,
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
-);
+!isTest
+  ? app.use(
+      cors({
+        origin: env.FRONTEND_URL,
+        credentials: true,
+        methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+        allowedHeaders: ["Content-Type", "Authorization"],
+      })
+    )
+  : app.use(cors());
 
 // Add middleware to set-up & handle sessions
 app.use(
@@ -66,8 +72,9 @@ app.use((req, res, next) => {
 // Error handler
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 app.use((error: unknown, req: Request, res: Response, next: NextFunction) => {
-  const isDebug = process.env.DEBUG === "true";
+  // Log the error if in debug mode
   if (isDebug) console.error(error);
+
   // Initialize to internal server error
   let errorMessage = "An unknown error occurred";
   let statusCode = 500;

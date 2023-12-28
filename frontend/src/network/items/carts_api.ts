@@ -8,14 +8,17 @@ const endpoint = `${apiUrl}/api/carts`;
 /** Interface for the input to create a cart item. */
 export interface CreateCartDetails {
   vendorId: string;
-  items: string[];
-  itemsQuantity: number[];
+  items: { item: string; quantity: number }[];
 }
 
 /** Interface for the input to update a cart item. */
 export interface UpdateCartDetails {
-  items: string[];
-  itemsQuantity: number[];
+  items: { item: string; quantity: number }[];
+}
+
+/** Interface for the input to update an item within a cart. */
+export interface UpdateItemDetails {
+  item: { item: string; quantity: number };
 }
 
 /**
@@ -44,7 +47,7 @@ export async function getCart(cartId: string): Promise<CartItem> {
 
 /**
  * Function to create a cart item for the currently authenticated buyer.
- * @param details the vendor ID, items, and items quantity.
+ * @param details vendor ID: string, items: { item: string; quantity: number }[]
  * @returns A promise that resolves to the new cart item object.
  */
 export async function createCart(details: CreateCartDetails): Promise<CartItem> {
@@ -61,11 +64,28 @@ export async function createCart(details: CreateCartDetails): Promise<CartItem> 
 /**
  * Function to update a cart item belonging to the currently authenticated buyer.
  * @param cartId the cart's ID.
- * @param details items, and items quantity.
+ * @param details items: { item: string; quantity: number }[]
  * @returns A promise that resolves to the updated cart item object.
  */
 export async function updateCart(cartId: string, details: UpdateCartDetails): Promise<CartItem> {
-  const response = await fetchData(`${endpoint}/${cartId}/items`, {
+  const response = await fetchData(`${endpoint}/${cartId}/`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(details),
+  });
+  return response.json();
+}
+
+/**
+ * Function to update an item within a cart item belonging to the currently authenticated buyer.
+ * @param cartId the cart's ID.
+ * @param details item: { item: string; quantity: number }
+ * @returns A promise that resolves to the updated cart item object.
+ */
+export async function updateItem(cartId: string, details: UpdateItemDetails): Promise<CartItem> {
+  const response = await fetchData(`${endpoint}/${cartId}/item`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
