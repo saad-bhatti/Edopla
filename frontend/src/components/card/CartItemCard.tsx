@@ -1,3 +1,4 @@
+import AddCircleIcon from "@mui/icons-material/AddCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -8,6 +9,7 @@ import WatchLaterIcon from "@mui/icons-material/WatchLater";
 import { Button, Divider, IconButton, Stack, Typography } from "@mui/joy";
 import CardContent from "@mui/joy/CardContent";
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { CartItem } from "../../models/items/cartItem";
 import CustomCard from "../custom/CustomCard";
 import CustomCounter from "../custom/CustomCounter";
@@ -66,7 +68,11 @@ const CartItemCard = ({
       {/* Card header. */}
       <Stack spacing={1} direction="row" justifyContent="space-between" alignItems="flex-start">
         {/* Vendor name. */}
-        <Typography level="h4">{vendorId.vendorName}</Typography>
+        <Link to={`/menu/${vendorId._id}`} style={{ textDecoration: "none", color: "inherit" }}>
+          <Typography level="h4" style={{ cursor: "pointer" }}>
+            {vendorId.vendorName}
+          </Typography>
+        </Link>
 
         {!isEditMode ? (
           /* Buttons in non-edit mode. */
@@ -79,11 +85,12 @@ const CartItemCard = ({
             {/* Empty cart button. */}
             <IconButton
               variant="plain"
+              color="danger"
               onClick={() => {
                 onEmpty(cartItem);
               }}
             >
-              <RemoveShoppingCartIcon sx={{ color: "rgba(255, 99, 71, 0.8)" }} />
+              <RemoveShoppingCartIcon />
             </IconButton>
           </Stack>
         ) : (
@@ -93,18 +100,20 @@ const CartItemCard = ({
             <IconButton
               variant="plain"
               size="sm"
+              color="danger"
               onClick={() => {
                 setUpdatedQuantities({}); // Reset the updates in quantities in the local state
                 setIsEditMode(false);
               }}
             >
-              <CancelIcon sx={{ color: "rgba(255, 99, 71, 0.8)" }} />
+              <CancelIcon />
             </IconButton>
 
             {/* Accept changes button. */}
             <IconButton
               variant="plain"
               size="sm"
+              color="success"
               onClick={() => {
                 // Update the items with the new quantities
                 const updatedItems = items.map(({ item, quantity }) => {
@@ -117,7 +126,7 @@ const CartItemCard = ({
                 setIsEditMode(false); // Exit edit mode
               }}
             >
-              <CheckCircleIcon sx={{ color: "rgba(11, 156, 49, 0.6)" }} />
+              <CheckCircleIcon />
             </IconButton>
           </Stack>
         )}
@@ -189,18 +198,19 @@ const CartItemCard = ({
               <IconButton
                 variant="plain"
                 size="sm"
+                color="danger"
                 onClick={() => {
                   onDeleteItem(cartItem, item._id);
                 }}
+                sx={{ alignSelf: "center" }}
               >
-                <DeleteIcon sx={{ color: "rgba(255, 99, 71, 0.8)" }} />
+                <DeleteIcon />
               </IconButton>
             )}
           </Stack>
         ))}
       </Stack>
 
-      {/* TODO: MAKE MORE VISIBLE */}
       <Divider sx={{ border: "1px solid #000" }} />
 
       {/* Total price. */}
@@ -211,8 +221,19 @@ const CartItemCard = ({
         <Typography level="body-sm">{`$${Math.round(totalPrice * 100) / 100}`}</Typography>
       </Stack>
 
-      {/* Save for later and checkout buttons. */}
+      {/* General buttons. */}
       <Stack spacing={1} direction="row" justifyContent="flex-end">
+        {/* Add items button. */}
+        <Link to={`/menu/${vendorId._id}`}>
+          <Button
+            variant="outlined"
+            size="sm"
+            startDecorator={<AddCircleIcon sx={{ fontSize: "medium" }} />}
+          >
+            Add items
+          </Button>
+        </Link>
+
         {/* Save for later button. */}
         <Button
           variant="outlined"

@@ -79,7 +79,7 @@ const NavBar = ({ onSignUpClicked, onLoginClicked, onLogoutSuccessful }: NavBarP
           />
 
           {/* Cart button. */}
-          <Link to="/cart">
+          <Link to="/carts">
             <IconButton variant="plain" color="neutral" size="sm" sx={{ alignSelf: "center" }}>
               <Badge badgeContent={carts?.length} size="sm">
                 <ShoppingCartIcon sx={{ fontSize: "large" }} />

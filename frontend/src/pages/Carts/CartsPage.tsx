@@ -1,4 +1,5 @@
-import { LinearProgress, Stack, Typography } from "@mui/joy";
+import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
+import { Button, LinearProgress, Stack, Typography } from "@mui/joy";
 import { useContext, useEffect, useState } from "react";
 import CartItemCard from "../../components/card/CartItemCard";
 import CustomDropdown from "../../components/custom/CustomDropdown";
@@ -7,6 +8,13 @@ import { displayError } from "../../errors/displayError";
 import { CartItem } from "../../models/items/cartItem";
 import * as CartsAPI from "../../network/items/carts_api";
 import { CartsContext, CartsContextProps } from "../../utils/contexts";
+import * as CartsManipulation from "./CartsManipulation";
+
+/***************************************************************************************************
+ * This file contains the UI for the carts page.                                                   *
+ * The carts page displays all the carts items of the authenticated user.                          *
+ * The carts items can be searched and sorted.                                                     *
+ **************************************************************************************************/
 
 /** UI for the cart page. */
 const CartPage = () => {
@@ -14,10 +22,42 @@ const CartPage = () => {
   const { carts, setCarts } = useContext<CartsContextProps | null>(CartsContext) || {};
   // State to track whether the cart is being seperated.
   const [isSeperating, setIsSeperating] = useState(true);
+  // State to track the active carts.
+  const [activeCarts, setActiveCarts] = useState<CartItem[]>(carts!);
   // State to track the carts that are not saved for later.
   const [nowCarts, setNowCarts] = useState<CartItem[]>([]);
   // State to track the carts that are saved for later.
   const [laterCarts, setLaterCarts] = useState<CartItem[]>([]);
+
+  /** Seperate the cart by "savedForLater" only once before rendering the page. */
+  useEffect(() => {
+    function seperateCarts() {
+      setIsSeperating(true);
+
+      // Seperate the carts by "savedForLater" if the carts are not empty.
+      const [nowCarts, laterCarts] = CartsManipulation.seperateCarts(activeCarts);
+      setNowCarts(nowCarts);
+      setLaterCarts(laterCarts);
+
+      setIsSeperating(false);
+    }
+    seperateCarts();
+  }, [carts, activeCarts]);
+
+  /**
+   * Function to search the carts by vendor or item names.
+   * @param searchValue The value to search the carts by.
+   * @returns Nothing.
+   */
+  function handleCartsSearch(searchValue: string): void {
+    const filteredCarts: CartItem[] = CartsManipulation.handleSearch(carts!, searchValue);
+    setActiveCarts(filteredCarts);
+  }
+
+  /** Array of functions to execute for each sort option when clicked. */
+  const sortFunctions: (() => void)[] = CartsManipulation.sortFunctions.map(
+    (sortFn: (cartsToSort: CartItem[]) => CartItem[]) => () => setActiveCarts(sortFn(activeCarts))
+  );
 
   /**
    * Function to handle emptying a cart item.
@@ -30,8 +70,9 @@ const CartPage = () => {
       await CartsAPI.emptyCart(cartItemToEmpty._id);
 
       // Remove the cart from the carts list.
-      if (setCarts && carts)
-        setCarts(carts.filter((cartItem) => cartItem._id !== cartItemToEmpty._id));
+      setCarts!(carts!.filter((cartItem) => cartItem._id !== cartItemToEmpty._id));
+      // Remove the cart from the active carts.
+      setActiveCarts(activeCarts.filter((cartItem) => cartItem._id !== cartItemToEmpty._id));
 
       // Remove the cart from its respective cart.
       cartItemToEmpty.savedForLater
@@ -59,13 +100,20 @@ const CartPage = () => {
       const updatedCart = await CartsAPI.updateCart(cartItem._id, requestBody);
 
       // Update the cart in the carts context.
-      if (setCarts && carts)
-        setCarts(
-          carts.map((traversalCartItem) => {
-            if (traversalCartItem._id === cartItem._id) return updatedCart;
-            return traversalCartItem;
-          })
-        );
+      setCarts!(
+        carts!.map((traversalCartItem) => {
+          if (traversalCartItem._id === cartItem._id) return updatedCart;
+          return traversalCartItem;
+        })
+      );
+
+      // Update the active carts.
+      setActiveCarts(
+        activeCarts.map((traversalCartItem) => {
+          if (traversalCartItem._id === cartItem._id) return updatedCart;
+          return traversalCartItem;
+        })
+      );
     } catch (error) {
       displayError(error);
       alert(error);
@@ -85,15 +133,23 @@ const CartPage = () => {
       const updatedCart = await CartsAPI.updateItem(cartItem._id, requestDetails);
 
       // If the updated cart is empty, delete the cart from the database.
-      if (!updatedCart.items.length && setCarts && carts) emptyCart(cartItem);
-      // Otherwise, update the cart in the carts context.
-      else if (setCarts && carts)
-        setCarts(
-          carts.map((traversalCartItem) => {
+      if (!updatedCart.items.length) emptyCart(cartItem);
+      else {
+        // Update the cart in the carts context.
+        setCarts!(
+          carts!.map((traversalCartItem) => {
             if (traversalCartItem._id === cartItem._id) return updatedCart;
             return traversalCartItem;
           })
         );
+        // Update the active carts.
+        setActiveCarts(
+          activeCarts.map((traversalCartItem) => {
+            if (traversalCartItem._id === cartItem._id) return updatedCart;
+            return traversalCartItem;
+          })
+        );
+      }
     } catch (error) {
       displayError(error);
       alert(error);
@@ -111,40 +167,25 @@ const CartPage = () => {
       const updatedCart = await CartsAPI.toggleSaveForLater(cartItemToToggle._id);
 
       // Update the cart in the carts context.
-      if (setCarts && carts)
-        setCarts(
-          carts.map((cartItem) => {
-            if (cartItem._id === cartItemToToggle._id) return updatedCart;
-            return cartItem;
-          })
-        );
+      setCarts!(
+        carts!.map((cartItem) => {
+          if (cartItem._id === cartItemToToggle._id) return updatedCart;
+          return cartItem;
+        })
+      );
+
+      // Update the active carts.
+      setActiveCarts(
+        activeCarts.map((cartItem) => {
+          if (cartItem._id === cartItemToToggle._id) return updatedCart;
+          return cartItem;
+        })
+      );
     } catch (error) {
       displayError(error);
       alert(error);
     }
   }
-
-  /** Seperate the cart by "savedForLater" only once before rendering the page. */
-  useEffect(() => {
-    function seperateCarts() {
-      setIsSeperating(true);
-
-      // Seperate the carts by "savedForLater" if the carts are not empty.
-      if (carts !== undefined && carts !== null && carts.length) {
-        const nowCarts: CartItem[] = [];
-        const laterCarts: CartItem[] = [];
-        carts.forEach((cartItem: CartItem) => {
-          if (cartItem.savedForLater) laterCarts.push(cartItem);
-          else nowCarts.push(cartItem);
-        });
-        setNowCarts(nowCarts);
-        setLaterCarts(laterCarts);
-      }
-
-      setIsSeperating(false);
-    }
-    seperateCarts();
-  }, [carts]);
 
   /** Variable containing the display for all "now" cart items. */
   const nowCartsStack =
@@ -199,23 +240,36 @@ const CartPage = () => {
         sx={{ minWidth: 0 }}
         margin={{ xs: "0 0 5px 0" }}
       >
+        {/* Dropdown for the sort options. */}
+        <CustomDropdown
+          label="Sort by"
+          options={CartsManipulation.sortOptions}
+          onOptionClick={sortFunctions}
+          variant="plain"
+          color="primary"
+        />
+
         {/* Search bar. */}
         <CustomSearch
           placeholder="Search by vendor or item"
           initialValue=""
           activeSearch={true}
-          onSearch={() => {}}
-          sx={{ width: "50%" }}
+          onSearch={handleCartsSearch}
+          sx={{ width: "30%" }}
         />
 
-        {/* Dropdown for the sort options. */}
-        <CustomDropdown
-          label="Sort by"
-          options={[]}
-          onOptionClick={[]}
-          variant="plain"
-          color="primary"
-        />
+        {/* Button to empty all carts. */}
+        <Button
+          variant="solid"
+          size="sm"
+          color="danger"
+          onClick={async () => {
+            await CartsAPI.emptyCarts();
+          }}
+          startDecorator={<DeleteForeverIcon />}
+        >
+          Empty all carts
+        </Button>
       </Stack>
 
       {/* Display for the indicator while the carts are being seperated. */}

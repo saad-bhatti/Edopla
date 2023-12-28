@@ -1,6 +1,6 @@
 import { Stack } from "@mui/joy";
 import { useEffect, useState } from "react";
-import { Spinner } from "react-bootstrap";
+import { LinearProgress } from "@mui/joy";
 import { useParams } from "react-router-dom";
 import MenuItemCard from "../../components/card/MenuItemCard";
 import CustomDropdown from "../../components/custom/CustomDropdown";
@@ -13,7 +13,7 @@ import styleUtils from "../../styles/utils.module.css";
 import * as MenuManipulation from "./MenuManipulation";
 import * as MenuPageHelper from "./MenuPageHelper";
 
-/**************************************************************************************************                                                                      *
+/***************************************************************************************************
  * This file contains the UI for the menu page.                                                    *
  * The menu page displays all the menu items of a vendor.                                          *
  * The menu items can be searched, filtered, and sorted.                                           *
@@ -94,7 +94,7 @@ const MenuPage = () => {
   return (
     <>
       {/* Display for the indicator while menu is loading. */}
-      {isLoading && <Spinner animation="border" variant="primary" />}
+      {isLoading && <LinearProgress size="lg" value={28} variant="soft" />}
 
       {/* Display for when the menu fails to load. */}
       {showLoadingError && <p>Something went wrong. Please try again.</p>}
@@ -114,7 +114,6 @@ const MenuPage = () => {
             activeSearch={true}
             onSearch={handleMenuSearch}
             sx={{ width: "50%", mx: "auto" }}
-
           />
 
           <Stack

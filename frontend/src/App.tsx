@@ -11,7 +11,7 @@ import { CartItem } from "./models/items/cartItem";
 import { User } from "./models/users/user";
 import { getCarts } from "./network/items/carts_api";
 import * as UsersAPI from "./network/users/users_api";
-import CartPage from "./pages/Cart/CartPage";
+import CartsPage from "./pages/Carts/CartsPage";
 import HomePage from "./pages/HomePage";
 import MenuPage from "./pages/Menu/MenuPage";
 import NotFoundPage from "./pages/NotFoundPage";
@@ -71,7 +71,7 @@ function App() {
               <Routes>
                 <Route path="/" element={<HomePage />} />
                 <Route path="/profiles" element={<ProfilesPage />} />
-                <Route path="/cart" element={<CartPage />} />
+                <Route path="/carts" element={<CartsPage />} />
                 <Route path="/menu/:vendorId" element={<MenuPage />} />
                 <Route path="/*" element={<NotFoundPage />} />
               </Routes>
