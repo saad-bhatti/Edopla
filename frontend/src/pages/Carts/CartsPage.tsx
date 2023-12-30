@@ -28,6 +28,8 @@ const CartPage = () => {
   const [nowCarts, setNowCarts] = useState<CartItem[]>([]);
   // State to track the carts that are saved for later.
   const [laterCarts, setLaterCarts] = useState<CartItem[]>([]);
+  // State to track whether the carts are being searched.
+  const [isSearching, setIsSearching] = useState(false);
 
   /** Seperate the cart by "savedForLater" only once before rendering the page. */
   useEffect(() => {
@@ -35,8 +37,10 @@ const CartPage = () => {
       setIsSeperating(true);
 
       // Load the carts from local storage if the carts context is empty.
-      const cartsFromLocalStorage = localStorage.getItem("carts");
-      if (cartsFromLocalStorage) setActiveCarts!(JSON.parse(cartsFromLocalStorage));
+      if (!activeCarts?.length && !isSearching) {
+        const cartsFromLocalStorage = localStorage.getItem("carts");
+        if (cartsFromLocalStorage) setActiveCarts!(JSON.parse(cartsFromLocalStorage));
+      }
 
       // Seperate the carts by "savedForLater" if the carts are not empty.
       const [nowCarts, laterCarts] = CartsManipulation.seperateCarts(activeCarts);
@@ -49,7 +53,7 @@ const CartPage = () => {
       setIsSeperating(false);
     }
     seperateCarts();
-  }, [carts, activeCarts]);
+  }, [carts, activeCarts, isSearching]);
 
   /**
    * Function to search the carts by vendor or item names.
@@ -57,7 +61,9 @@ const CartPage = () => {
    * @returns Nothing.
    */
   function handleCartsSearch(searchValue: string): void {
+    const isSearch: boolean = !searchValue.length ? false : true;
     const filteredCarts: CartItem[] = CartsManipulation.handleSearch(carts!, searchValue);
+    setIsSearching(isSearch);
     setActiveCarts(filteredCarts);
   }
 
