@@ -88,12 +88,7 @@ const ProfilesPage = () => {
               // Display the buyer profile card.
               {
                 tab: "Buyer",
-                panel: buyer && (
-                  <BuyerProfileCard
-                    buyer={buyer}
-                    onEditBuyerClicked={() => setShowBuyerModal(true)}
-                  />
-                ),
+                panel: buyer && <BuyerProfileCard buyer={buyer} onBuyerUpdate={setBuyer} />,
               },
               // Display the vendor profile card.
               {
