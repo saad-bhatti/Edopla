@@ -10,8 +10,8 @@ interface CustomDropdownProps {
   label: string;
   options: string[]; // Array of strings to display as options.
   onOptionClick: (() => void)[]; // Array of functions to handle the click of each option.
-  variant: "outlined" | "plain" | "soft" | "solid";
-  color: "primary" | "success" | "warning";
+  variant?: "outlined" | "plain" | "soft" | "solid";
+  color?: "primary" | "success" | "warning";
 }
 
 /** UI component for a custom dropdown. */

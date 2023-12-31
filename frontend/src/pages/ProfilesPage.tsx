@@ -95,10 +95,7 @@ const ProfilesPage = () => {
                 tab: "Vendor",
                 panel: vendor && (
                   // Display the vendor profile card.
-                  <VendorProfileCard
-                    vendor={vendor}
-                    onEditVendorClicked={() => setShowVendorModal(true)}
-                  />
+                  <VendorProfileCard vendor={vendor} onVendorUpdate={setVendor} />
                 ),
               },
             ]}

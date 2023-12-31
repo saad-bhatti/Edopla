@@ -31,6 +31,12 @@ const BuyerProfileCard = ({ buyer, onBuyerUpdate, sx }: BuyerProfileCardProps) =
   // State to track the new phone number input value.
   const [newPhoneNumber, setNewPhoneNumber] = useState<string>(phoneNumber || "");
 
+  // State to control errors on the buyer information form.
+  const [formError, setFormError] = useState<{ isError: number; error: string }>({
+    isError: 0,
+    error: "",
+  });
+
   // State to control the display of the snackbar.
   const [buyerSnackbarVisible, setBuyerSnackbarVisible] = useState<boolean>(false);
   // State to track the text and color of the snackbar.
@@ -42,11 +48,6 @@ const BuyerProfileCard = ({ buyer, onBuyerUpdate, sx }: BuyerProfileCardProps) =
     text: "",
     color: "primary",
   });
-  // State to control errors on the buyer information form.
-  const [formError, setFormError] = useState<{ isError: number; error: string }>({
-    isError: 0,
-    error: "",
-  });
 
   /** Function to check whether any changes to the buyer info have been made. */
   function isChange(): boolean {
@@ -55,15 +56,6 @@ const BuyerProfileCard = ({ buyer, onBuyerUpdate, sx }: BuyerProfileCardProps) =
 
   /** Function to handle change submissions to the buyer profile. */
   async function handleProfileChange() {
-    // Check that the required fields are not empty.
-    if (!newBuyerName.length) {
-      setFormError({ isError: 1, error: "Please enter your name." });
-      return;
-    }
-    if (!newAddress.length) {
-      setFormError({ isError: 2, error: "Please enter your address." });
-      return;
-    }
     // Check that the phone number is valid, checking that it only contains numbers.
     if (!newPhoneNumber.match(/^[0-9]+$/)) {
       setFormError({ isError: 3, error: "Please enter a valid phone number." });
@@ -98,7 +90,7 @@ const BuyerProfileCard = ({ buyer, onBuyerUpdate, sx }: BuyerProfileCardProps) =
     }
   }
 
-  /** UI layout for the change email form. */
+  /** UI layout for the change buyer information form. */
   const changeBuyerInfoForm = (
     <form
       onSubmit={(event) => {
@@ -106,7 +98,7 @@ const BuyerProfileCard = ({ buyer, onBuyerUpdate, sx }: BuyerProfileCardProps) =
         handleProfileChange();
       }}
     >
-      <Stack spacing={1} direction="column" marginBottom={1}>
+      <Stack spacing={1} direction="column" marginBottom={1} sx={{ maxWidth: "40%" }}>
         {/* Form error text. */}
         {formError.isError !== 0 && (
           <FormControl error>

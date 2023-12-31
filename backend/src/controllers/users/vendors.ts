@@ -5,13 +5,23 @@ import VendorModel from "../../models/users/vendor";
 import { assertIsDefined } from "../../util/assertIsDefined";
 import { assertIsPriceRange } from "../../util/assertIsPriceRange";
 
-/** "Type" of the HTTP request body when creating/modifying a vendor profile. */
-interface ProfileBody {
+/** "Type" of the HTTP request body when creating a vendor profile. */
+interface CreateProfileBody {
   vendorName?: string;
   address?: string;
   priceRange?: string;
   phoneNumber?: string;
   description?: string;
+}
+
+/** "Type" of the HTTP request body when modifying a vendor profile. */
+interface UpdateProfileBody {
+  vendorName?: string;
+  address?: string;
+  priceRange?: string;
+  phoneNumber?: string;
+  description?: string;
+  cuisineTypes?: string[];
 }
 
 /** "Type" of the HTTP request body when modifying a vendor's cuisine types. */
@@ -70,7 +80,7 @@ export const getVendor: RequestHandler<unknown, unknown, unknown, unknown> = asy
  *  - Body: vendorName, address, priceRange, phoneNumber, description
  *  - Return: Vendor
  */
-export const createVendor: RequestHandler<unknown, unknown, ProfileBody, unknown> = async (
+export const createVendor: RequestHandler<unknown, unknown, CreateProfileBody, unknown> = async (
   req,
   res,
   next
@@ -124,7 +134,7 @@ export const createVendor: RequestHandler<unknown, unknown, ProfileBody, unknown
  *  - Body: vendorName, address, priceRange, phoneNumber, description
  *  - Return: Vendor
  */
-export const updateVendor: RequestHandler<unknown, unknown, ProfileBody, unknown> = async (
+export const updateVendor: RequestHandler<unknown, unknown, UpdateProfileBody, unknown> = async (
   req,
   res,
   next
@@ -134,6 +144,7 @@ export const updateVendor: RequestHandler<unknown, unknown, ProfileBody, unknown
   const priceRange = req.body.priceRange;
   const phoneNumber = req.body.phoneNumber;
   const description = req.body.description;
+  const cuisineTypes = req.body.cuisineTypes;
   try {
     // Retrieve the existing vendor's profile
     assertIsDefined(req.session.vendorId);
@@ -151,6 +162,7 @@ export const updateVendor: RequestHandler<unknown, unknown, ProfileBody, unknown
     vendor.priceRange = priceRange;
     vendor.phoneNumber = phoneNumber;
     vendor.description = description;
+    vendor.cuisineTypes = cuisineTypes || vendor.cuisineTypes;
     const updatedVendor = await vendor.save();
 
     res.status(200).json(updatedVendor);

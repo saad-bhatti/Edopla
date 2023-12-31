@@ -339,7 +339,13 @@ const UserProfileCard = ({ user, sx }: UserProfileCardProps) => {
   /** UI layout for the user profile card. */
   const cardContent = (
     <CardContent>
-      <Stack spacing={2} direction="column" justifyContent="space-between" alignItems="flex-start">
+      <Stack
+        spacing={2}
+        direction="column"
+        justifyContent="space-between"
+        alignItems="flex-start"
+        sx={{ maxWidth: "51%" }}
+      >
         {/* Change email form. */}
         {changeEmailForm}
 
