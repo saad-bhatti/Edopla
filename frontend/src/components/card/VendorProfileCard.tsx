@@ -137,7 +137,7 @@ const VendorProfileCard = ({ vendor, onVendorUpdate, sx }: VendorProfileCardProp
         )}
 
         {/* Vendor name section title. */}
-        <FormLabel>Buyer Name</FormLabel>
+        <FormLabel>Vendor Name</FormLabel>
         {/* Vendor name input. */}
         <FormControl error={formError.isError === 1}>
           <CustomInput
