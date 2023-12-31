@@ -14,6 +14,8 @@ import styleUtils from "../../styles/utils.module.css";
 import * as Contexts from "../../utils/contexts";
 import * as MenuManipulation from "./MenuManipulation";
 import * as MenuPageHelper from "./MenuPageHelper";
+import CustomSnackbar from "../../components/custom/CustomSnackbar";
+import InfoOutlined from "@mui/icons-material/InfoOutlined";
 
 /***************************************************************************************************
  * This file contains the UI for the menu page.                                                    *
@@ -41,6 +43,18 @@ const MenuPage = () => {
   const [activeMenu, setActiveMenu] = useState<MenuItem[]>([]);
   // State to track the user's cart for this vendor.
   const [cart, setCart] = useState<CartItem | null>(null);
+
+  // State to control the display of the snackbar.
+  const [snackbarVisible, setSnackbarVisible] = useState<boolean>(false);
+  // State to track the text and color of the snackbar.
+  type possibleColors = "primary" | "neutral" | "danger" | "success" | "warning";
+  const [snackbarFormat, setSnackbarFormat] = useState<{
+    text: string;
+    color: possibleColors;
+  }>({
+    text: "",
+    color: "primary",
+  });
 
   /** Retrieve the menu only once before rendering the page. */
   useEffect(() => {
@@ -111,25 +125,49 @@ const MenuPage = () => {
     }
 
     // If the user's cart for this vendor already exists
-    if (cart) {
-      // Send request to update the cart
-      const requestDetails = { item: { item: menuItem._id, quantity: quantity } };
-      const updatedCart = await updateItem(cart._id, requestDetails);
-      // Update the cart in the context
-      setCarts!(
-        carts!.map((cartItem) => (cartItem._id === updatedCart._id ? updatedCart : cartItem))
-      );
-    }
-    // If the user's cart for this vendor does not exist
-    else {
-      // Send request to create the cart
-      const requestDetails = {
-        vendorId: vendorId!,
-        items: [{ item: menuItem._id, quantity: quantity }],
-      };
-      const newCart = await createCart(requestDetails);
-      // Update the cart in the context
-      setCarts!([...carts!, newCart]);
+    try {
+      if (cart) {
+        // Send request to update the cart
+        const requestDetails = { item: { item: menuItem._id, quantity: quantity } };
+        const updatedCart = await updateItem(cart._id, requestDetails);
+        // Update the cart in the context
+        setCarts!(
+          carts!.map((cartItem) => (cartItem._id === updatedCart._id ? updatedCart : cartItem))
+        );
+
+        // Show snackbar to indicate success.
+        setSnackbarFormat({
+          text: quantity
+            ? "Item successfully modified in the cart!"
+            : "Item successfully removed from the cart!",
+          color: "success",
+        });
+      }
+      // If the user's cart for this vendor does not exist
+      else {
+        // Send request to create the cart
+        const requestDetails = {
+          vendorId: vendorId!,
+          items: [{ item: menuItem._id, quantity: quantity }],
+        };
+        const newCart = await createCart(requestDetails);
+        // Update the cart in the context
+        setCarts!([...carts!, newCart]);
+
+        // Show snackbar to indicate success.
+        setSnackbarFormat({
+          text: "Item successfully added to the cart!",
+          color: "success",
+        });
+      }
+    } catch (error) {
+      // Show snackbar to indicate failure.
+      setSnackbarFormat({
+        text: "Failed to add or update the item to the cart.",
+        color: "danger",
+      });
+    } finally {
+      setSnackbarVisible(true);
     }
   }
 
@@ -155,6 +193,19 @@ const MenuPage = () => {
     </Stack>
   );
 
+  /** UI layout for the snackbar. */
+  const snackbar = (
+    <CustomSnackbar
+      content={snackbarFormat.text}
+      color={snackbarFormat.color}
+      open={snackbarVisible}
+      onClose={() => {
+        setSnackbarVisible(false);
+      }}
+      startDecorator={<InfoOutlined fontSize="small" />}
+    />
+  );
+
   /** UI layout for the profiles page. */
   return (
     <>
@@ -172,6 +223,9 @@ const MenuPage = () => {
       {/* Display each menu item. */}
       {!isLoading && !showLoadingError && vendorId && (
         <>
+          {/* Display for the snackbar. */}
+          {snackbar}
+
           {/* Search bar. */}
           <CustomSearch
             placeholder="Search by name or category"

@@ -1,10 +1,10 @@
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import Button from "@mui/joy/Button";
 import FormControl from "@mui/joy/FormControl";
-import Input from "@mui/joy/Input";
 import Stack from "@mui/joy/Stack";
 import { SxProps } from "@mui/joy/styles/types";
 import { useState } from "react";
+import CustomInput from "./CustomInput";
 
 /** Props of the custom search component. */
 interface CustomSearchProps {
@@ -16,24 +16,26 @@ interface CustomSearchProps {
 }
 
 /** UI component for a custom search. */
-const CustomSearch = ({ placeholder, initialValue, activeSearch, onSearch, sx }: CustomSearchProps) => {
+const CustomSearch = ({
+  placeholder,
+  initialValue,
+  activeSearch,
+  onSearch,
+  sx,
+}: CustomSearchProps) => {
   /** State to track the value of the search bar. */
   const [value, setValue] = useState<string>(initialValue);
-  const stackSX = {...sx, border: "2px solid blue", borderRadius: "8px"};
+  const stackSX = { ...sx, border: "2px solid blue", borderRadius: "8px" };
 
   /** UI layout for the custom search. */
   return (
-    <Stack
-      direction="row"
-      sx={stackSX}
-    >
+    <Stack direction="row" sx={stackSX}>
       <FormControl sx={{ flex: 1 }}>
-        <Input
-          variant="plain"
+        <CustomInput
           type="search"
           placeholder={placeholder}
           value={value}
-          onChange={(event) => {
+          onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
             const newValue = event.target.value;
             setValue(newValue);
             if (activeSearch) onSearch(newValue);

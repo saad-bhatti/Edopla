@@ -1,10 +1,11 @@
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
+import InfoOutlined from "@mui/icons-material/InfoOutlined";
 import { Button, LinearProgress, Stack, Typography } from "@mui/joy";
 import { useContext, useEffect, useState } from "react";
 import CartItemCard from "../../components/card/CartItemCard";
 import CustomDropdown from "../../components/custom/CustomDropdown";
 import CustomSearch from "../../components/custom/CustomSearch";
-import { displayError } from "../../errors/displayError";
+import CustomSnackbar from "../../components/custom/CustomSnackbar";
 import { CartItem } from "../../models/items/cartItem";
 import * as CartsAPI from "../../network/items/carts_api";
 import { CartsContext, CartsContextProps } from "../../utils/contexts";
@@ -28,6 +29,20 @@ const CartPage = () => {
   const [nowCarts, setNowCarts] = useState<CartItem[]>([]);
   // State to track the carts that are saved for later.
   const [laterCarts, setLaterCarts] = useState<CartItem[]>([]);
+  // State to track whether the carts are being searched.
+  const [isSearching, setIsSearching] = useState(false);
+
+  // State to control the display of the snackbar.
+  const [snackbarVisible, setSnackbarVisible] = useState<boolean>(false);
+  // State to track the text and color of the snackbar.
+  type possibleColors = "primary" | "neutral" | "danger" | "success" | "warning";
+  const [snackbarFormat, setSnackbarFormat] = useState<{
+    text: string;
+    color: possibleColors;
+  }>({
+    text: "",
+    color: "primary",
+  });
 
   /** Seperate the cart by "savedForLater" only once before rendering the page. */
   useEffect(() => {
@@ -35,8 +50,10 @@ const CartPage = () => {
       setIsSeperating(true);
 
       // Load the carts from local storage if the carts context is empty.
-      const cartsFromLocalStorage = localStorage.getItem("carts");
-      if (cartsFromLocalStorage) setActiveCarts!(JSON.parse(cartsFromLocalStorage));
+      if (!activeCarts?.length && !isSearching) {
+        const cartsFromLocalStorage = localStorage.getItem("carts");
+        if (cartsFromLocalStorage) setActiveCarts!(JSON.parse(cartsFromLocalStorage));
+      }
 
       // Seperate the carts by "savedForLater" if the carts are not empty.
       const [nowCarts, laterCarts] = CartsManipulation.seperateCarts(activeCarts);
@@ -49,7 +66,7 @@ const CartPage = () => {
       setIsSeperating(false);
     }
     seperateCarts();
-  }, [carts, activeCarts]);
+  }, [carts, activeCarts, isSearching]);
 
   /**
    * Function to search the carts by vendor or item names.
@@ -57,7 +74,9 @@ const CartPage = () => {
    * @returns Nothing.
    */
   function handleCartsSearch(searchValue: string): void {
+    const isSearch: boolean = !searchValue.length ? false : true;
     const filteredCarts: CartItem[] = CartsManipulation.handleSearch(carts!, searchValue);
+    setIsSearching(isSearch);
     setActiveCarts(filteredCarts);
   }
 
@@ -65,6 +84,30 @@ const CartPage = () => {
   const sortFunctions: (() => void)[] = CartsManipulation.sortFunctions.map(
     (sortFn: (cartsToSort: CartItem[]) => CartItem[]) => () => setActiveCarts(sortFn(activeCarts))
   );
+
+  /**
+   * Function to handle emptying all carts.
+   * @returns Nothing.
+   */
+  async function emptyAllCarts(): Promise<void> {
+    try {
+      await CartsAPI.emptyCarts();
+      setCarts!([]);
+      setActiveCarts([]);
+      setSnackbarFormat({
+        text: "All carts emptied successfully!",
+        color: "success",
+      });
+    } catch (error) {
+      // Show snackbar to indicate failure.
+      setSnackbarFormat({
+        text: "Failed to empty all carts.",
+        color: "danger",
+      });
+    } finally {
+      setSnackbarVisible(true);
+    }
+  }
 
   /**
    * Function to handle emptying a cart item.
@@ -85,9 +128,20 @@ const CartPage = () => {
       cartItemToEmpty.savedForLater
         ? setLaterCarts(laterCarts.filter((cartItem) => cartItem._id !== cartItemToEmpty._id))
         : setNowCarts(nowCarts.filter((cartItem) => cartItem._id !== cartItemToEmpty._id));
+
+      // Show snackbar to indicate success.
+      setSnackbarFormat({
+        text: "Cart emptied successfully!",
+        color: "success",
+      });
     } catch (error) {
-      displayError(error);
-      alert(error);
+      // Show snackbar to indicate failure.
+      setSnackbarFormat({
+        text: "Failed to empty cart.",
+        color: "danger",
+      });
+    } finally {
+      setSnackbarVisible(true);
     }
   }
 
@@ -121,9 +175,20 @@ const CartPage = () => {
           return traversalCartItem;
         })
       );
+
+      // Show snackbar to indicate success.
+      setSnackbarFormat({
+        text: "Cart updated successfully!",
+        color: "success",
+      });
     } catch (error) {
-      displayError(error);
-      alert(error);
+      // Show snackbar to indicate failure.
+      setSnackbarFormat({
+        text: "Failed to update cart.",
+        color: "danger",
+      });
+    } finally {
+      setSnackbarVisible(true);
     }
   }
 
@@ -156,10 +221,21 @@ const CartPage = () => {
             return traversalCartItem;
           })
         );
+
+        // Show snackbar to indicate success.
+        setSnackbarFormat({
+          text: "Item deleted successfully!",
+          color: "success",
+        });
       }
     } catch (error) {
-      displayError(error);
-      alert(error);
+      // Show snackbar to indicate failure.
+      setSnackbarFormat({
+        text: "Failed to delete item",
+        color: "danger",
+      });
+    } finally {
+      setSnackbarVisible(true);
     }
   }
 
@@ -188,9 +264,20 @@ const CartPage = () => {
           return cartItem;
         })
       );
+
+      // Show snackbar to indicate success.
+      setSnackbarFormat({
+        text: "Successfully updated the cart!",
+        color: "success",
+      });
     } catch (error) {
-      displayError(error);
-      alert(error);
+      // Show snackbar to indicate failure.
+      setSnackbarFormat({
+        text: "Failed to update cart.",
+        color: "danger",
+      });
+    } finally {
+      setSnackbarVisible(true);
     }
   }
 
@@ -236,8 +323,24 @@ const CartPage = () => {
       </Typography>
     );
 
+  /** UI layout for the snackbar. */
+  const snackbar = (
+    <CustomSnackbar
+      content={snackbarFormat.text}
+      color={snackbarFormat.color}
+      open={snackbarVisible}
+      onClose={() => {
+        setSnackbarVisible(false);
+      }}
+      startDecorator={<InfoOutlined fontSize="small" />}
+    />
+  );
+
   return (
     <>
+      {/* Snackbar. */}
+      {snackbar}
+
       <Stack
         useFlexGap
         direction="row"
@@ -270,8 +373,8 @@ const CartPage = () => {
           variant="solid"
           size="sm"
           color="danger"
-          onClick={async () => {
-            await CartsAPI.emptyCarts();
+          onClick={() => {
+            emptyAllCarts();
           }}
           startDecorator={<DeleteForeverIcon />}
         >
