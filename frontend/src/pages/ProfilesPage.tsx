@@ -4,8 +4,6 @@ import BuyerProfileCard from "../components/card/BuyerProfileCard";
 import UserProfileCard from "../components/card/UserProfileCard";
 import VendorProfileCard from "../components/card/VendorProfileCard";
 import CustomTabs from "../components/custom/CustomTabs";
-import BuyerProfileModal from "../components/modal/BuyerProfileModal";
-import VendorProfileModal from "../components/modal/VendorProfileModal";
 import { displayError } from "../errors/displayError";
 import { Buyer } from "../models/users/buyer";
 import { Vendor } from "../models/users/vendor";
@@ -23,12 +21,8 @@ const ProfilesPage = () => {
   const [showLoadingError, setShowLoadingError] = useState(false);
   // State to track the user's buyer profile.
   const [buyer, setBuyer] = useState<Buyer | null>(null);
-  // State to control the display of the buyer profile modal.
-  const [showBuyerModal, setShowBuyerModal] = useState(false);
   // State to track the user's vendor profile.
   const [vendor, setVendor] = useState<Vendor | null>(null);
-  // State to control the display of the vendor profile modal.
-  const [showVendorModal, setShowVendorModal] = useState(false);
 
   /** Retrieve the buyer and vendor profiles only once before rendering the page. */
   useEffect(() => {
@@ -101,30 +95,6 @@ const ProfilesPage = () => {
             ]}
             sx={{ marginBottom: "10px" }}
           />
-
-          {/* Edit the buyer profile modal. */}
-          {showBuyerModal && (
-            <BuyerProfileModal
-              buyer={buyer}
-              onSaveSuccessful={(buyer) => {
-                setBuyer(buyer);
-                setShowBuyerModal(false);
-              }}
-              onDismissed={() => setShowBuyerModal(false)}
-            />
-          )}
-
-          {/* Edit the vendor profile modal. */}
-          {showVendorModal && (
-            <VendorProfileModal
-              vendor={vendor}
-              onSaveSuccessful={(vendor) => {
-                setVendor(vendor);
-                setShowVendorModal(false);
-              }}
-              onDismissed={() => setShowVendorModal(false)}
-            />
-          )}
         </>
       )}
     </>

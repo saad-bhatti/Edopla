@@ -38,10 +38,10 @@ const BuyerProfileCard = ({ buyer, onBuyerUpdate, sx }: BuyerProfileCardProps) =
   });
 
   // State to control the display of the snackbar.
-  const [buyerSnackbarVisible, setBuyerSnackbarVisible] = useState<boolean>(false);
+  const [snackbarVisible, setSnackbarVisible] = useState<boolean>(false);
   // State to track the text and color of the snackbar.
   type possibleColors = "primary" | "neutral" | "danger" | "success" | "warning";
-  const [buyerSnackbarFormat, setBuyerSnackbarFormat] = useState<{
+  const [snackbarFormat, setSnackbarFormat] = useState<{
     text: string;
     color: possibleColors;
   }>({
@@ -75,18 +75,18 @@ const BuyerProfileCard = ({ buyer, onBuyerUpdate, sx }: BuyerProfileCardProps) =
       onBuyerUpdate(updatedBuyer);
 
       // Show snackbar to indicate success.
-      setBuyerSnackbarFormat({
+      setSnackbarFormat({
         text: "Buyer profile updated successfully!",
         color: "success",
       });
-      setBuyerSnackbarVisible(true);
+      setSnackbarVisible(true);
     } catch (error) {
       // Show snackbar to indicate failure.
-      setBuyerSnackbarFormat({
+      setSnackbarFormat({
         text: "Failed to update buyer profile.",
         color: "danger",
       });
-      setBuyerSnackbarVisible(true);
+      setSnackbarVisible(true);
     }
   }
 
@@ -191,13 +191,13 @@ const BuyerProfileCard = ({ buyer, onBuyerUpdate, sx }: BuyerProfileCardProps) =
   const cardContent = <CardContent>{changeBuyerInfoForm}</CardContent>;
 
   /** UI layout for the buyer info snackbar. */
-  const buyerInfoSnackbar = (
+  const snackbar = (
     <CustomSnackbar
-      content={buyerSnackbarFormat.text}
-      color={buyerSnackbarFormat.color}
-      open={buyerSnackbarVisible}
+      content={snackbarFormat.text}
+      color={snackbarFormat.color}
+      open={snackbarVisible}
       onClose={() => {
-        setBuyerSnackbarVisible(false);
+        setSnackbarVisible(false);
       }}
       startDecorator={<InfoOutlined fontSize="small" />}
     />
@@ -207,7 +207,7 @@ const BuyerProfileCard = ({ buyer, onBuyerUpdate, sx }: BuyerProfileCardProps) =
   return (
     <>
       {/* Display the password snackbar. */}
-      {buyerInfoSnackbar}
+      {snackbar}
 
       {/* Display the buyer profile card. */}
       <CustomCard cardContent={cardContent} sx={sx} />
