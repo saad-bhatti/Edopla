@@ -35,7 +35,7 @@ const UserProfileCard = ({ user, sx }: UserProfileCardProps) => {
   // State to control the display of the snackbar.
   const [emailSnackbarVisible, setEmailSnackbarVisible] = useState<boolean>(false);
   // State to control errors on the email form.
-  const [emailError, setEmailError] = useState<{ isError: boolean; error: string }>({
+  const [emailError] = useState<{ isError: boolean; error: string }>({
     isError: false,
     error: "",
   });

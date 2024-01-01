@@ -8,6 +8,7 @@ import { useContext } from "react";
 import { Link } from "react-router-dom";
 import * as Context from "../../utils/contexts";
 import CustomSearch from "../custom/CustomSearch";
+import ColorSchemeToggle from "./ColorSchemeToggle";
 import { NavBarLoggedInHead, NavBarLoggedInTail } from "./NavBarLoggedInView";
 import { NavBarLoggedOutHead, NavBarLoggedOutTail } from "./NavBarLoggedOutView";
 
@@ -65,7 +66,6 @@ const NavBar = ({ onSignUpClicked, onLoginClicked, onLogoutSuccessful }: NavBarP
         {/* Navigation bar tail. */}
         <Stack
           direction="row"
-          justifyContent="center"
           alignItems="center"
           spacing={1}
           sx={{ display: { xs: "none", sm: "flex" } }}
@@ -77,6 +77,9 @@ const NavBar = ({ onSignUpClicked, onLoginClicked, onLogoutSuccessful }: NavBarP
             activeSearch={false}
             onSearch={() => {}}
           />
+
+          {/* Color scheme toggle. */}
+          <ColorSchemeToggle />
 
           {/* Cart button. */}
           <Link to="/carts">
