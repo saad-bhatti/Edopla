@@ -47,7 +47,7 @@ const CustomSnackbar = ({ content, color, open, onClose, startDecorator }: Custo
       anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
       startDecorator={startDecorator}
       endDecorator={<CloseIcon sx={{ cursor: "pointer" }} onClick={onClose} />}
-      autoHideDuration={7000}
+      autoHideDuration={5000}
       animationDuration={animationDuration}
       sx={{
         ...(open && {

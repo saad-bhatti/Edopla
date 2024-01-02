@@ -20,3 +20,8 @@ export class ForbiddenError extends HttpError {}
  * with another resource.
  */
 export class ConflictError extends HttpError {}
+
+/**
+ * 422 status: error thrown when a request contains an invalid field.
+ */
+export class InvalidFieldError extends HttpError {}

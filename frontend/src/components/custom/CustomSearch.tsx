@@ -1,6 +1,5 @@
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import Button from "@mui/joy/Button";
-import FormControl from "@mui/joy/FormControl";
 import Stack from "@mui/joy/Stack";
 import { SxProps } from "@mui/joy/styles/types";
 import { useState } from "react";
@@ -25,28 +24,26 @@ const CustomSearch = ({
 }: CustomSearchProps) => {
   /** State to track the value of the search bar. */
   const [value, setValue] = useState<string>(initialValue);
-  const stackSX = { ...sx, border: "2px solid blue", borderRadius: "8px" };
+  const stackSX = { ...sx, border: "1px solid", borderRadius: "6px" };
 
   /** UI layout for the custom search. */
   return (
     <Stack direction="row" sx={stackSX}>
-      <FormControl sx={{ flex: 1 }}>
-        <CustomInput
-          type="search"
-          placeholder={placeholder}
-          value={value}
-          onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-            const newValue = event.target.value;
-            setValue(newValue);
-            if (activeSearch) onSearch(newValue);
-          }}
-          startDecorator={<SearchRoundedIcon />}
-          aria-label="Search"
-          sx={{ border: "none", outline: "none" }}
-        />
-      </FormControl>
+      <CustomInput
+        type="search"
+        placeholder={placeholder}
+        value={value}
+        onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+          const newValue = event.target.value;
+          setValue(newValue);
+          if (activeSearch) onSearch(newValue);
+        }}
+        startDecorator={<SearchRoundedIcon />}
+        aria-label="Search"
+        sx={{ flex: 1 }}
+      />
       <Button
-        variant="solid"
+        variant="plain"
         color="primary"
         onClick={() => {
           onSearch(value);
