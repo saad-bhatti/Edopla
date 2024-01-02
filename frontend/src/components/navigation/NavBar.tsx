@@ -1,5 +1,5 @@
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
-import { IconButton } from "@mui/joy";
+import { Container, IconButton } from "@mui/joy";
 import Badge from "@mui/joy/Badge";
 import Box from "@mui/joy/Box";
 import Button from "@mui/joy/Button";
@@ -12,15 +12,8 @@ import ColorSchemeToggle from "./ColorSchemeToggle";
 import { NavBarLoggedInHead, NavBarLoggedInTail } from "./NavBarLoggedInView";
 import { NavBarLoggedOutHead, NavBarLoggedOutTail } from "./NavBarLoggedOutView";
 
-/** Props of the custom navigation component. */
-interface NavBarProps {
-  onSignUpClicked: () => void;
-  onLoginClicked: () => void;
-  onLogoutSuccessful: () => void;
-}
-
 /** UI component for a custom navigation. */
-const NavBar = ({ onSignUpClicked, onLoginClicked, onLogoutSuccessful }: NavBarProps) => {
+const NavBar = () => {
   // Retrieve the logged in user from the context
   const { loggedInUser } =
     useContext<Context.LoggedInUserContextProps | null>(Context.LoggedInUserContext) || {};
@@ -29,14 +22,16 @@ const NavBar = ({ onSignUpClicked, onLoginClicked, onLogoutSuccessful }: NavBarP
 
   /** UI layout for the custom navigation. */
   return (
-    <div style={{ margin: "0.5% 1%" }}>
+    <Container id="Navbar" style={{ padding: 2 }} sx={{ minWidth: "100%" }}>
       {/* Navigation bar head. */}
       <Box
         sx={{
           display: "flex",
           flexGrow: 1,
           justifyContent: "space-between",
-          outline: "2px solid #E0E0E0",
+          border: "0.5px solid",
+          borderRadius: "5px",
+          padding: "5px 0px",
         }}
       >
         <Stack
@@ -91,17 +86,10 @@ const NavBar = ({ onSignUpClicked, onLoginClicked, onLogoutSuccessful }: NavBarP
           </Link>
 
           {/* Rest of tail depending in authentication status. */}
-          {loggedInUser ? (
-            <NavBarLoggedInTail onLogoutSuccessful={onLogoutSuccessful} />
-          ) : (
-            <NavBarLoggedOutTail
-              onSignUpClicked={onSignUpClicked}
-              onLoginClicked={onLoginClicked}
-            />
-          )}
+          {loggedInUser ? <NavBarLoggedInTail /> : <NavBarLoggedOutTail />}
         </Stack>
       </Box>
-    </div>
+    </Container>
   );
 };
 

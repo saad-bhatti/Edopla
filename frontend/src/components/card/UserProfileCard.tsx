@@ -19,6 +19,10 @@ import { User } from "../../models/users/user";
 import CustomCard from "../custom/CustomCard";
 import CustomInput from "../custom/CustomInput";
 import CustomSnackbar from "../custom/CustomSnackbar";
+import {
+  calculateDescriptivePasswordStrength,
+  calculateNumericalPasswordStrength,
+} from "../../utils/passwordStrength";
 
 /** Props of the user profile card component. */
 interface UserProfileCardProps {
@@ -133,38 +137,10 @@ const UserProfileCard = ({ user, sx }: UserProfileCardProps) => {
     />
   );
 
-  /**
-   * Function to calculate the descriptive password strength.
-   * @returns The descriptive password strength.
-   */
-  function calculateDescriptivePasswordStrength(): string {
-    const lengthRequirement: number = newPassword.length >= 8 ? 1 : 0;
-    const containsNumber: number = /\d/.test(newPassword) ? 1 : 0;
-    const containsSpecialCharacter: number = /[!@#$%^&*(),.?":{}|<>]/.test(newPassword) ? 1 : 0;
-
-    const strength: number = lengthRequirement + containsNumber + containsSpecialCharacter;
-    if (newPassword.length === 0) return "";
-    else if (strength === 0) return "Very Weak";
-    else if (strength === 1) return "Weak";
-    else if (strength === 2) return "Strong";
-    else return "Very Strong";
-  }
-
-  /**
-   * Function to calculate the numerical password strength.
-   * @returns The numerical password strength.
-   */
-  function calculateNumericalPasswordStrength(): number {
-    const lengthRequirement: number = newPassword.length >= 8 ? 1 : 0;
-    const containsNumber: number = /\d/.test(newPassword) ? 1 : 0;
-    const containsSpecialCharacter: number = /[!@#$%^&*(),.?":{}|<>]/.test(newPassword) ? 1 : 0;
-    return lengthRequirement + containsNumber + containsSpecialCharacter;
-  }
-
   /** Function to handle a password change request. */
   function handlePasswordChange(): void {
     // Validate the password
-    if (calculateNumericalPasswordStrength() < 3) {
+    if (calculateNumericalPasswordStrength(newPassword) < 3) {
       setPasswordError({
         isError: 2,
         error: "The new password does not meet the requirements",
@@ -231,7 +207,7 @@ const UserProfileCard = ({ user, sx }: UserProfileCardProps) => {
             spacing={0.5}
             direction="column"
             sx={{
-              "--hue": Math.min(calculateNumericalPasswordStrength() * 40, 120),
+              "--hue": Math.min(calculateNumericalPasswordStrength(newPassword) * 40, 120),
             }}
           >
             {/* New password input. */}
@@ -249,7 +225,7 @@ const UserProfileCard = ({ user, sx }: UserProfileCardProps) => {
             <LinearProgress
               determinate
               size="sm"
-              value={Math.min((calculateNumericalPasswordStrength() * 100) / 3, 100)}
+              value={Math.min((calculateNumericalPasswordStrength(newPassword) * 100) / 3, 100)}
               sx={{
                 bgcolor: "background.level3",
                 color: "hsl(var(--hue) 80% 40%)",
@@ -260,7 +236,7 @@ const UserProfileCard = ({ user, sx }: UserProfileCardProps) => {
               level="body-xs"
               sx={{ alignSelf: "flex-end", color: "hsl(var(--hue) 80% 30%)" }}
             >
-              {calculateDescriptivePasswordStrength()}
+              {calculateDescriptivePasswordStrength(newPassword)}
             </Typography>
           </Stack>
         </FormControl>

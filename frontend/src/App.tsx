@@ -1,11 +1,8 @@
+import Container from "@mui/joy/Container";
 import CssBaseline from "@mui/joy/CssBaseline";
 import { CssVarsProvider } from "@mui/joy/styles";
 import { useEffect, useState } from "react";
 import { BrowserRouter } from "react-router-dom";
-import BuyerProfileModal from "./components/modal/BuyerProfileModal";
-import LoginModal from "./components/modal/LoginModal";
-import SignUpModal from "./components/modal/SignUpModal";
-import VendorProfileModal from "./components/modal/VendorProfileModal";
 import AppRoutes from "./components/navigation/AppRoutes";
 import NavBar from "./components/navigation/NavBar";
 import { displayError } from "./errors/displayError";
@@ -20,14 +17,6 @@ function App() {
   const [loggedInUser, setLoggedInUser] = useState<User | null>(null);
   // State to track the user's cart
   const [carts, setCarts] = useState<CartItem[]>([]);
-  // State to control whether the sign up modal is shown
-  const [showSignUpModal, setShowSignUpModal] = useState(false);
-  // State to control whether the login modal is shown
-  const [showLoginModal, setShowLogInModal] = useState(false);
-  // State to control whether the buyer modal is shown
-  const [showBuyerModal, setShowBuyerModal] = useState(false);
-  // State to control whether the vendor modal is shown
-  const [showVendorModal, setShowVendorModal] = useState(false);
 
   // Retrieve the logged in user and their cart only once before rendering the page
   useEffect(() => {
@@ -46,82 +35,18 @@ function App() {
   return (
     <LoggedInUserContext.Provider value={{ loggedInUser, setLoggedInUser }}>
       <CartsContext.Provider value={{ carts, setCarts }}>
-        <>
-          <CssVarsProvider defaultMode="system">
-            <CssBaseline />
-            <BrowserRouter>
-              <div>
-                {/* Display for the navigation bar */}
-                <NavBar
-                  onSignUpClicked={() => {
-                    setShowSignUpModal(true);
-                  }}
-                  onLoginClicked={() => {
-                    setShowLogInModal(true);
-                  }}
-                  onLogoutSuccessful={() => {
-                    setLoggedInUser(null);
-                    setCarts([]);
-                  }}
-                />
+        <CssVarsProvider defaultMode="system">
+          <CssBaseline />
+          <BrowserRouter>
+            <Container id="App" style={{ padding: 0, margin: 0 }} sx={{ minWidth: "100%" }}>
+              {/* Display for the navigation bar */}
+              <NavBar />
 
-                {/* Available routes. */}
-                <AppRoutes />
-
-                {/* Sign up modal */}
-                {showSignUpModal && (
-                  <SignUpModal
-                    onDismissed={() => {
-                      setShowSignUpModal(false);
-                    }}
-                    onSignUpSuccessful={(user) => {
-                      setLoggedInUser(user);
-                      setShowSignUpModal(false);
-                      setShowBuyerModal(true);
-                    }}
-                  />
-                )}
-
-                {/* Buyer profile creation modal */}
-                {showBuyerModal && (
-                  <BuyerProfileModal
-                    buyer={null}
-                    onSaveSuccessful={(buyer) => {
-                      setShowBuyerModal(false);
-                      setShowVendorModal(true);
-                    }}
-                    onDismissed={() => {}}
-                  />
-                )}
-
-                {/* Vendor profile creation modal */}
-                {showVendorModal && (
-                  <VendorProfileModal
-                    vendor={null}
-                    onSaveSuccessful={(vendor) => {
-                      setShowVendorModal(false);
-                    }}
-                    onDismissed={() => {}}
-                  />
-                )}
-
-                {/* Login modal */}
-                {showLoginModal && (
-                  <LoginModal
-                    onDismissed={() => {
-                      setShowLogInModal(false);
-                    }}
-                    onLoginSuccessful={async (user) => {
-                      setLoggedInUser(user);
-                      setCarts(await getCarts());
-                      setShowLogInModal(false);
-                    }}
-                  />
-                )}
-              </div>
-            </BrowserRouter>
-          </CssVarsProvider>
-        </>
+              {/* Available routes. */}
+              <AppRoutes />
+            </Container>
+          </BrowserRouter>
+        </CssVarsProvider>
       </CartsContext.Provider>
     </LoggedInUserContext.Provider>
   );

@@ -1,45 +1,39 @@
 import Button from "@mui/joy/Button";
+import { Link } from "react-router-dom";
 
 /** UI component for the logged out view of the navigation bar head. */
 export const NavBarLoggedOutHead = () => {
-  return <></>;
+  return <div id="NavBarHead"></div>;
 };
 
-/** "Type" for the props of the logged out view of the navigation bar. */
-interface NavBarLoggedOutViewProps {
-  onSignUpClicked: () => void;
-  onLoginClicked: () => void;
-}
-
 /** UI component for the logged out view of the navigation bar tail. */
-export const NavBarLoggedOutTail = ({
-  onSignUpClicked,
-  onLoginClicked,
-}: NavBarLoggedOutViewProps) => {
+export const NavBarLoggedOutTail = () => {
   /** UI layout for the navigation bar when logged out. */
   return (
-    <>
+    <div id="NavBarTail">
       {/* Sign up button. */}
-      <Button
-        variant="plain"
-        color="neutral"
-        size="sm"
-        sx={{ alignSelf: "center", fontSize: "md" }}
-        onClick={onSignUpClicked}
-      >
-        Sign Up
-      </Button>
+      <Link to="/signup">
+        <Button
+          variant="plain"
+          color="neutral"
+          size="sm"
+          sx={{ alignSelf: "center", fontSize: "md" }}
+        >
+          Sign Up
+        </Button>
+      </Link>
 
       {/* Login button. */}
-      <Button
-        variant="plain"
-        color="neutral"
-        size="sm"
-        sx={{ alignSelf: "center", fontSize: "md" }}
-        onClick={onLoginClicked}
-      >
-        Login
-      </Button>
-    </>
+      <Link to="/login">
+        <Button
+          variant="plain"
+          color="neutral"
+          size="sm"
+          sx={{ alignSelf: "center", fontSize: "md" }}
+        >
+          Login
+        </Button>
+      </Link>
+    </div>
   );
 };
