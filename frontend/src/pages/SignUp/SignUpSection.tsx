@@ -5,7 +5,6 @@ import InfoOutlined from "@mui/icons-material/InfoOutlined";
 import Key from "@mui/icons-material/Key";
 import {
   Button,
-  Container,
   Divider,
   FormControl,
   FormHelperText,
@@ -14,56 +13,52 @@ import {
   Stack,
   Typography,
 } from "@mui/joy";
-import { useColorScheme } from "@mui/joy/styles";
-import { useContext, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import CustomInput from "../components/custom/CustomInput";
-import CustomSnackbar from "../components/custom/CustomSnackbar";
-import { displayError } from "../errors/displayError";
-import { User } from "../models/users/user";
-import { signUp } from "../network/users/users_api";
-import * as Context from "../utils/contexts";
+import { useState } from "react";
+import CustomInput from "../../components/custom/CustomInput";
+import { displayError } from "../../errors/displayError";
+import { ConflictError } from "../../errors/http_errors";
+import { CartItem } from "../../models/items/cartItem";
+import { User } from "../../models/users/user";
+import { signUp } from "../../network/users/users_api";
 import {
   calculateDescriptivePasswordStrength,
   calculateNumericalPasswordStrength,
-} from "../utils/passwordStrength";
-import { ConflictError } from "../errors/http_errors";
+} from "../../utils/passwordStrength";
 
-/** UI for the sign up page. */
-const SignUpPage = () => {
-  // Variable to navigate to other pages
-  const navigate = useNavigate();
-  // Get the current color scheme and the function to change it
-  const { colorScheme } = useColorScheme();
+/** Props of the sign up section. */
+interface SignUpSectionProps {
+  setLoggedInUser: React.Dispatch<React.SetStateAction<User | null>>;
+  setCarts: React.Dispatch<React.SetStateAction<CartItem[]>>;
 
-  // Retrieve the set logged in user function from the context
-  const { setLoggedInUser } =
-    useContext<Context.LoggedInUserContextProps | null>(Context.LoggedInUserContext) || {};
-  // Retrieve the set cart function from the context
-  const { setCarts } = useContext<Context.CartsContextProps | null>(Context.CartsContext) || {};
+  setStep: React.Dispatch<React.SetStateAction<number>>;
+
+  setSnackbarFormat: React.Dispatch<
+    React.SetStateAction<{
+      text: string;
+      color: "primary" | "neutral" | "danger" | "success" | "warning";
+    }>
+  >;
+  setSnackbarVisible: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+/** UI for the sign up section. */
+const SignUpSection = ({
+  setLoggedInUser,
+  setCarts,
+  setStep,
+  setSnackbarFormat,
+  setSnackbarVisible,
+}: SignUpSectionProps) => {
   // State to track the email input.
   const [email, setEmail] = useState<string>("");
   // State to track the password input.
   const [password, setPassword] = useState<string>("");
   // State to track the confirm password input.
   const [confirmPassword, setConfirmPassword] = useState<string>("");
-
-  // State to control errors on the buyer information form.
+  // State to control errors on the sign up information form.
   const [formError, setFormError] = useState<{ isError: number; error: string }>({
     isError: 0,
     error: "",
-  });
-
-  // State to control the display of the snackbar.
-  const [snackbarVisible, setSnackbarVisible] = useState<boolean>(false);
-  // State to track the text and color of the snackbar.
-  type possibleColors = "primary" | "neutral" | "danger" | "success" | "warning";
-  const [snackbarFormat, setSnackbarFormat] = useState<{
-    text: string;
-    color: possibleColors;
-  }>({
-    text: "",
-    color: "primary",
   });
 
   /** UI layout for the third party signup options. */
@@ -135,7 +130,15 @@ const SignUpPage = () => {
       // Initialize the user's cart.
       setCarts!([]);
 
-      // TODO: Create the profiles
+      // Set the snackbar to display a success message.
+      setSnackbarFormat({
+        text: "Successfully created your account!",
+        color: "success",
+      });
+      setSnackbarVisible(true);
+
+      // Increment the step.
+      setStep((prevStep) => prevStep + 1);
     } catch (error) {
       if (error instanceof ConflictError)
         setFormError({
@@ -262,7 +265,7 @@ const SignUpPage = () => {
           </Stack>
         </FormControl>
 
-        {/* TODO: FONT SIZE Password requirements. */}
+        {/* Password requirements. */}
         <FormHelperText sx={{ fontSize: "small" }}>
           <InfoOutlined fontSize="small" />
           Password requirements: Minimum of 8 characters, a number, and a special character.
@@ -277,8 +280,9 @@ const SignUpPage = () => {
   );
 
   /** UI layout for the sign up section. */
-  const signUpSection = (
+  return (
     <Stack
+      id="SignUpSection"
       direction="column"
       alignItems="center"
       gap={3}
@@ -287,7 +291,7 @@ const SignUpPage = () => {
         outline: "0.5px solid #E0E0E0",
         borderRadius: "6px",
         padding: "1% 0%",
-        minHeight: "88vh",
+        minHeight: "75vh",
       }}
     >
       {/* Welcome message. */}
@@ -305,59 +309,6 @@ const SignUpPage = () => {
       {signUpForm}
     </Stack>
   );
-
-  /** UI layout for the side image. */
-  const sideImage = (
-    <Container
-      sx={(theme) => ({
-        [theme.getColorSchemeSelector("light")]: {
-          backgroundImage:
-            "url(https://images.unsplash.com/photo-1527181152855-fc03fc7949c8?auto=format&w=1000&dpr=2)",
-        },
-
-        [theme.getColorSchemeSelector("dark")]: {
-          backgroundImage:
-            "url(https://images.unsplash.com/photo-1572072393749-3ca9c8ea0831?auto=format&w=1000&dpr=2)",
-        },
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
-        borderRadius: "6px",
-      })}
-    />
-  );
-
-  /** UI layout for the snackbar. */
-  const snackbar = (
-    <CustomSnackbar
-      content={snackbarFormat.text}
-      color={snackbarFormat.color}
-      open={snackbarVisible}
-      onClose={() => {
-        setSnackbarVisible(false);
-      }}
-      startDecorator={<InfoOutlined fontSize="small" />}
-    />
-  );
-
-  /** UI layout for the sign up page. */
-  return (
-    <Stack id="SignUpPage" direction="row" spacing={1}>
-      {/* Snackbar. */}
-      {snackbar}
-
-      {/* Log in section and side image. */}
-      {colorScheme === "light" ? (
-        <>
-          {sideImage} {signUpSection}
-        </>
-      ) : (
-        <>
-          {signUpSection} {sideImage}
-        </>
-      )}
-    </Stack>
-  );
 };
 
-export default SignUpPage;
+export default SignUpSection;

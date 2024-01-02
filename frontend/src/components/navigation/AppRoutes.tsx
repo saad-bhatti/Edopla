@@ -6,7 +6,7 @@ import LogInPage from "../../pages/LogInPage";
 import MenuPage from "../../pages/Menu/MenuPage";
 import NotFoundPage from "../../pages/NotFoundPage";
 import ProfilesPage from "../../pages/ProfilesPage";
-import SignUpPage from "../../pages/SignUpPage";
+import SignUpPage from "../../pages/SignUp/SignUpPage";
 
 /** UI component for the routes of the application. */
 const AppRoutes = () => {
