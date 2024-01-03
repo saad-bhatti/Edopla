@@ -61,15 +61,16 @@ export const NavBarLoggedInHead = () => {
       {snackbar}
 
       {/* Buy button. */}
-      <Button
-        variant="plain"
-        color="neutral"
-        size="sm"
-        onClick={pageComingSoon}
-        sx={{ alignSelf: "center", fontSize: "md" }}
-      >
-        Buy
-      </Button>
+      <Link to="/buy">
+        <Button
+          variant="plain"
+          color="neutral"
+          size="sm"
+          sx={{ alignSelf: "center", fontSize: "md" }}
+        >
+          Buy
+        </Button>
+      </Link>
 
       {/* Sell button. */}
       <Button

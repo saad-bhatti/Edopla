@@ -10,7 +10,6 @@ import { CartItem } from "../../models/items/cartItem";
 import { MenuItem } from "../../models/items/menuItem";
 import { createCart, updateItem } from "../../network/items/carts_api";
 import { getMenu } from "../../network/items/menus_api";
-import styleUtils from "../../styles/utils.module.css";
 import * as Contexts from "../../utils/contexts";
 import * as MenuManipulation from "./MenuManipulation";
 import * as MenuPageHelper from "./MenuPageHelper";
@@ -216,9 +215,7 @@ const MenuPage = () => {
       {showLoadingError && <p>Something went wrong. Please try again.</p>}
 
       {/* Display if no vendor id is provided. */}
-      {!isLoading && !showLoadingError && !vendorId && (
-        <h2 className={styleUtils.flexCenter}>No vendor id provided.</h2>
-      )}
+      {!isLoading && !showLoadingError && !vendorId && <h2>No vendor id provided.</h2>}
 
       {/* Display each menu item. */}
       {!isLoading && !showLoadingError && vendorId && (
