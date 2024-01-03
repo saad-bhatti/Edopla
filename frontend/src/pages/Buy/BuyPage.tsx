@@ -1,4 +1,4 @@
-import { Container, LinearProgress, Stack, Typography } from "@mui/joy";
+import { Button, Container, LinearProgress, Stack, Typography } from "@mui/joy";
 import { useContext, useEffect, useState } from "react";
 import CustomDropdown from "../../components/custom/CustomDropdown";
 import CustomFilter from "../../components/custom/CustomFilter";
@@ -6,13 +6,14 @@ import CustomSearch from "../../components/custom/CustomSearch";
 import { displayError } from "../../errors/displayError";
 import * as Contexts from "../../utils/contexts";
 import * as BuyManipulation from "./BuyManipulation";
-// import * as BuyPageHelper from "./BuyPageHelper";
+import * as BuyPageHelper from "./BuyPageHelper";
 import CustomSnackbar from "../../components/custom/CustomSnackbar";
 import InfoOutlined from "@mui/icons-material/InfoOutlined";
 import { Vendor } from "../../models/users/vendor";
 import { getSavedVendors, toggleSavedVendor } from "../../network/users/buyers_api";
 import { getAllVendors } from "../../network/users/vendors_api";
 import VendorInformationCard from "../../components/card/VendorInformationCard";
+import CloseIcon from "@mui/icons-material/Close";
 
 /***************************************************************************************************
  * This file contains the UI for the buy page.                                                     *
@@ -31,13 +32,20 @@ const BuyPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   // State to show an error message if the vendors fail to load.
   const [showLoadingError, setShowLoadingError] = useState(false);
-  // State to contain information of the vendors in the cart.
-  const [cartVendors, setCartVendors] = useState<Vendor[]>([]);
-  // State to contain information of the saved vendors.
-  const [savedVendors, setSavedVendors] = useState<Vendor[]>([]);
-  // State to contain information of the unsaved vendors.
-  const [unsavedVendors, setUnsavedVendors] = useState<Vendor[]>([]);
 
+  // State to contain information of all vendors.
+  const [completeVendorList, setCompleteVendorList] = useState<Vendor[]>([]);
+  // State to contain information of all the active vendors.
+  const [activeVendorList, setActiveVendorList] = useState<Vendor[]>([]);
+  // State to contain information of the vendors in the cart.
+  const [cartVendorList, setCartVendorList] = useState<Vendor[]>([]);
+  // State to contain information of the saved vendors.
+  const [savedVendorList, setSavedVendorList] = useState<Vendor[]>([]);
+  // State to contain information of the unsaved vendors.
+  const [unsavedVendorList, setUnsavedVendorList] = useState<Vendor[]>([]);
+
+  // State to track the search value.
+  const [searchValue, setSearchValue] = useState<string>("");
   // State to control the display of the snackbar.
   const [snackbarVisible, setSnackbarVisible] = useState<boolean>(false);
   // State to track the text and color of the snackbar.
@@ -55,25 +63,28 @@ const BuyPage = () => {
     async function loadVendors() {
       try {
         setShowLoadingError(false);
-        setIsLoading(true); // Show the loading indicator
+        setIsLoading(true);
 
-        // Retrieve all vendors
+        // Retrieve all vendors and saved vendors from the database
         const allVendors = await getAllVendors();
-
-        // Set the vendors that exist in the cart
-        const vendorsInCart: Vendor[] = carts!.map((cart) => cart.vendorId);
-        setCartVendors(vendorsInCart);
-
-        // Retrieve saved vendors
         const savedVendors: Vendor[] = await getSavedVendors();
-        setSavedVendors(savedVendors);
 
-        // Set unsaved vendors
-        setUnsavedVendors(
-          allVendors.filter((vendor) => {
-            return !savedVendors.includes(vendor);
-          })
+        // Initialize the active vendor list and cart vendor list
+        if (!activeVendorList.length) setActiveVendorList(allVendors);
+        const vendorsInCart: Vendor[] = carts!.map((cart) => cart.vendorId);
+
+        // Prepare the vendor lists
+        const preparedLists: [Vendor[], Vendor[], Vendor[]] = BuyManipulation.prepareLists(
+          activeVendorList,
+          vendorsInCart,
+          savedVendors
         );
+
+        // Update the states
+        setCompleteVendorList(allVendors);
+        setCartVendorList(preparedLists[0]);
+        setSavedVendorList(preparedLists[1]);
+        setUnsavedVendorList(preparedLists[2]);
       } catch (error) {
         displayError(error);
         setShowLoadingError(true); // Show the loading error
@@ -82,12 +93,22 @@ const BuyPage = () => {
       }
     }
     loadVendors();
-  }, [loggedInUser, carts]);
+  }, [loggedInUser, carts, activeVendorList]);
 
-  // /** Function to search the menu by its name or category. */
-  // const handleMenuSearch = (searchValue: string): void => {
-  //   BuyPageHelper.handleSearch(completeMenu, searchValue, setActiveMenu);
-  // };
+  /** Function to search the complete vendor list by its name, categories, or price range. */
+  const handleVendorSearch = (searchValue: string): void => {
+    setSearchValue(searchValue);
+    const filteredList: Vendor[] = BuyManipulation.handleSearch(completeVendorList, searchValue);
+    if (filteredList.length) setActiveVendorList(filteredList);
+    else {
+      setSnackbarFormat({
+        text: "No vendor matching the search was found.",
+        color: "warning",
+      });
+      setSnackbarVisible(true);
+      setActiveVendorList(completeVendorList);
+    }
+  };
   // /** Array containing the price range of the menu. */
   // const priceRange: number[] = BuyManipulation.getPriceRange(completeMenu);
   // /** Array containing the categories of the menu. */
@@ -107,23 +128,35 @@ const BuyPage = () => {
   //   categories,
   //   setCategoryFilter
   // );
-  // /** Array of functions to execute for each sort option when clicked. */
-  // const sortFunctions: (() => void)[] = BuyPageHelper.generateSortFunctions(
-  //   activeMenu,
-  //   setActiveMenu
-  // );
+  /** Array of functions to execute for each sort option when clicked. */
+  const sortFunctions: (() => void)[] = BuyPageHelper.generateSortFunctions(
+    activeVendorList,
+    setActiveVendorList
+  );
 
   /** UI layout for the vendor view options. */
-  const vendorViewOptions = (
+  const VendorListViewOptions = (
     <>
       {/* Search bar. */}
-      <CustomSearch
-        placeholder="Search"
-        initialValue=""
-        activeSearch={true}
-        onSearch={() => {}}
-        sx={{ width: "50%", mx: "auto" }}
-      />
+      <Stack direction="row" gap={0.5} justifyContent="center">
+        <CustomSearch
+          placeholder="Search"
+          initialValue={searchValue}
+          activeSearch={false}
+          onSearch={handleVendorSearch}
+          sx={{ width: "50%" }}
+        />
+        {searchValue && (
+          <Button
+            variant="solid"
+            color="warning"
+            onClick={() => handleVendorSearch("")}
+            endDecorator={<CloseIcon />}
+          >
+            Clear Search
+          </Button>
+        )}
+      </Stack>
 
       {/* Filter and sort options. */}
       <Stack
@@ -147,8 +180,8 @@ const BuyPage = () => {
         {/* Dropdown for the sort options. */}
         <CustomDropdown
           label="Sort by"
-          options={[]}
-          onOptionClick={[() => {}]}
+          options={BuyManipulation.sortOptions}
+          onOptionClick={sortFunctions}
           variant="plain"
           color="primary"
         />
@@ -164,13 +197,15 @@ const BuyPage = () => {
   async function toggleVendor(vendorToToggle: Vendor) {
     try {
       const updatedSavedVendors = await toggleSavedVendor({ vendorId: vendorToToggle._id });
-      const initialLength = savedVendors.length;
+      const initialLength = savedVendorList.length;
       const updatedLength = updatedSavedVendors.length;
 
-      setSavedVendors(updatedSavedVendors);
+      setSavedVendorList(updatedSavedVendors);
       if (updatedLength > initialLength)
-        setUnsavedVendors(unsavedVendors.filter((vendor) => vendor._id !== vendorToToggle._id));
-      else setUnsavedVendors([...unsavedVendors, vendorToToggle]);
+        setUnsavedVendorList(
+          unsavedVendorList.filter((vendor) => vendor._id !== vendorToToggle._id)
+        );
+      else setUnsavedVendorList([...unsavedVendorList, vendorToToggle]);
 
       // Show snackbar to indicate success.
       setSnackbarFormat({
@@ -189,14 +224,14 @@ const BuyPage = () => {
   }
 
   /** UI layout for the vendor cards in the cart. */
-  const cartVendorCards = carts!.length ? (
+  const CartCards = carts!.length ? (
     <Stack id="cardVendorsSection" direction="column" gap={2}>
-      <Typography level="title-lg">Continue Shopping</Typography>
-      {cartVendors.map((vendor) => (
+      <Typography level="h3">Continue Shopping</Typography>
+      {cartVendorList.map((vendor) => (
         <VendorInformationCard
           key={`cart-${vendor._id}`}
           vendor={vendor}
-          isSaved={savedVendors.includes(vendor)}
+          isSaved={savedVendorList.includes(vendor)}
           onSaveToggled={() => toggleVendor(vendor)}
           isCart={true}
         />
@@ -205,10 +240,10 @@ const BuyPage = () => {
   ) : null;
 
   /** UI layout for the saved vendor cards. */
-  const savedVendorCards = savedVendors.length ? (
+  const SavedCards = savedVendorList.length ? (
     <Stack id="savedVendorsSection" direction="column" gap={2}>
-      <Typography level="title-lg">Saved Vendors</Typography>
-      {savedVendors.map((vendor) => (
+      <Typography level="h3">Saved Vendors</Typography>
+      {savedVendorList.map((vendor) => (
         <VendorInformationCard
           key={`saved-${vendor._id}`}
           vendor={vendor}
@@ -220,10 +255,10 @@ const BuyPage = () => {
   ) : null;
 
   /** UI layout for the unsaved vendor cards. */
-  const unsavedVendorCards = unsavedVendors.length ? (
+  const UnsavedCards = unsavedVendorList.length ? (
     <Stack id="unsavedVendorsSection" direction="column" gap={2}>
-      <Typography level="title-lg">Other Vendors</Typography>
-      {unsavedVendors.map((vendor) => (
+      <Typography level="h3">Other Vendors</Typography>
+      {unsavedVendorList.map((vendor) => (
         <VendorInformationCard
           key={`unsaved-${vendor._id}`}
           vendor={vendor}
@@ -235,7 +270,7 @@ const BuyPage = () => {
   ) : null;
 
   /** UI layout for the snackbar. */
-  const snackbar = (
+  const Snackbar = (
     <CustomSnackbar
       content={snackbarFormat.text}
       color={snackbarFormat.color}
@@ -260,21 +295,21 @@ const BuyPage = () => {
       {!isLoading && !showLoadingError && (
         <>
           {/* Display for the snackbar. */}
-          {snackbar}
+          {Snackbar}
 
           {/* Display for the vendor view options. */}
-          {vendorViewOptions}
+          {VendorListViewOptions}
 
           {/* Display for the vendor cards. */}
           <Stack direction="column" gap={4}>
             {/** Vendors in cart section. */}
-            {cartVendorCards}
+            {CartCards}
 
             {/** Saved vendors section. */}
-            {savedVendorCards}
+            {SavedCards}
 
             {/** Unsaved vendors section. */}
-            {unsavedVendorCards}
+            {UnsavedCards}
           </Stack>
         </>
       )}

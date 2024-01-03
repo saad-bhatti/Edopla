@@ -68,8 +68,8 @@ const VendorInformationCard = ({
           </Button>
         )}
         <Button
-          variant="soft"
-          color="primary"
+          variant="solid"
+          color="success"
           onClick={() => {
             navigate(`/menu/${vendor._id}`);
           }}
