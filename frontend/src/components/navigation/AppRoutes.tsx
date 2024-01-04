@@ -1,5 +1,6 @@
 import Container from "@mui/joy/Container";
 import { Route, Routes } from "react-router-dom";
+import BuyPage from "../../pages/Buy/BuyPage";
 import CartsPage from "../../pages/Carts/CartsPage";
 import HomePage from "../../pages/HomePage";
 import LogInPage from "../../pages/LogInPage";
@@ -20,6 +21,7 @@ const AppRoutes = () => {
         <Route path="/" element={<HomePage />} />
         <Route path="/signup" element={<SignUpPage />} />
         <Route path="/login" element={<LogInPage />} />
+        <Route path="/buy" element={<BuyPage />} />
         <Route path="/profiles" element={<ProfilesPage />} />
         <Route path="/carts" element={<CartsPage />} />
         <Route path="/menu/:vendorId" element={<MenuPage />} />

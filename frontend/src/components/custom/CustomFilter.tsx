@@ -15,7 +15,7 @@ interface CustomFilterProps {
 }
 
 /** UI component for a custom filter. */
-const CustomFilter = ({ filterOptions, onApply, onRemove,variant, color }: CustomFilterProps) => {
+const CustomFilter = ({ filterOptions, onApply, onRemove, variant, color }: CustomFilterProps) => {
   // State to control whether the filter options are visible or not.
   const [isVisible, setIsVisible] = useState<boolean>(false);
   const [isActive, setIsActive] = useState<boolean>(false);
@@ -43,19 +43,32 @@ const CustomFilter = ({ filterOptions, onApply, onRemove,variant, color }: Custo
           ))}
         </Stack>
 
-        {/* Button to apply or remove filters. */}
-        <Button
-        variant="solid"
-        color="primary"
-        onClick={() => {
-          !isActive ? onApply() : onRemove();
-          setIsActive(!isActive);
-          setIsVisible(false);
-        }}
-        sx={{ alignSelf: "flex-end", marginRight: "2%", minWidth: "fit-content" }}
-        >
-          {!isActive ? "Apply" : "Remove"}
-        </Button>
+        {/* Buttons to apply or remove filters. */}
+        <Stack gap={0.5} direction="row" alignSelf="flex-end" mr="2%" minWidth="fit-content">
+          <Button
+            variant="soft"
+            color="warning"
+            onClick={() => {
+              onRemove();
+              setIsActive(false);
+              setIsVisible(false);
+            }}
+            disabled={!isActive}
+          >
+            Remove
+          </Button>
+          <Button
+            variant="solid"
+            color="primary"
+            onClick={() => {
+              onApply();
+              setIsActive(true);
+              setIsVisible(false);
+            }}
+          >
+            Apply
+          </Button>
+        </Stack>
       </Drawer>
     </>
   );

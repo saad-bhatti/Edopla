@@ -92,8 +92,12 @@ const CartPage = () => {
   async function emptyAllCarts(): Promise<void> {
     try {
       await CartsAPI.emptyCarts();
+
+      // Store an empty carts in local storage.
+      localStorage.setItem("carts", JSON.stringify([]));
       setCarts!([]);
       setActiveCarts([]);
+
       setSnackbarFormat({
         text: "All carts emptied successfully!",
         color: "success",
@@ -377,6 +381,7 @@ const CartPage = () => {
             emptyAllCarts();
           }}
           startDecorator={<DeleteForeverIcon />}
+          disabled={!carts?.length}
         >
           Empty all carts
         </Button>
