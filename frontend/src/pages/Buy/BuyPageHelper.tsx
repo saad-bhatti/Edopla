@@ -5,79 +5,66 @@ import * as BuyManipulation from "./BuyManipulation";
 
 /**************************************************************************************************                                                                      *
  * This file contains the helper functions for the buy page.                                      *
- * These helper functions are used to handle filter and sort.                                     *
+ * These helper functions are used to generate filter and sort functionality.                     *
  **************************************************************************************************/
 
-// //////////////////////////////////////////// FILTERING /////////////////////////////////////////////
-// /**
-//  * Helper function to generate the filter options.
-//  * @param priceRange The price range of the menu. [min, max]
-//  * @param setPriceFilter The function to update the slider values.
-//  * @param categories The categories of the menu.
-//  * @returns An array of filter options.
-//  */
-// export function generateFilterOptions(
-//   priceRange: number[],
-//   setPriceFilter: React.Dispatch<React.SetStateAction<number[]>>,
-//   categories: string[],
-//   setCategoryFilter: React.Dispatch<React.SetStateAction<string>>
-// ): JSX.Element[] {
-//   return [
-//     // Price filter.
-//     <CustomSlider
-//       label="Price range"
-//       defaultValue={[priceRange[0], priceRange[1]]}
-//       step={1}
-//       min={priceRange[0]}
-//       max={priceRange[1]}
-//       marks={[
-//         { value: priceRange[0], label: `$${priceRange[0]}` },
-//         {
-//           value: (priceRange[0] + priceRange[1]) / 2,
-//           label: "$" + (priceRange[0] + priceRange[1]) / 2,
-//         },
-//         { value: priceRange[1], label: `$${priceRange[1]}` },
-//       ]}
-//       onChange={(values) => {
-//         setPriceFilter(values);
-//       }}
-//     />,
-//     // Category filter.
-//     <CustomAutoComplete
-//       label="Category"
-//       options={categories}
-//       placeholder="Choose a category"
-//       defaultValue={""}
-//       isOptionEqual={(option, value) => value === "" || option === value}
-//       onChange={(input) => {
-//         setCategoryFilter(input);
-//       }}
-//     />,
-//   ];
-// }
-
-// /**
-//  * Helper function to apply filters and update the active menu.
-//  * @param completeMenu The complete menu.
-//  * @param priceFilter The price filter values.
-//  * @param categoryFilter The category filter value.
-//  * @param setActiveMenu The function to update the active menu.
-//  */
-// export function applyFilter(
-//   completeMenu: MenuItem[],
-//   priceFilter: number[],
-//   categoryFilter: string,
-//   setActiveMenu: React.Dispatch<React.SetStateAction<MenuItem[]>>
-// ): void {
-//   const filteredMenu = MenuManipulation.filterByPriceAndCategory(
-//     completeMenu,
-//     priceFilter,
-//     categoryFilter
-//   );
-
-//   // Update the activeMenu state with the filtered menu
-//   setActiveMenu(filteredMenu);
-// }
+//////////////////////////////////////////// FILTERING /////////////////////////////////////////////
+/**
+ * Helper function to generate the filter options.
+ * @param priceRange The price range of the vendor list. [min, max]
+ * @param setPriceRangeFilter The function to update the slider values.
+ * @param cuisineTypes The cuisine types of the vendor list.
+ * @param setCuisineTypeFilter The function to update the cuisine type filter value.
+ * @returns An array of filter options.
+ */
+export function generateFilterOptions(
+  setPriceRangeFilter: React.Dispatch<React.SetStateAction<string[]>>,
+  cuisineTypes: string[],
+  setCuisineTypeFilter: React.Dispatch<React.SetStateAction<string>>
+): JSX.Element[] {
+  return [
+    // Price range filter.
+    <CustomSlider
+      label="Price range"
+      defaultValue={[1, 3]}
+      step={1}
+      min={1}
+      max={3}
+      marks={[
+        { value: 1, label: "$" },
+        { value: 2, label: "$$" },
+        { value: 3, label: "$$$" },
+      ]}
+      onChange={(values) => {
+        // Convert the slider values to a string array.
+        const sliderValues: string[] = values.map((value: number) => {
+          switch (value) {
+            case 1:
+              return "$";
+            case 2:
+              return "$$";
+            case 3:
+              return "$$$";
+            default:
+              return "";
+          }
+        });
+        setPriceRangeFilter(sliderValues);
+      }}
+    />,
+    // Category filter.
+    <CustomAutoComplete
+      label="Cuisine Type"
+      options={cuisineTypes}
+      placeholder="Enter a cuisine type"
+      defaultValue={""}
+      isOptionEqual={(option, value) => value === "" || option === value}
+      onChange={(input) => {
+        setCuisineTypeFilter(input);
+      }}
+    />,
+  ];
+}
 
 ///////////////////////////////////////////// SORTING //////////////////////////////////////////////
 /**

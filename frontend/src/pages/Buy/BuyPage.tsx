@@ -1,19 +1,19 @@
+import CloseIcon from "@mui/icons-material/Close";
+import InfoOutlined from "@mui/icons-material/InfoOutlined";
 import { Button, Container, LinearProgress, Stack, Typography } from "@mui/joy";
 import { useContext, useEffect, useState } from "react";
+import VendorInformationCard from "../../components/card/VendorInformationCard";
 import CustomDropdown from "../../components/custom/CustomDropdown";
 import CustomFilter from "../../components/custom/CustomFilter";
 import CustomSearch from "../../components/custom/CustomSearch";
-import { displayError } from "../../errors/displayError";
-import * as Contexts from "../../utils/contexts";
-import * as BuyManipulation from "./BuyManipulation";
-import * as BuyPageHelper from "./BuyPageHelper";
 import CustomSnackbar from "../../components/custom/CustomSnackbar";
-import InfoOutlined from "@mui/icons-material/InfoOutlined";
+import { displayError } from "../../errors/displayError";
 import { Vendor } from "../../models/users/vendor";
 import { getSavedVendors, toggleSavedVendor } from "../../network/users/buyers_api";
 import { getAllVendors } from "../../network/users/vendors_api";
-import VendorInformationCard from "../../components/card/VendorInformationCard";
-import CloseIcon from "@mui/icons-material/Close";
+import * as Contexts from "../../utils/contexts";
+import * as BuyManipulation from "./BuyManipulation";
+import * as BuyPageHelper from "./BuyPageHelper";
 
 /***************************************************************************************************
  * This file contains the UI for the buy page.                                                     *
@@ -65,23 +65,29 @@ const BuyPage = () => {
         setShowLoadingError(false);
         setIsLoading(true);
 
-        // Retrieve all vendors and saved vendors from the database
-        const allVendors = await getAllVendors();
-        const savedVendors: Vendor[] = await getSavedVendors();
+        // Execute this block on initial render
+        if (!activeVendorList.length && !searchValue) {
+          // Retrieve all vendors and saved vendors from the database
+          const allVendors = await getAllVendors();
+          setCompleteVendorList(allVendors);
 
-        // Initialize the active vendor list and cart vendor list
-        if (!activeVendorList.length) setActiveVendorList(allVendors);
-        const vendorsInCart: Vendor[] = carts!.map((cart) => cart.vendorId);
+          const savedVendors: Vendor[] = await getSavedVendors();
+          setSavedVendorList(savedVendors);
+
+          // Initialize the active vendor list and cart vendor list
+          setActiveVendorList(allVendors);
+          const vendorsInCart: Vendor[] = carts!.map((cart) => cart.vendorId);
+          setCartVendorList(vendorsInCart);
+        }
 
         // Prepare the vendor lists
         const preparedLists: [Vendor[], Vendor[], Vendor[]] = BuyManipulation.prepareLists(
           activeVendorList,
-          vendorsInCart,
-          savedVendors
+          cartVendorList,
+          savedVendorList
         );
 
         // Update the states
-        setCompleteVendorList(allVendors);
         setCartVendorList(preparedLists[0]);
         setSavedVendorList(preparedLists[1]);
         setUnsavedVendorList(preparedLists[2]);
@@ -93,10 +99,11 @@ const BuyPage = () => {
       }
     }
     loadVendors();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loggedInUser, carts, activeVendorList]);
 
   /** Function to search the complete vendor list by its name, categories, or price range. */
-  const handleVendorSearch = (searchValue: string): void => {
+  function handleVendorSearch(searchValue: string): void {
     setSearchValue(searchValue);
     const filteredList: Vendor[] = BuyManipulation.handleSearch(completeVendorList, searchValue);
     if (filteredList.length) setActiveVendorList(filteredList);
@@ -108,26 +115,39 @@ const BuyPage = () => {
       setSnackbarVisible(true);
       setActiveVendorList(completeVendorList);
     }
-  };
-  // /** Array containing the price range of the menu. */
-  // const priceRange: number[] = BuyManipulation.getPriceRange(completeMenu);
-  // /** Array containing the categories of the menu. */
-  // const categories: string[] = BuyManipulation.getCategories(completeMenu);
-  // /** State to track the slider values. */
-  // const [priceFilter, setPriceFilter] = useState<number[]>([priceRange[0], priceRange[1]]);
-  // /** State to track the category filter. */
-  // const [categoryFilter, setCategoryFilter] = useState<string>("");
-  // // Callback function to be invoked when the "Apply" button is clicked in the filter
-  // const handleFilterApply = () => {
-  //   BuyPageHelper.applyFilter(completeMenu, priceFilter, categoryFilter, setActiveMenu);
-  // };
-  // /** Array of filter options. */
-  // const filterOptions = BuyPageHelper.generateFilterOptions(
-  //   priceRange,
-  //   setPriceFilter,
-  //   categories,
-  //   setCategoryFilter
-  // );
+  }
+
+  /** Array containing the categories of the menu. */
+  const cuisineTypes: string[] = BuyManipulation.getCuisineTypes(completeVendorList);
+  /** State to track the slider values. */
+  const [priceRangeFilter, setPriceRangeFilter] = useState<string[]>(["$", "$$$"]);
+  /** State to track the cuisine type filter. */
+  const [cuisineFilter, setCuisineFilter] = useState<string>("");
+  /** Array of filter options. */
+  const filterOptions = BuyPageHelper.generateFilterOptions(
+    setPriceRangeFilter,
+    cuisineTypes,
+    setCuisineFilter
+  );
+  function handleApplyFilter() {
+    const filteredList = BuyManipulation.filterByPriceRangeAndCuisineType(
+      completeVendorList,
+      priceRangeFilter,
+      cuisineFilter
+    );
+
+    // Update the activeVendorList state with the filtered vendor list
+    if (filteredList.length) setActiveVendorList(filteredList);
+    else {
+      setSnackbarFormat({
+        text: "No vendor matching the filter was found.",
+        color: "warning",
+      });
+      setSnackbarVisible(true);
+      setActiveVendorList(completeVendorList);
+    }
+  }
+
   /** Array of functions to execute for each sort option when clicked. */
   const sortFunctions: (() => void)[] = BuyPageHelper.generateSortFunctions(
     activeVendorList,
@@ -142,7 +162,7 @@ const BuyPage = () => {
         <CustomSearch
           placeholder="Search"
           initialValue={searchValue}
-          activeSearch={false}
+          activeSearch={true}
           onSearch={handleVendorSearch}
           sx={{ width: "50%" }}
         />
@@ -170,9 +190,11 @@ const BuyPage = () => {
       >
         {/* Drawer for the filter options. */}
         <CustomFilter
-          filterOptions={[]}
-          onApply={() => {}}
-          onRemove={() => {}}
+          filterOptions={filterOptions}
+          onApply={handleApplyFilter}
+          onRemove={() => {
+            setActiveVendorList(completeVendorList);
+          }}
           variant="outlined"
           color="neutral"
         />

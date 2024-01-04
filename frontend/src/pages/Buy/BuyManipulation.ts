@@ -60,59 +60,56 @@ export const handleSearch = (completeList: Vendor[], searchValue: string): Vendo
   });
 };
 
-// //////////////////////////////////////////// FILTERING /////////////////////////////////////////////
-// /**
-//  * Function to retrieve the range of prices within a menu.
-//  * @param menu The menu to retrieve the price range from.
-//  * @returns The array of price range [min, max].
-//  */
-// export function getPriceRange(menu: MenuItem[]): number[] {
-//   const prices = menu.map((menuItem) => menuItem.price);
-//   return [Math.min(...prices), Math.max(...prices)];
-// }
+//////////////////////////////////////////// FILTERING /////////////////////////////////////////////
+/**
+ * Function to retrieve all the unique cuisine types within a vendor in a sorted order.
+ * @param vendorList The vendor list to retrieve the cuisine types from.
+ * @returns The array of sorted unique cuisine types.
+ */
+export function getCuisineTypes(vendorList: Vendor[]): string[] {
+  const cuisineTypeSet = new Set<string>();
+  vendorList.forEach((vendor: Vendor) => {
+    vendor.cuisineTypes.forEach((category: string) => {
+      cuisineTypeSet.add(category);
+    });
+  });
+  return Array.from(cuisineTypeSet).sort();
+}
 
-// /**
-//  * Function to retrieve all the unique categories within a menu in a sorted order.
-//  * @param menu The menu to retrieve the categories from.
-//  * @returns The array of sorted unique categories.
-//  */
-// export function getCategories(menu: MenuItem[]): string[] {
-//   const categorySet = new Set<string>();
-//   menu.forEach((menuItem) => categorySet.add(menuItem.category));
-//   return Array.from(categorySet).sort();
-// }
-
-// /**
-//  * Function to filter the menu by price and category.
-//  * @param menu The menu to filter.
-//  * @param priceRange The price range to filter by. [min, max]
-//  * @param category The category to filter by.
-//  * @returns The filtered menu.
-//  */
-// export function filterByPriceAndCategory(
-//   menu: MenuItem[],
-//   priceRange: number[],
-//   category: string
-// ): MenuItem[] {
-//   const isCategoryFilter: boolean = category !== "";
-//   const isPriceFilter: boolean = priceRange !== getPriceRange(menu);
-//   // Filtering by both price and category
-//   if (isCategoryFilter && isPriceFilter)
-//     return menu.filter(
-//       (menuItem) =>
-//         menuItem.price >= priceRange[0] &&
-//         menuItem.price <= priceRange[1] &&
-//         menuItem.category === category
-//     );
-//   // Filtering by category only
-//   else if (isCategoryFilter) return menu.filter((menuItem) => menuItem.category === category);
-//   // Filtering by price only
-//   else if (isPriceFilter)
-//     return menu.filter(
-//       (menuItem) => menuItem.price >= priceRange[0] && menuItem.price <= priceRange[1]
-//     );
-//   else return menu;
-// }
+/**
+ * Function to filter a vendor list by its price range and cuisine types.
+ * @param vendorList The vendor list to filter.
+ * @param priceRange The price range to filter by. [min, max]
+ * @param cuisineType The cuisine type to filter by.
+ * @returns The filtered vendor list.
+ */
+export function filterByPriceRangeAndCuisineType(
+  vendorList: Vendor[],
+  priceRange: string[],
+  cuisineType: string
+): Vendor[] {
+  const isCuisineFilter: boolean = cuisineType !== "";
+  const isPriceRangeFilter: boolean = priceRange[0] !== "$" || priceRange[1] !== "$$$";
+  // Filtering by both price range and cuisine type
+  if (isCuisineFilter && isPriceRangeFilter)
+    return vendorList.filter(
+      (vendor: Vendor) =>
+        vendor.cuisineTypes.includes(cuisineType) &&
+        vendor.priceRange.length >= priceRange[0].length &&
+        vendor.priceRange.length <= priceRange[1].length
+    );
+  // Filtering by cuisine type only
+  else if (isCuisineFilter)
+    return vendorList.filter((vendor: Vendor) => vendor.cuisineTypes.includes(cuisineType));
+  // Filtering by price range only
+  else if (isPriceRangeFilter)
+    return vendorList.filter(
+      (vendor: Vendor) =>
+        vendor.priceRange.length >= priceRange[0].length &&
+        vendor.priceRange.length <= priceRange[1].length
+    );
+  else return vendorList;
+}
 
 ///////////////////////////////////////////// SORTING //////////////////////////////////////////////
 /** Array of sort options. */
