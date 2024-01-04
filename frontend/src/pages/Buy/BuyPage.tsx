@@ -65,29 +65,26 @@ const BuyPage = () => {
         setShowLoadingError(false);
         setIsLoading(true);
 
-        // Execute this block on initial render
-        if (!activeVendorList.length && !searchValue) {
-          // Retrieve all vendors and saved vendors from the database
-          const allVendors = await getAllVendors();
-          setCompleteVendorList(allVendors);
-
-          const savedVendors: Vendor[] = await getSavedVendors();
-          setSavedVendorList(savedVendors);
-
-          // Initialize the active vendor list and cart vendor list
-          setActiveVendorList(allVendors);
-          const vendorsInCart: Vendor[] = carts!.map((cart) => cart.vendorId);
-          setCartVendorList(vendorsInCart);
+        let allVendors: Vendor[] = completeVendorList;
+        let activeVendors: Vendor[] = activeVendorList;
+        let savedVendors: Vendor[] = savedVendorList;
+        let cartVendors: Vendor[] = cartVendorList;
+        if (!activeVendors.length && !searchValue) {
+          allVendors = await getAllVendors();
+          savedVendors = await getSavedVendors();
+          cartVendors = carts!.map((cart) => cart.vendorId);
+          activeVendors = allVendors;
         }
 
         // Prepare the vendor lists
         const preparedLists: [Vendor[], Vendor[], Vendor[]] = BuyManipulation.prepareLists(
-          activeVendorList,
-          cartVendorList,
-          savedVendorList
+          activeVendors,
+          cartVendors,
+          savedVendors
         );
 
         // Update the states
+        setCompleteVendorList(allVendors);
         setCartVendorList(preparedLists[0]);
         setSavedVendorList(preparedLists[1]);
         setUnsavedVendorList(preparedLists[2]);
@@ -231,7 +228,10 @@ const BuyPage = () => {
 
       // Show snackbar to indicate success.
       setSnackbarFormat({
-        text: updatedLength > initialLength ? "Vendor successfully saved!" : "Vendor unsaved!",
+        text:
+          updatedLength > initialLength
+            ? "Vendor successfully saved!"
+            : "Vendor successfully unsaved!",
         color: "success",
       });
     } catch (error) {
