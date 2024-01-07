@@ -18,7 +18,7 @@ import CustomSnackbar from "../../components/custom/CustomSnackbar";
 import { displayError } from "../../errors/displayError";
 import { CartItem } from "../../models/items/cartItem";
 import { MenuItem } from "../../models/items/menuItem";
-import { createCart, updateItem } from "../../network/items/carts_api";
+import { createCart, emptyCart, updateItem } from "../../network/items/carts_api";
 import { getMenu } from "../../network/items/menus_api";
 import { onlyBackgroundSx } from "../../styles/PageSX";
 import { SectionTitleText } from "../../styles/Text";
@@ -31,9 +31,6 @@ import * as MenuPageHelper from "./MenuPageHelper";
 const MenuPage = () => {
   // Retrieve the vendor id from the URL path.
   const { vendorId } = useParams();
-  // Retrieve the logged in user.
-  const { loggedInUser } =
-    useContext<Contexts.LoggedInUserContextProps | null>(Contexts.LoggedInUserContext) || {};
   // Retrieve the logged in user's cart.
   const { carts, setCarts } =
     useContext<Contexts.CartsContextProps | null>(Contexts.CartsContext) || {};
@@ -117,27 +114,24 @@ const MenuPage = () => {
   );
 
   async function onItemUpdate(menuItem: MenuItem, quantity: number): Promise<void> {
-    // If the user is not logged in
-    if (!loggedInUser) {
-      displayError(new Error("You must be logged in to add items to your cart."));
-      return;
-    }
-    // If the user does not have a buyer profile
-    else if (!loggedInUser._buyer) {
-      displayError(new Error("You must have a buyer profile to add items to your cart."));
-      return;
-    }
-
     // If the user's cart for this vendor already exists
     try {
       if (cart) {
         // Send request to update the cart
         const requestDetails = { item: { item: menuItem._id, quantity: quantity } };
         const updatedCart = await updateItem(cart._id, requestDetails);
-        // Update the cart in the context
-        setCarts!(
-          carts!.map((cartItem) => (cartItem._id === updatedCart._id ? updatedCart : cartItem))
-        );
+
+        // If the resulting cart is empty, remove it from the context
+        if (updatedCart.items.length === 0) {
+          emptyCart(updatedCart._id);
+          setCarts!(carts!.filter((cartItem) => cartItem._id !== updatedCart._id));
+        }
+
+        // Otherwise, update the cart in the context
+        else
+          setCarts!(
+            carts!.map((cartItem) => (cartItem._id === updatedCart._id ? updatedCart : cartItem))
+          );
 
         // Show snackbar to indicate success.
         setSnackbarFormat({
