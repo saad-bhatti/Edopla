@@ -1,3 +1,9 @@
+/**************************************************************************************************
+ * This file contains the UI for the custom input component.                                      *
+ * This component is used to create an input field with the provided type, placeholder, value,    *
+ * and function to execute upon change in input.                                                  *
+ **************************************************************************************************/
+
 import Input from "@mui/joy/Input";
 import { SxProps } from "@mui/joy/styles/types";
 

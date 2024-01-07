@@ -1,3 +1,9 @@
+/***************************************************************************************************
+ * This file contains the UI for the menu page.                                                    *
+ * The menu page displays all the menu items of a vendor.                                          *
+ * The menu items can be searched, filtered, and sorted.                                           *
+ **************************************************************************************************/
+
 import InfoOutlined from "@mui/icons-material/InfoOutlined";
 import { Container, LinearProgress, Stack } from "@mui/joy";
 import { SxProps } from "@mui/joy/styles/types";
@@ -16,12 +22,6 @@ import { getMenu } from "../../network/items/menus_api";
 import * as Contexts from "../../utils/contexts";
 import * as MenuManipulation from "./MenuManipulation";
 import * as MenuPageHelper from "./MenuPageHelper";
-
-/***************************************************************************************************
- * This file contains the UI for the menu page.                                                    *
- * The menu page displays all the menu items of a vendor.                                          *
- * The menu items can be searched, filtered, and sorted.                                           *
- **************************************************************************************************/
 
 /** Props for the menu page. */
 interface MenuPageProps {

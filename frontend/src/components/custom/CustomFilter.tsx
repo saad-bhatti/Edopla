@@ -1,3 +1,9 @@
+/**************************************************************************************************
+ * This file contains the UI for the custom filter component.                                     *
+ * This component is used to create a filter that can be used to apply or remove filters, which   *
+ * are defined by the user.                                                                       *
+ **************************************************************************************************/
+
 import Button from "@mui/joy/Button";
 import DialogTitle from "@mui/joy/DialogTitle";
 import Drawer from "@mui/joy/Drawer";

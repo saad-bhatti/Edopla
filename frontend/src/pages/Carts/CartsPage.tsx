@@ -1,3 +1,9 @@
+/**************************************************************************************************
+ * This file contains the UI for the carts page.                                                  *
+ * The carts page displays all the carts items of the authenticated user.                         *
+ * The carts items can be searched and sorted.                                                    *
+ **************************************************************************************************/
+
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import InfoOutlined from "@mui/icons-material/InfoOutlined";
 import { Button, Container, LinearProgress, Stack, Typography } from "@mui/joy";
@@ -11,12 +17,6 @@ import { CartItem } from "../../models/items/cartItem";
 import * as CartsAPI from "../../network/items/carts_api";
 import { CartsContext, CartsContextProps } from "../../utils/contexts";
 import * as CartsManipulation from "./CartsManipulation";
-
-/***************************************************************************************************
- * This file contains the UI for the carts page.                                                   *
- * The carts page displays all the carts items of the authenticated user.                          *
- * The carts items can be searched and sorted.                                                     *
- **************************************************************************************************/
 
 /** Props for the carts page. */
 interface CartsPageProps {

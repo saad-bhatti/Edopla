@@ -1,3 +1,9 @@
+/**************************************************************************************************
+ * This file contains the UI for the user profile card.                                           *
+ * The user profile card allows the user to change their email and password.                      *
+ * The user profile card is displayed in the profiles page.                                       *
+ **************************************************************************************************/
+
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import InfoOutlined from "@mui/icons-material/InfoOutlined";
 import Key from "@mui/icons-material/Key";
@@ -16,13 +22,13 @@ import {
 import { SxProps } from "@mui/joy/styles/types";
 import { useState } from "react";
 import { User } from "../../models/users/user";
-import CustomCard from "../custom/CustomCard";
-import CustomInput from "../custom/CustomInput";
-import CustomSnackbar from "../custom/CustomSnackbar";
 import {
   calculateDescriptivePasswordStrength,
   calculateNumericalPasswordStrength,
 } from "../../utils/passwordStrength";
+import CustomCard from "../custom/CustomCard";
+import CustomInput from "../custom/CustomInput";
+import CustomSnackbar from "../custom/CustomSnackbar";
 
 /** Props of the user profile card component. */
 interface UserProfileCardProps {

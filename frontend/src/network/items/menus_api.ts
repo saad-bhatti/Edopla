@@ -1,3 +1,7 @@
+/**************************************************************************************************
+ * This file exports functions to make menu item related HTTP requests to the backend server.     *
+ **************************************************************************************************/
+
 import { MenuItem } from "../../models/items/menuItem";
 import { fetchData } from "../../utils/fetchData";
 

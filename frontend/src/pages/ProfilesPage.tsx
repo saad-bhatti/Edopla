@@ -1,4 +1,9 @@
-import { Container, LinearProgress, Stack, Typography } from "@mui/joy";
+/**************************************************************************************************
+ * This file contains the UI for the profiles page.                                               *
+ * This page is used to display and change the user, buyer, and vendor profile information.       *
+ **************************************************************************************************/
+
+import { Container, LinearProgress, Stack } from "@mui/joy";
 import { SxProps } from "@mui/joy/styles/types";
 import { useContext, useEffect, useState } from "react";
 import BuyerProfileCard from "../components/card/BuyerProfileCard";
@@ -10,6 +15,7 @@ import { Buyer } from "../models/users/buyer";
 import { Vendor } from "../models/users/vendor";
 import { getBuyer } from "../network/users/buyers_api";
 import { getVendor } from "../network/users/vendors_api";
+import { SectionTitleText } from "../styles/Text";
 import { LoggedInUserContext, LoggedInUserContextProps } from "../utils/contexts";
 
 /** Props for the profiles page. */
@@ -66,15 +72,15 @@ const ProfilesPage = ({ style, sx }: ProfilesPageProps) => {
 
       {/* Display for when the profiles fail to load. */}
       {showLoadingError && (
-        <Stack alignItems="center">
-          <Typography level="h3">Something went wrong. Please try again.</Typography>
+        <Stack id="ProfilesPage" alignItems="center">
+          <SectionTitleText>Something went wrong. Please try again.</SectionTitleText>
         </Stack>
       )}
 
       {/* Display if the user is not logged in. */}
       {!isLoading && !showLoadingError && !loggedInUser && (
-        <Stack alignItems="center">
-          <Typography level="h3">Please sign up or log in to see profile details.</Typography>
+        <Stack id="ProfilesPage" alignItems="center">
+          <SectionTitleText>Please sign up or log in to see profile details.</SectionTitleText>
         </Stack>
       )}
 

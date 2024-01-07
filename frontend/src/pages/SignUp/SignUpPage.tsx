@@ -1,3 +1,9 @@
+/**************************************************************************************************
+ * This file contains the UI for the sign up page.                                                *
+ * This page is used to sign up to the website, either with an email and password or with a third *
+ * party account.                                                                                 *
+ **************************************************************************************************/
+
 import InfoOutlined from "@mui/icons-material/InfoOutlined";
 import { Container, Stack } from "@mui/joy";
 import { useColorScheme } from "@mui/joy/styles";

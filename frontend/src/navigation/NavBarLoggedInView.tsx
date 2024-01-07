@@ -1,7 +1,12 @@
+/**************************************************************************************************
+ * This file contains the UI for the navigation bar when the user is logged in.                   *
+ **************************************************************************************************/
+
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import DensityMediumIcon from "@mui/icons-material/DensityMedium";
 import InfoOutlined from "@mui/icons-material/InfoOutlined";
 import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
+import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import {
   Dropdown,
   IconButton,
@@ -9,17 +14,16 @@ import {
   Menu,
   MenuButton,
   MenuItem,
-  Typography,
   Stack,
+  Typography,
 } from "@mui/joy";
+import Badge from "@mui/joy/Badge";
 import Button from "@mui/joy/Button";
 import { useContext, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { logout } from "../../network/users/users_api";
-import * as Context from "../../utils/contexts";
-import CustomSnackbar from "../custom/CustomSnackbar";
-import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
-import Badge from "@mui/joy/Badge";
+import CustomSnackbar from "../components/custom/CustomSnackbar";
+import { logout } from "../network/users/users_api";
+import * as Context from "../utils/contexts";
 
 /** UI component for the logged in view of the navigation bar head. */
 export const NavBarLoggedInHead = () => {

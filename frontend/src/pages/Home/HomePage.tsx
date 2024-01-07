@@ -1,3 +1,8 @@
+/**************************************************************************************************
+ * This file contains the UI for the home page.                                                   *
+ * This page is used to display the general information and features of the application.          *
+ **************************************************************************************************/
+
 import Stack from "@mui/joy/Stack";
 import CustomAnimation from "../../components/custom/CustomAnimation";
 import About from "./About";
@@ -6,7 +11,9 @@ import Features from "./Features";
 import Header from "./Header";
 import Meet from "./Meet";
 
+/** UI for the home page. */
 const HomePage = () => {
+  /** UI layout for the home page. */
   return (
     <Stack
       id="HomePage"

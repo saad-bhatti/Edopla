@@ -1,3 +1,9 @@
+/**************************************************************************************************
+ * This file contains the UI for the custom slider component.                                     *
+ * This component is used to create a slider with the provided details that execute a specific    *
+ * function when the value changes.                                                               *
+ **************************************************************************************************/
+
 import FormControl from "@mui/joy/FormControl";
 import FormLabel from "@mui/joy/FormLabel";
 import Slider, { sliderClasses } from "@mui/joy/Slider";

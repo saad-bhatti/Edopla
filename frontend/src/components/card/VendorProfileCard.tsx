@@ -1,3 +1,9 @@
+/**************************************************************************************************
+ * This file contains the UI for the vendor profile card.                                         *
+ * The vendor profile card allows the vendor to change their details.                             *
+ * The vendor profile card is displayed in the profiles page.                                     *
+ **************************************************************************************************/
+
 import BadgeIcon from "@mui/icons-material/Badge";
 import CloseIcon from "@mui/icons-material/Close";
 import InfoOutlined from "@mui/icons-material/InfoOutlined";
@@ -73,7 +79,7 @@ const VendorProfileCard = ({ vendor, onVendorUpdate, sx }: VendorProfileCardProp
   }
 
   /** Function to handle change submissions to the vendor profile. */
-  async function handleProfileChange() {  
+  async function handleProfileChange() {
     // Check that the phone number is valid, checking that it only contains numbers.
     if (!newPhoneNumber.match(/^[0-9]+$/)) {
       setFormError({ isError: 3, error: "Please enter a valid phone number." });
@@ -81,7 +87,7 @@ const VendorProfileCard = ({ vendor, onVendorUpdate, sx }: VendorProfileCardProp
     }
     // If there are no errors, reset the form error state.
     setFormError({ isError: 0, error: "" });
-    
+
     try {
       // Send request to backend to update vendor info.
       const requestDetails = {

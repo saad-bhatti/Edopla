@@ -1,9 +1,13 @@
+/**************************************************************************************************
+ * This file contains the UI for the features section of the home page.                           *
+ **************************************************************************************************/
+
 import PersonIcon from "@mui/icons-material/Person";
 import ShoppingBagIcon from "@mui/icons-material/ShoppingBag";
 import StorefrontIcon from "@mui/icons-material/Storefront";
 import { Container, Stack } from "@mui/joy";
 import { ReactElement, cloneElement } from "react";
-import { LargeBodyText, SectionTitleText, SubSectionTitleText } from "./Styling";
+import { LargeBodyText, SectionTitleText, SubSectionTitleText } from "../../styles/Text";
 
 /** UI for the HomePage's features section. */
 const Features = () => {

@@ -1,3 +1,8 @@
+/**************************************************************************************************
+ * This file contains the UI for the text components.                                             *
+ * These components are used to display formatted text in the application.                        *
+ **************************************************************************************************/
+
 import { Typography, TypographyProps } from "@mui/joy";
 import { ReactElement, ReactNode } from "react";
 

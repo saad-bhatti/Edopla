@@ -1,3 +1,7 @@
+/**************************************************************************************************
+ * This file exports functions to make order item related HTTP requests to the backend server.    *
+ **************************************************************************************************/
+
 import { OrderItem } from "../../models/items/orderItem";
 import { fetchData } from "../../utils/fetchData";
 

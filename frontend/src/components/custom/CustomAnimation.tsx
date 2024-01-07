@@ -1,3 +1,8 @@
+/**************************************************************************************************
+ * This file contains the UI for the custom animation component.                                  *
+ * This component is used to animate the children components when they appear on screen.          *
+ **************************************************************************************************/
+
 import { ReactNode } from "react";
 import { useInView } from "react-intersection-observer";
 import { animated, useSpring } from "react-spring";

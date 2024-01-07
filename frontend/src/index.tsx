@@ -1,3 +1,7 @@
+/**************************************************************************************************
+ * This file contains the UI for the entire application.                                          *
+ *************************************************************************************************/
+
 import "bootstrap/dist/css/bootstrap.min.css";
 import React from "react";
 import ReactDOM from "react-dom/client";

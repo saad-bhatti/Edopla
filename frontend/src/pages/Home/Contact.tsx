@@ -1,8 +1,12 @@
+/**************************************************************************************************
+ * This file contains the UI for the contact section of the home page.                            *
+ **************************************************************************************************/
+
 import EmailIcon from "@mui/icons-material/Email";
 import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import PhoneIcon from "@mui/icons-material/Phone";
 import { Container, Stack } from "@mui/joy";
-import { LargeBodyText, SectionTitleText } from "./Styling";
+import { LargeBodyText, SectionTitleText } from "../../styles/Text";
 
 /** UI for the HomePage's contact section. */
 const Contact = () => {

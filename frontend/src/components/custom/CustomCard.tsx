@@ -1,3 +1,8 @@
+/**************************************************************************************************
+ * This file contains the UI for the custom card component.                                       *
+ * This component is used to create a custom card with a custom layout.                           *
+ **************************************************************************************************/
+
 import Card from "@mui/joy/Card";
 import { SxProps } from "@mui/joy/styles/types";
 

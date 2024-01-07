@@ -1,5 +1,9 @@
+/**************************************************************************************************
+ * This file contains the UI for the header section of the home page.                             *
+ **************************************************************************************************/
+
 import { Container, Stack } from "@mui/joy";
-import { LargeBodyText, SectionTitleText } from "./Styling";
+import { LargeBodyText, SectionTitleText } from "../../styles/Text";
 
 /** UI for the HomePage's header section. */
 const Header = () => {

@@ -1,12 +1,16 @@
+/**************************************************************************************************
+ * This file contains the available routes for the application.                                   *
+ **************************************************************************************************/
+
 import { Route, Routes } from "react-router-dom";
-import BuyPage from "../../pages/Buy/BuyPage";
-import CartsPage from "../../pages/Carts/CartsPage";
-import HomePage from "../../pages/Home/HomePage";
-import LogInPage from "../../pages/LogInPage";
-import MenuPage from "../../pages/Menu/MenuPage";
-import NotFoundPage from "../../pages/NotFoundPage";
-import ProfilesPage from "../../pages/ProfilesPage";
-import SignUpPage from "../../pages/SignUp/SignUpPage";
+import BuyerPage from "./pages/Buyer/BuyerPage";
+import CartsPage from "./pages/Carts/CartsPage";
+import HomePage from "./pages/Home/HomePage";
+import LogInPage from "./pages/LogInPage";
+import MenuPage from "./pages/Menu/MenuPage";
+import NotFoundPage from "./pages/NotFoundPage";
+import ProfilesPage from "./pages/ProfilesPage";
+import SignUpPage from "./pages/SignUp/SignUpPage";
 
 /** Define styles for the page containers. */
 const style = {
@@ -26,7 +30,7 @@ const AppRoutes = () => {
       <Route path="/" element={<HomePage />} />
       <Route path="/signup" element={<SignUpPage style={style} sx={sx} />} />
       <Route path="/login" element={<LogInPage style={style} sx={sx} />} />
-      <Route path="/buy" element={<BuyPage style={style} sx={sx} />} />
+      <Route path="/buy" element={<BuyerPage style={style} sx={sx} />} />
       <Route path="/profiles" element={<ProfilesPage style={style} sx={sx} />} />
       <Route path="/carts" element={<CartsPage style={style} sx={sx} />} />
       <Route path="/menu/:vendorId" element={<MenuPage style={style} sx={sx} />} />

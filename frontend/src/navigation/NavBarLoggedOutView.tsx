@@ -1,3 +1,7 @@
+/**************************************************************************************************
+ * This file contains the UI for the navigation bar when the user is logged out.                  *
+ **************************************************************************************************/
+
 import Button from "@mui/joy/Button";
 import { Link } from "react-router-dom";
 

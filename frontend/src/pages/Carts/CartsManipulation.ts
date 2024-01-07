@@ -1,9 +1,10 @@
-import { CartItem } from "../../models/items/cartItem";
-
 /**************************************************************************************************                                                                      *
  * This file contains the manipulation options for the carts.                                     *
  * These manipulation options including general purpose, searching and sorting.                   *
  **************************************************************************************************/
+
+import { CartItem } from "../../models/items/cartItem";
+
 ///////////////////////////////////////////// GENERAL //////////////////////////////////////////////
 /**
  * Function to seperate the provided carts based on whether they are saved for later or not.

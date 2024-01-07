@@ -1,3 +1,9 @@
+/***************************************************************************************************
+ * This file contains the UI for the buy page.                                                     *
+ * The buy page displays the cards of all the vendors.                                             *
+ * The vendors can be searched, filtered, and sorted.                                              *
+ **************************************************************************************************/
+
 import CloseIcon from "@mui/icons-material/Close";
 import InfoOutlined from "@mui/icons-material/InfoOutlined";
 import { Button, Container, LinearProgress, Stack, Typography } from "@mui/joy";
@@ -12,15 +18,10 @@ import { displayError } from "../../errors/displayError";
 import { Vendor } from "../../models/users/vendor";
 import { getSavedVendors, toggleSavedVendor } from "../../network/users/buyers_api";
 import { getAllVendors } from "../../network/users/vendors_api";
+import { SectionTitleText } from "../../styles/Text";
 import * as Contexts from "../../utils/contexts";
-import * as BuyManipulation from "./BuyManipulation";
-import * as BuyPageHelper from "./BuyPageHelper";
-
-/***************************************************************************************************
- * This file contains the UI for the buy page.                                                     *
- * The buy page displays the cards of all the vendors.                                             *
- * The vendors can be searched, filtered, and sorted.                                              *
- **************************************************************************************************/
+import * as BuyerPageHelper from "./BuyerPageHelper";
+import * as VendorListManipulation from "./VendorListManipulation";
 
 /** Props for the buy page. */
 interface BuyPageProps {
@@ -84,7 +85,7 @@ const BuyPage = ({ style, sx }: BuyPageProps) => {
         }
 
         // Prepare the vendor lists
-        const preparedLists: [Vendor[], Vendor[], Vendor[]] = BuyManipulation.prepareLists(
+        const preparedLists: [Vendor[], Vendor[], Vendor[]] = VendorListManipulation.prepareLists(
           activeVendors,
           cartVendors,
           savedVendors
@@ -109,7 +110,10 @@ const BuyPage = ({ style, sx }: BuyPageProps) => {
   /** Function to search the complete vendor list by its name, categories, or price range. */
   function handleVendorSearch(searchValue: string): void {
     setSearchValue(searchValue);
-    const filteredList: Vendor[] = BuyManipulation.handleSearch(completeVendorList, searchValue);
+    const filteredList: Vendor[] = VendorListManipulation.handleSearch(
+      completeVendorList,
+      searchValue
+    );
     if (filteredList.length) setActiveVendorList(filteredList);
     else {
       setSnackbarFormat({
@@ -122,19 +126,19 @@ const BuyPage = ({ style, sx }: BuyPageProps) => {
   }
 
   /** Array containing the categories of the menu. */
-  const cuisineTypes: string[] = BuyManipulation.getCuisineTypes(completeVendorList);
+  const cuisineTypes: string[] = VendorListManipulation.getCuisineTypes(completeVendorList);
   /** State to track the slider values. */
   const [priceRangeFilter, setPriceRangeFilter] = useState<string[]>(["$", "$$$"]);
   /** State to track the cuisine type filter. */
   const [cuisineFilter, setCuisineFilter] = useState<string>("");
   /** Array of filter options. */
-  const filterOptions = BuyPageHelper.generateFilterOptions(
+  const filterOptions = BuyerPageHelper.generateFilterOptions(
     setPriceRangeFilter,
     cuisineTypes,
     setCuisineFilter
   );
   function handleApplyFilter() {
-    const filteredList = BuyManipulation.filterByPriceRangeAndCuisineType(
+    const filteredList = VendorListManipulation.filterByPriceRangeAndCuisineType(
       completeVendorList,
       priceRangeFilter,
       cuisineFilter
@@ -153,7 +157,7 @@ const BuyPage = ({ style, sx }: BuyPageProps) => {
   }
 
   /** Array of functions to execute for each sort option when clicked. */
-  const sortFunctions: (() => void)[] = BuyPageHelper.generateSortFunctions(
+  const sortFunctions: (() => void)[] = BuyerPageHelper.generateSortFunctions(
     activeVendorList,
     setActiveVendorList
   );
@@ -206,7 +210,7 @@ const BuyPage = ({ style, sx }: BuyPageProps) => {
         {/* Dropdown for the sort options. */}
         <CustomDropdown
           label="Sort by"
-          options={BuyManipulation.sortOptions}
+          options={VendorListManipulation.sortOptions}
           onOptionClick={sortFunctions}
           variant="plain"
           color="primary"
@@ -318,7 +322,9 @@ const BuyPage = ({ style, sx }: BuyPageProps) => {
       {isLoading && <LinearProgress size="lg" value={28} variant="soft" />}
 
       {/* Display for when the menu fails to load. */}
-      {showLoadingError && <p>Something went wrong. Please try again.</p>}
+      {showLoadingError && (
+        <SectionTitleText>Something went wrong. Please try again.</SectionTitleText>
+      )}
 
       {/* Display each menu item. */}
       {!isLoading && !showLoadingError && (

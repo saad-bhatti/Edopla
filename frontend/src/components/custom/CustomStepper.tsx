@@ -1,3 +1,9 @@
+/**************************************************************************************************
+ * This file contains the UI for the custom stepper component.                                    *
+ * This component is used to create a custom stepper with the provided labels.                    *
+ * Inspiration: https://mui.com/joy-ui/react-stepper/#system-CompanyRegistrationStepper.tsx       *
+ **************************************************************************************************/
+
 import CheckRoundedIcon from "@mui/icons-material/CheckRounded";
 import KeyboardArrowDownRoundedIcon from "@mui/icons-material/KeyboardArrowDownRounded";
 import Step, { stepClasses } from "@mui/joy/Step";
@@ -5,8 +11,6 @@ import StepIndicator, { stepIndicatorClasses } from "@mui/joy/StepIndicator";
 import Stepper from "@mui/joy/Stepper";
 import Typography from "@mui/joy/Typography";
 import { SxProps } from "@mui/joy/styles/types";
-
-/** Inspiration: https://mui.com/joy-ui/react-stepper/#system-CompanyRegistrationStepper.tsx */
 
 /** Props of the custom stepper component. */
 interface CustomStepperProps {

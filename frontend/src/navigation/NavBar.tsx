@@ -1,11 +1,16 @@
+/**************************************************************************************************
+ * This file contains the UI for the navigation bar.                                              *
+ * The navigation bar allows the user to navigate through the application.                        *
+ **************************************************************************************************/
+
 import { Container } from "@mui/joy";
 import Box from "@mui/joy/Box";
 import Button from "@mui/joy/Button";
 import Stack from "@mui/joy/Stack";
 import { useContext } from "react";
 import { Link } from "react-router-dom";
-import { LoggedInUserContext, LoggedInUserContextProps } from "../../utils/contexts";
-import CustomSearch from "../custom/CustomSearch";
+import { LoggedInUserContext, LoggedInUserContextProps } from "../utils/contexts";
+import CustomSearch from "../components/custom/CustomSearch";
 import ColorSchemeToggle from "./ColorSchemeToggle";
 import { NavBarLoggedInHead, NavBarLoggedInTail } from "./NavBarLoggedInView";
 import { NavBarLoggedOutHead, NavBarLoggedOutTail } from "./NavBarLoggedOutView";
@@ -17,7 +22,19 @@ const NavBar = () => {
 
   /** UI layout for the custom navigation. */
   return (
-    <Container id="Navbar" style={{ padding: 2 }} sx={{ minWidth: "100%" }}>
+    <Container
+      id="Navbar"
+      style={{ padding: 2 }}
+      sx={(theme) => ({
+        minWidth: "100%",
+        [theme.getColorSchemeSelector("light")]: {
+          background: "linear-gradient(to right, #dcdcdc, #ffffff)",
+        },
+        [theme.getColorSchemeSelector("dark")]: {
+          background: "linear-gradient(to right, #010001, #020944)",
+        },
+      })}
+    >
       {/* Navigation bar head. */}
       <Box
         sx={{
@@ -41,7 +58,6 @@ const NavBar = () => {
             <Button
               variant="plain"
               color="neutral"
-              href="/"
               size="sm"
               sx={{ alignSelf: "center", fontSize: "md" }}
             >

@@ -1,3 +1,7 @@
+/**************************************************************************************************
+ * This file exports functions to make vendor profile related HTTP requests to the backend server.*
+ **************************************************************************************************/
+
 import { Vendor } from "../../models/users/vendor";
 import { fetchData } from "../../utils/fetchData";
 

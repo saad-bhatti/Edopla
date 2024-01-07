@@ -1,3 +1,9 @@
+/**************************************************************************************************
+ * This file contains the UI for the color scheme toggle.                                         *
+ * The color scheme toggle allows the user to change the color scheme of the application.         *
+ * The color scheme toggle is displayed in the navigation bar.                                    *
+ **************************************************************************************************/
+
 import DarkModeRoundedIcon from "@mui/icons-material/DarkModeRounded";
 import LightModeRoundedIcon from "@mui/icons-material/LightModeRounded";
 import IconButton from "@mui/joy/IconButton";

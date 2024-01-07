@@ -1,3 +1,9 @@
+/**************************************************************************************************
+ * This file contains the UI for the menu item card.                                              *
+ * The menu item card allows the buyer to add or update the quantity of items in their cart.      *
+ * The menu item card is displayed in the menu page.                                              *
+ **************************************************************************************************/
+
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import { Button } from "@mui/joy";
 import CardContent from "@mui/joy/CardContent";

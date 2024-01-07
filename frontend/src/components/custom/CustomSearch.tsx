@@ -1,3 +1,9 @@
+/**************************************************************************************************
+ * This file contains the UI for the custom search component.                                     *
+ * This component is used to create a search bar with a search button that executes the function  *
+ * provided upon clicking or change of input.                                                     *
+ **************************************************************************************************/
+
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import Button from "@mui/joy/Button";
 import Stack from "@mui/joy/Stack";

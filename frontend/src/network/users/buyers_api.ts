@@ -1,3 +1,7 @@
+/**************************************************************************************************
+ * This file exports functions to make buyer profile related HTTP requests to the backend server. *
+ **************************************************************************************************/
+
 import { Buyer } from "../../models/users/buyer";
 import { Vendor } from "../../models/users/vendor";
 import { fetchData } from "../../utils/fetchData";

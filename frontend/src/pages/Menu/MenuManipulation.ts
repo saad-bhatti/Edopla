@@ -1,9 +1,9 @@
-import { MenuItem } from "../../models/items/menuItem";
-
 /**************************************************************************************************                                                                      *
  * This file contains the manipulation options for the menu.                                      *
  * These manipulation options including searching, filtering, and sorting.                        *
  **************************************************************************************************/
+
+import { MenuItem } from "../../models/items/menuItem";
 
 //////////////////////////////////////////// SEARCHING /////////////////////////////////////////////
 /**

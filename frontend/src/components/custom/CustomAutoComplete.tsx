@@ -1,3 +1,8 @@
+/**************************************************************************************************
+ * This file contains the UI for the custom autocomplete component.                               *
+ * This component is used to create a text input with autocomplete functionality.                 *
+ **************************************************************************************************/
+
 import Autocomplete from "@mui/joy/Autocomplete";
 import AutocompleteOption from "@mui/joy/AutocompleteOption";
 import FormControl from "@mui/joy/FormControl";

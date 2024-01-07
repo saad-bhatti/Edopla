@@ -1,3 +1,9 @@
+/**************************************************************************************************
+ * This file contains the UI for the log in page.                                                 *
+ * This page is used to log in to the website, either with an email and password or with a third  *
+ * party account.                                                                                 *
+ **************************************************************************************************/
+
 import EmailIcon from "@mui/icons-material/Email";
 import FacebookIcon from "@mui/icons-material/Facebook";
 import GoogleIcon from "@mui/icons-material/Google";

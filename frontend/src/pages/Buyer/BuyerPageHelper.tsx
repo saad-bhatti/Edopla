@@ -1,12 +1,12 @@
-import CustomAutoComplete from "../../components/custom/CustomAutoComplete";
-import CustomSlider from "../../components/custom/CustomSlider";
-import { Vendor } from "../../models/users/vendor";
-import * as BuyManipulation from "./BuyManipulation";
-
 /**************************************************************************************************                                                                      *
  * This file contains the helper functions for the buy page.                                      *
  * These helper functions are used to generate filter and sort functionality.                     *
  **************************************************************************************************/
+
+import CustomAutoComplete from "../../components/custom/CustomAutoComplete";
+import CustomSlider from "../../components/custom/CustomSlider";
+import { Vendor } from "../../models/users/vendor";
+import * as VendorListManipulation from "./VendorListManipulation";
 
 //////////////////////////////////////////// FILTERING /////////////////////////////////////////////
 /**
@@ -77,7 +77,7 @@ export function generateSortFunctions(
   activeVendorList: Vendor[],
   setActiveVendorList: React.Dispatch<React.SetStateAction<Vendor[]>>
 ): (() => void)[] {
-  return BuyManipulation.sortFunctions.map(
+  return VendorListManipulation.sortFunctions.map(
     (sortFn: (listToSort: Vendor[]) => Vendor[]) => () =>
       setActiveVendorList(sortFn(activeVendorList))
   );

@@ -1,3 +1,9 @@
+/**************************************************************************************************
+ * This file contains the UI for the buyer profile card.                                          *
+ * The buyer profile card allows the buyer to change their name, address, and phone number.       *
+ * The buyer profile card is displayed in the profiles page.                                      *
+ **************************************************************************************************/
+
 import BadgeIcon from "@mui/icons-material/Badge";
 import InfoOutlined from "@mui/icons-material/InfoOutlined";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
