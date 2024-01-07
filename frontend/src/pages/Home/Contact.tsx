@@ -7,6 +7,7 @@ import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import PhoneIcon from "@mui/icons-material/Phone";
 import { Container, Stack } from "@mui/joy";
 import { LargeBodyText, SectionTitleText } from "../../styles/Text";
+import { minPageWidth } from "../../styles/constants";
 
 /** UI for the HomePage's contact section. */
 const Contact = () => {
@@ -14,7 +15,7 @@ const Contact = () => {
     <Container
       id="Contact"
       sx={(theme) => ({
-        minWidth: "100vw",
+        minWidth: minPageWidth,
         maxHeight: "75vh",
         borderRadius: "40% 40% 0% 0%",
         [theme.getColorSchemeSelector("dark")]: {
@@ -24,7 +25,7 @@ const Contact = () => {
     >
       <Stack direction="column" alignItems="center" gap={5} paddingY="5%">
         {/* Section title. */}
-        <SectionTitleText children="Contact" />
+        <SectionTitleText children="Contact Us" />
 
         {/* Description section. */}
 

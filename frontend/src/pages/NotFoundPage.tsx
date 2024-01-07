@@ -5,12 +5,22 @@
 
 import SentimentVeryDissatisfiedIcon from "@mui/icons-material/SentimentVeryDissatisfied";
 import Stack from "@mui/joy/Stack";
+import { SxProps, Theme } from "@mui/joy/styles/types";
+import { onlyBackgroundSx } from "../styles/PageSX";
 import { SectionTitleText } from "../styles/Text";
+import { minPageHeight } from "../styles/constants";
 
-/** Page to be loaded when a route is not found. */
+/** UI for the not found page. */
 const NotFoundPage = () => {
+  /** Sx for the not found page. */
+  const customSx: SxProps = (theme: Theme) => ({
+    ...onlyBackgroundSx(theme),
+    margin: 0,
+    minHeight: minPageHeight,
+  });
+
   return (
-    <Stack id="NotFoundPage" direction="row" justifyContent="center" gap={5} py={10}>
+    <Stack id="NotFoundPage" direction="row" justifyContent="center" gap={5} py={10} sx={customSx}>
       <SentimentVeryDissatisfiedIcon sx={{ fontSize: "20vh" }} />
       <SectionTitleText>Page not found</SectionTitleText>
     </Stack>

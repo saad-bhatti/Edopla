@@ -4,7 +4,9 @@
  **************************************************************************************************/
 
 import Stack from "@mui/joy/Stack";
+import { SxProps, Theme } from "@mui/joy/styles/types";
 import CustomAnimation from "../../components/custom/CustomAnimation";
+import { onlyBackgroundSx } from "../../styles/PageSX";
 import About from "./About";
 import Contact from "./Contact";
 import Features from "./Features";
@@ -13,26 +15,18 @@ import Meet from "./Meet";
 
 /** UI for the home page. */
 const HomePage = () => {
+  /** Sx for the home page. */
+  const customSx: SxProps = (theme: Theme) => ({
+    ...onlyBackgroundSx(theme),
+  });
+
   /** UI layout for the home page. */
   return (
-    <Stack
-      id="HomePage"
-      direction="column"
-      gap={10}
-      sx={(theme) => ({
-        margin: 0,
-        [theme.getColorSchemeSelector("light")]: {
-          background: "linear-gradient(to right, #dcdcdc, #ffffff)",
-        },
-        [theme.getColorSchemeSelector("dark")]: {
-          background: "linear-gradient(to right, #010001, #020944)",
-        },
-      })}
-    >
+    <Stack id="HomePage" direction="column" gap={10} sx={customSx}>
       <CustomAnimation child={<Header />} transformAnimation="translateY(-5%)" />
-      <CustomAnimation child={<Features />} />
+      <CustomAnimation child={<Features />} transformAnimation="translateX(-5%)" />
       <CustomAnimation child={<About />} transformAnimation="translateX(-5%)" />
-      <CustomAnimation child={<Meet />} transformAnimation="translateX(5%)" />
+      <CustomAnimation child={<Meet />} transformAnimation="translateX(-5%)" />
       <CustomAnimation child={<Contact />} transformAnimation="translateY(5%)" />
     </Stack>
   );

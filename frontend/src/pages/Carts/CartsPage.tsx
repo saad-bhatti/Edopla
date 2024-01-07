@@ -7,7 +7,7 @@
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import InfoOutlined from "@mui/icons-material/InfoOutlined";
 import { Button, Container, LinearProgress, Stack, Typography } from "@mui/joy";
-import { SxProps } from "@mui/joy/styles/types";
+import { SxProps, Theme } from "@mui/joy/styles/types";
 import { useContext, useEffect, useState } from "react";
 import CartItemCard from "../../components/card/CartItemCard";
 import CustomDropdown from "../../components/custom/CustomDropdown";
@@ -15,17 +15,13 @@ import CustomSearch from "../../components/custom/CustomSearch";
 import CustomSnackbar from "../../components/custom/CustomSnackbar";
 import { CartItem } from "../../models/items/cartItem";
 import * as CartsAPI from "../../network/items/carts_api";
+import { onlyBackgroundSx } from "../../styles/PageSX";
+import { minPageHeight, minPageWidth } from "../../styles/constants";
 import { CartsContext, CartsContextProps } from "../../utils/contexts";
 import * as CartsManipulation from "./CartsManipulation";
 
-/** Props for the carts page. */
-interface CartsPageProps {
-  style: React.CSSProperties;
-  sx: SxProps;
-}
-
 /** UI for the cart page. */
-const CartPage = ({ style, sx }: CartsPageProps) => {
+const CartPage = () => {
   // Retrieve the logged in user's cart from the context
   const { carts, setCarts } = useContext<CartsContextProps | null>(CartsContext) || {};
   // State to track whether the cart is being seperated.
@@ -347,8 +343,16 @@ const CartPage = ({ style, sx }: CartsPageProps) => {
     />
   );
 
+  /** Sx for the carts page. */
+  const customSx: SxProps = (theme: Theme) => ({
+    ...onlyBackgroundSx(theme),
+    py: 5,
+    minWidth: minPageWidth,
+    minHeight: minPageHeight,
+  });
+
   return (
-    <Container id="CartsPage" style={style} sx={sx}>
+    <Container id="CartsPage" sx={customSx}>
       {/* Snackbar. */}
       {snackbar}
 

@@ -7,10 +7,13 @@ import { Container } from "@mui/joy";
 import Box from "@mui/joy/Box";
 import Button from "@mui/joy/Button";
 import Stack from "@mui/joy/Stack";
+import { SxProps, Theme } from "@mui/joy/styles/types";
 import { useContext } from "react";
 import { Link } from "react-router-dom";
-import { LoggedInUserContext, LoggedInUserContextProps } from "../utils/contexts";
 import CustomSearch from "../components/custom/CustomSearch";
+import { onlyBackgroundSx } from "../styles/PageSX";
+import * as Constants from "../styles/constants";
+import { LoggedInUserContext, LoggedInUserContextProps } from "../utils/contexts";
 import ColorSchemeToggle from "./ColorSchemeToggle";
 import { NavBarLoggedInHead, NavBarLoggedInTail } from "./NavBarLoggedInView";
 import { NavBarLoggedOutHead, NavBarLoggedOutTail } from "./NavBarLoggedOutView";
@@ -19,22 +22,16 @@ import { NavBarLoggedOutHead, NavBarLoggedOutTail } from "./NavBarLoggedOutView"
 const NavBar = () => {
   // Retrieve the logged in user from the context
   const { loggedInUser } = useContext<LoggedInUserContextProps | null>(LoggedInUserContext) || {};
+  /** Sx for the navigation bar. */
+  const customSx: SxProps = (theme: Theme) => ({
+    ...onlyBackgroundSx(theme),
+    minWidth: Constants.minPageWidth,
+    maxHeight: Constants.navBarMaxWidth,
+  });
 
   /** UI layout for the custom navigation. */
   return (
-    <Container
-      id="Navbar"
-      style={{ padding: 2 }}
-      sx={(theme) => ({
-        minWidth: "100%",
-        [theme.getColorSchemeSelector("light")]: {
-          background: "linear-gradient(to right, #dcdcdc, #ffffff)",
-        },
-        [theme.getColorSchemeSelector("dark")]: {
-          background: "linear-gradient(to right, #010001, #020944)",
-        },
-      })}
-    >
+    <Container id="Navbar" style={{ padding: 0 }} sx={customSx}>
       {/* Navigation bar head. */}
       <Box
         sx={{

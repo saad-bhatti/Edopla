@@ -6,8 +6,9 @@
 
 import CloseIcon from "@mui/icons-material/Close";
 import InfoOutlined from "@mui/icons-material/InfoOutlined";
+import SentimentVeryDissatisfiedIcon from "@mui/icons-material/SentimentVeryDissatisfied";
 import { Button, Container, LinearProgress, Stack, Typography } from "@mui/joy";
-import { SxProps } from "@mui/joy/styles/types";
+import { SxProps, Theme } from "@mui/joy/styles/types";
 import { useContext, useEffect, useState } from "react";
 import VendorInformationCard from "../../components/card/VendorInformationCard";
 import CustomDropdown from "../../components/custom/CustomDropdown";
@@ -19,18 +20,14 @@ import { Vendor } from "../../models/users/vendor";
 import { getSavedVendors, toggleSavedVendor } from "../../network/users/buyers_api";
 import { getAllVendors } from "../../network/users/vendors_api";
 import { SectionTitleText } from "../../styles/Text";
+import { minPageHeight, minPageWidth } from "../../styles/constants";
 import * as Contexts from "../../utils/contexts";
+import { onlyBackgroundSx } from "../../styles/PageSX";
 import * as BuyerPageHelper from "./BuyerPageHelper";
 import * as VendorListManipulation from "./VendorListManipulation";
 
-/** Props for the buy page. */
-interface BuyPageProps {
-  style: React.CSSProperties;
-  sx: SxProps;
-}
-
 /** UI for the buy page. */
-const BuyPage = ({ style, sx }: BuyPageProps) => {
+const BuyPage = () => {
   // Retrieve the logged in user.
   const { loggedInUser } =
     useContext<Contexts.LoggedInUserContextProps | null>(Contexts.LoggedInUserContext) || {};
@@ -315,20 +312,45 @@ const BuyPage = ({ style, sx }: BuyPageProps) => {
     />
   );
 
+  /** Sx for when a loading error occurs. */
+  const errorSx: SxProps = (theme: Theme) => ({
+    ...onlyBackgroundSx(theme),
+    margin: 0,
+    minHeight: minPageHeight,
+  });
+
+  /** Sx for the buyer page. */
+  const customSx: SxProps = (theme: Theme) => ({
+    ...onlyBackgroundSx(theme),
+    py: 5,
+    minWidth: minPageWidth,
+    minHeight: minPageHeight,
+  });
+
   /** UI layout for the profiles page. */
   return (
-    <Container id="BuyPage" style={style} sx={sx}>
+    <>
       {/* Display for the indicator while menu is loading. */}
       {isLoading && <LinearProgress size="lg" value={28} variant="soft" />}
 
       {/* Display for when the menu fails to load. */}
       {showLoadingError && (
-        <SectionTitleText>Something went wrong. Please try again.</SectionTitleText>
+        <Stack
+          id="ProfilesPage"
+          direction="row"
+          justifyContent="center"
+          gap={5}
+          py={10}
+          sx={errorSx}
+        >
+          <SentimentVeryDissatisfiedIcon sx={{ fontSize: "20vh" }} />
+          <SectionTitleText>Something went wrong. Please try again.</SectionTitleText>
+        </Stack>
       )}
 
       {/* Display each menu item. */}
       {!isLoading && !showLoadingError && (
-        <>
+        <Container id="BuyPage" sx={customSx}>
           {/* Display for the snackbar. */}
           {Snackbar}
 
@@ -346,9 +368,9 @@ const BuyPage = ({ style, sx }: BuyPageProps) => {
             {/** Unsaved vendors section. */}
             {UnsavedCards}
           </Stack>
-        </>
+        </Container>
       )}
-    </Container>
+    </>
   );
 };
 

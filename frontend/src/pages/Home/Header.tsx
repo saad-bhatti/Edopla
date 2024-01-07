@@ -4,6 +4,7 @@
 
 import { Container, Stack } from "@mui/joy";
 import { LargeBodyText, SectionTitleText } from "../../styles/Text";
+import { minPageWidth } from "../../styles/constants";
 
 /** UI for the HomePage's header section. */
 const Header = () => {
@@ -11,7 +12,7 @@ const Header = () => {
     <Container
       id="Header"
       sx={(theme) => ({
-        minWidth: "100vw",
+        minWidth: minPageWidth,
         maxHeight: "80vh",
         borderRadius: "0 0 40% 40%",
         [theme.getColorSchemeSelector("dark")]: {
