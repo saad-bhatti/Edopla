@@ -1,3 +1,7 @@
+/**************************************************************************************************
+ * This file contains the UI for the create buyer section of the sign up page.                    *
+ **************************************************************************************************/
+
 import BadgeIcon from "@mui/icons-material/Badge";
 import InfoOutlined from "@mui/icons-material/InfoOutlined";
 import LocationOnIcon from "@mui/icons-material/LocationOn";

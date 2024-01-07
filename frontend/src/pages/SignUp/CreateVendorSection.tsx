@@ -1,3 +1,7 @@
+/**************************************************************************************************
+ * This file contains the UI for the create vendor section of the sign up page.                   *
+ **************************************************************************************************/
+
 import BadgeIcon from "@mui/icons-material/Badge";
 import CloseIcon from "@mui/icons-material/Close";
 import InfoOutlined from "@mui/icons-material/InfoOutlined";

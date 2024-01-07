@@ -1,4 +1,13 @@
-import { ConflictError, ForbiddenError, UnauthorizedError } from "../errors/http_errors";
+/**************************************************************************************************
+ * This file contains the function to create & send an HTTP request to the backend server.        *
+ **************************************************************************************************/
+
+import {
+  ConflictError,
+  ForbiddenError,
+  InvalidFieldError,
+  UnauthorizedError,
+} from "../errors/http_errors";
 
 /**
  * Function to create & send an HTTP request to the backend server.
@@ -33,6 +42,8 @@ export async function fetchData(
         throw new ForbiddenError(errorMessage);
       case 409:
         throw new ConflictError(errorMessage);
+      case 422:
+        throw new InvalidFieldError(errorMessage);
       default:
         throw new Error(
           "Request failed with status: " + response.status + " and message: " + errorMessage

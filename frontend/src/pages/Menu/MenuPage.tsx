@@ -1,6 +1,13 @@
+/***************************************************************************************************
+ * This file contains the UI for the menu page.                                                    *
+ * The menu page displays all the menu items of a vendor.                                          *
+ * The menu items can be searched, filtered, and sorted.                                           *
+ **************************************************************************************************/
+
 import InfoOutlined from "@mui/icons-material/InfoOutlined";
+import SentimentVeryDissatisfiedIcon from "@mui/icons-material/SentimentVeryDissatisfied";
 import { Container, LinearProgress, Stack } from "@mui/joy";
-import { SxProps } from "@mui/joy/styles/types";
+import { SxProps, Theme } from "@mui/joy/styles/types";
 import { useContext, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import MenuItemCard from "../../components/card/MenuItemCard";
@@ -11,31 +18,19 @@ import CustomSnackbar from "../../components/custom/CustomSnackbar";
 import { displayError } from "../../errors/displayError";
 import { CartItem } from "../../models/items/cartItem";
 import { MenuItem } from "../../models/items/menuItem";
-import { createCart, updateItem } from "../../network/items/carts_api";
+import { createCart, emptyCart, updateItem } from "../../network/items/carts_api";
 import { getMenu } from "../../network/items/menus_api";
+import { onlyBackgroundSx } from "../../styles/PageSX";
+import { SectionTitleText } from "../../styles/Text";
+import { minPageHeight, minPageWidth } from "../../styles/constants";
 import * as Contexts from "../../utils/contexts";
 import * as MenuManipulation from "./MenuManipulation";
 import * as MenuPageHelper from "./MenuPageHelper";
 
-/***************************************************************************************************
- * This file contains the UI for the menu page.                                                    *
- * The menu page displays all the menu items of a vendor.                                          *
- * The menu items can be searched, filtered, and sorted.                                           *
- **************************************************************************************************/
-
-/** Props for the menu page. */
-interface MenuPageProps {
-  style: React.CSSProperties;
-  sx: SxProps;
-}
-
 /** UI for the menu page. */
-const MenuPage = ({ style, sx }: MenuPageProps) => {
+const MenuPage = () => {
   // Retrieve the vendor id from the URL path.
   const { vendorId } = useParams();
-  // Retrieve the logged in user.
-  const { loggedInUser } =
-    useContext<Contexts.LoggedInUserContextProps | null>(Contexts.LoggedInUserContext) || {};
   // Retrieve the logged in user's cart.
   const { carts, setCarts } =
     useContext<Contexts.CartsContextProps | null>(Contexts.CartsContext) || {};
@@ -119,27 +114,24 @@ const MenuPage = ({ style, sx }: MenuPageProps) => {
   );
 
   async function onItemUpdate(menuItem: MenuItem, quantity: number): Promise<void> {
-    // If the user is not logged in
-    if (!loggedInUser) {
-      displayError(new Error("You must be logged in to add items to your cart."));
-      return;
-    }
-    // If the user does not have a buyer profile
-    else if (!loggedInUser._buyer) {
-      displayError(new Error("You must have a buyer profile to add items to your cart."));
-      return;
-    }
-
     // If the user's cart for this vendor already exists
     try {
       if (cart) {
         // Send request to update the cart
         const requestDetails = { item: { item: menuItem._id, quantity: quantity } };
         const updatedCart = await updateItem(cart._id, requestDetails);
-        // Update the cart in the context
-        setCarts!(
-          carts!.map((cartItem) => (cartItem._id === updatedCart._id ? updatedCart : cartItem))
-        );
+
+        // If the resulting cart is empty, remove it from the context
+        if (updatedCart.items.length === 0) {
+          emptyCart(updatedCart._id);
+          setCarts!(carts!.filter((cartItem) => cartItem._id !== updatedCart._id));
+        }
+
+        // Otherwise, update the cart in the context
+        else
+          setCarts!(
+            carts!.map((cartItem) => (cartItem._id === updatedCart._id ? updatedCart : cartItem))
+          );
 
         // Show snackbar to indicate success.
         setSnackbarFormat({
@@ -212,6 +204,21 @@ const MenuPage = ({ style, sx }: MenuPageProps) => {
     />
   );
 
+  /** Sx for when a loading error occurs. */
+  const errorSx: SxProps = (theme: Theme) => ({
+    ...onlyBackgroundSx(theme),
+    margin: 0,
+    minHeight: minPageHeight,
+  });
+
+  /** Sx for the menu page. */
+  const customSx: SxProps = (theme: Theme) => ({
+    ...onlyBackgroundSx(theme),
+    py: 5,
+    minWidth: minPageWidth,
+    minHeight: minPageHeight,
+  });
+
   /** UI layout for the profiles page. */
   return (
     <>
@@ -219,14 +226,24 @@ const MenuPage = ({ style, sx }: MenuPageProps) => {
       {isLoading && <LinearProgress size="lg" value={28} variant="soft" />}
 
       {/* Display for when the menu fails to load. */}
-      {showLoadingError && <p>Something went wrong. Please try again.</p>}
+      {showLoadingError && (
+        <Stack id="MenuPage" direction="row" justifyContent="center" gap={5} py={10} sx={errorSx}>
+          <SentimentVeryDissatisfiedIcon sx={{ fontSize: "20vh" }} />
+          <SectionTitleText>Something went wrong. Please try again.</SectionTitleText>
+        </Stack>
+      )}
 
       {/* Display if no vendor id is provided. */}
-      {!isLoading && !showLoadingError && !vendorId && <h2>No vendor id provided.</h2>}
+      {!isLoading && !showLoadingError && !vendorId && (
+        <Stack id="MenuPage" direction="row" justifyContent="center" gap={5} py={10} sx={errorSx}>
+          <SentimentVeryDissatisfiedIcon sx={{ fontSize: "20vh" }} />
+          <SectionTitleText>No vendor id provided.</SectionTitleText>
+        </Stack>
+      )}
 
       {/* Display each menu item. */}
       {!isLoading && !showLoadingError && vendorId && (
-        <Container id="MenuPage" style={style} sx={sx}>
+        <Container id="MenuPage" sx={customSx}>
           {/* Display for the snackbar. */}
           {snackbar}
 

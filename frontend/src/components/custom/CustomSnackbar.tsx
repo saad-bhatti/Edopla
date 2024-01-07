@@ -1,3 +1,9 @@
+/**************************************************************************************************
+ * This file contains the UI for the custom snackbar component.                                   *
+ * This component is used to create a custom snackbar with the provided content and color.        *
+ * Note: This is a small popup that appears at the bottom of the screen (like a notification).    *
+ **************************************************************************************************/
+
 import CloseIcon from "@mui/icons-material/Close";
 import Snackbar from "@mui/joy/Snackbar";
 import { keyframes } from "@mui/system";

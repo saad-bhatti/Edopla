@@ -1,12 +1,12 @@
-import CustomAutoComplete from "../../components/custom/CustomAutoComplete";
-import CustomSlider from "../../components/custom/CustomSlider";
-import { MenuItem } from "../../models/items/menuItem";
-import * as MenuManipulation from "./MenuManipulation";
-
 /**************************************************************************************************                                                                      *
  * This file contains the helper functions for the menu page.                                      *
  * These helper functions are used to handle search, filter, and sort.                             *
  **************************************************************************************************/
+
+import CustomAutoComplete from "../../components/custom/CustomAutoComplete";
+import CustomSlider from "../../components/custom/CustomSlider";
+import { MenuItem } from "../../models/items/menuItem";
+import * as MenuManipulation from "./MenuManipulation";
 
 //////////////////////////////////////////// SEARCHING /////////////////////////////////////////////
 /**

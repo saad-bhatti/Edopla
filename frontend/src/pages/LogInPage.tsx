@@ -1,3 +1,9 @@
+/**************************************************************************************************
+ * This file contains the UI for the log in page.                                                 *
+ * This page is used to log in to the website, either with an email and password or with a third  *
+ * party account.                                                                                 *
+ **************************************************************************************************/
+
 import EmailIcon from "@mui/icons-material/Email";
 import FacebookIcon from "@mui/icons-material/Facebook";
 import GoogleIcon from "@mui/icons-material/Google";
@@ -23,16 +29,12 @@ import { displayError } from "../errors/displayError";
 import { User } from "../models/users/user";
 import { getCarts } from "../network/items/carts_api";
 import { logIn } from "../network/users/users_api";
+import { simpleSx } from "../styles/PageSX";
+import { minPageHeight } from "../styles/constants";
 import * as Context from "../utils/contexts";
 
-/** Props for the log in page. */
-interface LogInPageProps {
-  style: React.CSSProperties;
-  sx: SxProps;
-}
-
 /** UI for the log in page. */
-const LogInPage = ({ style, sx }: LogInPageProps) => {
+const LogInPage = () => {
   // Variable to navigate to other pages
   const navigate = useNavigate();
   // Get the current color scheme and the function to change it
@@ -127,7 +129,7 @@ const LogInPage = ({ style, sx }: LogInPageProps) => {
       // Show snackbar to indicate failure.
       if (error instanceof Error) {
         setSnackbarFormat({
-          text: error.message.split(":")[2],
+          text: error.message,
           color: "danger",
         });
         setSnackbarVisible(true);
@@ -258,9 +260,15 @@ const LogInPage = ({ style, sx }: LogInPageProps) => {
     />
   );
 
+  /** Sx for the log in page. */
+  const customSx: SxProps = {
+    ...simpleSx,
+    maxHeight: minPageHeight,
+  };
+
   /** UI layout for the login page. */
   return (
-    <Stack id="LoginPage" direction="row" spacing={1} style={style} sx={sx}>
+    <Stack id="LoginPage" direction="row" spacing={1} sx={customSx}>
       {/* Snackbar. */}
       {snackbar}
 

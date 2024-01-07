@@ -1,3 +1,7 @@
+/**************************************************************************************************
+ * This file exports functions to make cart item related HTTP requests to the backend server.     *
+ **************************************************************************************************/
+
 import { CartItem } from "../../models/items/cartItem";
 import { fetchData } from "../../utils/fetchData";
 

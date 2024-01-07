@@ -1,3 +1,9 @@
+/**************************************************************************************************
+ * This file contains the UI for the sign up page.                                                *
+ * This page is used to sign up to the website, either with an email and password or with a third *
+ * party account.                                                                                 *
+ **************************************************************************************************/
+
 import InfoOutlined from "@mui/icons-material/InfoOutlined";
 import { Container, Stack } from "@mui/joy";
 import { useColorScheme } from "@mui/joy/styles";
@@ -5,19 +11,15 @@ import { SxProps } from "@mui/joy/styles/types";
 import { useContext, useState } from "react";
 import CustomSnackbar from "../../components/custom/CustomSnackbar";
 import CustomStepper from "../../components/custom/CustomStepper";
+import { simpleSx } from "../../styles/PageSX";
+import { minPageHeight } from "../../styles/constants";
 import * as Context from "../../utils/contexts";
 import CreateBuyerSection from "./CreateBuyerSection";
 import CreateVendorSection from "./CreateVendorSection";
 import SignUpSection from "./SignUpSection";
 
-/** Props for the sign up page. */
-interface SignUpPageProps {
-  style: React.CSSProperties;
-  sx: SxProps;
-}
-
 /** UI for the sign up page. */
-const SignUpPage = ({ style, sx }: SignUpPageProps) => {
+const SignUpPage = () => {
   // Get the current color scheme and the function to change it
   const { colorScheme } = useColorScheme();
 
@@ -47,7 +49,7 @@ const SignUpPage = ({ style, sx }: SignUpPageProps) => {
       currentStep={currentStep}
       sx={{
         minWidth: "50vw",
-        minHeight: "12vh",
+        minHeight: "10vh",
         outline: "0.5px solid #E0E0E0",
         borderRadius: "6px",
         padding: "1% 0%",
@@ -136,9 +138,15 @@ const SignUpPage = ({ style, sx }: SignUpPageProps) => {
     />
   );
 
+  /** Sx for the log in page. */
+  const customSx: SxProps = {
+    ...simpleSx,
+    maxHeight: minPageHeight,
+  };
+
   /** UI layout for the sign up page. */
   return (
-    <Stack id="SignUpPage" direction="row" spacing={1} style={style} sx={sx}>
+    <Stack id="SignUpPage" direction="row" spacing={1} sx={customSx}>
       {/* Snackbar. */}
       {snackbar}
 

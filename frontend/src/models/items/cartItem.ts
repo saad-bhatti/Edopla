@@ -1,3 +1,7 @@
+/**************************************************************************************************
+ * This file creates the interface for the Cart Item object.                                      *
+ **************************************************************************************************/
+
 import { Vendor } from "../users/vendor";
 import { MenuItem } from "./menuItem";
 
@@ -5,6 +9,6 @@ import { MenuItem } from "./menuItem";
 export interface CartItem {
   _id: string;
   vendorId: Vendor;
-  items: {item: MenuItem, quantity: number}[];
+  items: { item: MenuItem; quantity: number }[];
   savedForLater: boolean;
 }

@@ -1,3 +1,9 @@
+/**************************************************************************************************
+ * This file contains the UI for the cart item card.                                              *
+ * The cart item card allows the buyer to change the quantity of items in their cart.             *
+ * The cart item card is displayed in the cart page.                                              *
+ **************************************************************************************************/
+
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";

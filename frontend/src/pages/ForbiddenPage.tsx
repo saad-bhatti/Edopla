@@ -1,6 +1,6 @@
 /**************************************************************************************************
- * This file contains the UI for the not found page.                                              *
- * This page is used to display a message when a route is not found.                              *
+ * This file contains the UI for the forbidden page.                                              *
+ * This page displays a message when a client lacks the authentication to access a route.         *
  **************************************************************************************************/
 
 import SentimentVeryDissatisfiedIcon from "@mui/icons-material/SentimentVeryDissatisfied";
@@ -10,9 +10,9 @@ import { onlyBackgroundSx } from "../styles/PageSX";
 import { SectionTitleText } from "../styles/Text";
 import { minPageHeight } from "../styles/constants";
 
-/** UI for the not found page. */
+/** UI for the forbidden page. */
 const NotFoundPage = () => {
-  /** Sx for the not found page. */
+  /** Sx for the forbidden page. */
   const customSx: SxProps = (theme: Theme) => ({
     ...onlyBackgroundSx(theme),
     margin: 0,
@@ -20,9 +20,9 @@ const NotFoundPage = () => {
   });
 
   return (
-    <Stack id="NotFoundPage" direction="row" justifyContent="center" gap={5} py={10} sx={customSx}>
+    <Stack id="ForbiddenPage" direction="row" justifyContent="center" gap={5} py={10} sx={customSx}>
       <SentimentVeryDissatisfiedIcon sx={{ fontSize: "20vh" }} />
-      <SectionTitleText>Page not found</SectionTitleText>
+      <SectionTitleText>Forbidden.</SectionTitleText>
     </Stack>
   );
 };

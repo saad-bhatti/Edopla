@@ -1,6 +1,10 @@
+/**************************************************************************************************
+ * This file contains the UI for the about section of the home page.                              *
+ **************************************************************************************************/
+
 import { AspectRatio, Container, Stack } from "@mui/joy";
 import logo from "../../images/logo.png";
-import { LargeBodyText, SectionTitleText } from "./Styling";
+import { LargeBodyText, SectionTitleText } from "../../styles/Text";
 
 /** UI for the HomePage's about section. */
 const About = () => {

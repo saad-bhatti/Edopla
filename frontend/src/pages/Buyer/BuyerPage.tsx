@@ -1,7 +1,14 @@
+/***************************************************************************************************
+ * This file contains the UI for the buy page.                                                     *
+ * The buy page displays the cards of all the vendors.                                             *
+ * The vendors can be searched, filtered, and sorted.                                              *
+ **************************************************************************************************/
+
 import CloseIcon from "@mui/icons-material/Close";
 import InfoOutlined from "@mui/icons-material/InfoOutlined";
+import SentimentVeryDissatisfiedIcon from "@mui/icons-material/SentimentVeryDissatisfied";
 import { Button, Container, LinearProgress, Stack, Typography } from "@mui/joy";
-import { SxProps } from "@mui/joy/styles/types";
+import { SxProps, Theme } from "@mui/joy/styles/types";
 import { useContext, useEffect, useState } from "react";
 import VendorInformationCard from "../../components/card/VendorInformationCard";
 import CustomDropdown from "../../components/custom/CustomDropdown";
@@ -12,24 +19,15 @@ import { displayError } from "../../errors/displayError";
 import { Vendor } from "../../models/users/vendor";
 import { getSavedVendors, toggleSavedVendor } from "../../network/users/buyers_api";
 import { getAllVendors } from "../../network/users/vendors_api";
+import { SectionTitleText } from "../../styles/Text";
+import { minPageHeight, minPageWidth } from "../../styles/constants";
 import * as Contexts from "../../utils/contexts";
-import * as BuyManipulation from "./BuyManipulation";
-import * as BuyPageHelper from "./BuyPageHelper";
-
-/***************************************************************************************************
- * This file contains the UI for the buy page.                                                     *
- * The buy page displays the cards of all the vendors.                                             *
- * The vendors can be searched, filtered, and sorted.                                              *
- **************************************************************************************************/
-
-/** Props for the buy page. */
-interface BuyPageProps {
-  style: React.CSSProperties;
-  sx: SxProps;
-}
+import { onlyBackgroundSx } from "../../styles/PageSX";
+import * as BuyerPageHelper from "./BuyerPageHelper";
+import * as VendorListManipulation from "./VendorListManipulation";
 
 /** UI for the buy page. */
-const BuyPage = ({ style, sx }: BuyPageProps) => {
+const BuyPage = () => {
   // Retrieve the logged in user.
   const { loggedInUser } =
     useContext<Contexts.LoggedInUserContextProps | null>(Contexts.LoggedInUserContext) || {};
@@ -84,7 +82,7 @@ const BuyPage = ({ style, sx }: BuyPageProps) => {
         }
 
         // Prepare the vendor lists
-        const preparedLists: [Vendor[], Vendor[], Vendor[]] = BuyManipulation.prepareLists(
+        const preparedLists: [Vendor[], Vendor[], Vendor[]] = VendorListManipulation.prepareLists(
           activeVendors,
           cartVendors,
           savedVendors
@@ -109,7 +107,10 @@ const BuyPage = ({ style, sx }: BuyPageProps) => {
   /** Function to search the complete vendor list by its name, categories, or price range. */
   function handleVendorSearch(searchValue: string): void {
     setSearchValue(searchValue);
-    const filteredList: Vendor[] = BuyManipulation.handleSearch(completeVendorList, searchValue);
+    const filteredList: Vendor[] = VendorListManipulation.handleSearch(
+      completeVendorList,
+      searchValue
+    );
     if (filteredList.length) setActiveVendorList(filteredList);
     else {
       setSnackbarFormat({
@@ -122,19 +123,19 @@ const BuyPage = ({ style, sx }: BuyPageProps) => {
   }
 
   /** Array containing the categories of the menu. */
-  const cuisineTypes: string[] = BuyManipulation.getCuisineTypes(completeVendorList);
+  const cuisineTypes: string[] = VendorListManipulation.getCuisineTypes(completeVendorList);
   /** State to track the slider values. */
   const [priceRangeFilter, setPriceRangeFilter] = useState<string[]>(["$", "$$$"]);
   /** State to track the cuisine type filter. */
   const [cuisineFilter, setCuisineFilter] = useState<string>("");
   /** Array of filter options. */
-  const filterOptions = BuyPageHelper.generateFilterOptions(
+  const filterOptions = BuyerPageHelper.generateFilterOptions(
     setPriceRangeFilter,
     cuisineTypes,
     setCuisineFilter
   );
   function handleApplyFilter() {
-    const filteredList = BuyManipulation.filterByPriceRangeAndCuisineType(
+    const filteredList = VendorListManipulation.filterByPriceRangeAndCuisineType(
       completeVendorList,
       priceRangeFilter,
       cuisineFilter
@@ -153,7 +154,7 @@ const BuyPage = ({ style, sx }: BuyPageProps) => {
   }
 
   /** Array of functions to execute for each sort option when clicked. */
-  const sortFunctions: (() => void)[] = BuyPageHelper.generateSortFunctions(
+  const sortFunctions: (() => void)[] = BuyerPageHelper.generateSortFunctions(
     activeVendorList,
     setActiveVendorList
   );
@@ -206,7 +207,7 @@ const BuyPage = ({ style, sx }: BuyPageProps) => {
         {/* Dropdown for the sort options. */}
         <CustomDropdown
           label="Sort by"
-          options={BuyManipulation.sortOptions}
+          options={VendorListManipulation.sortOptions}
           onOptionClick={sortFunctions}
           variant="plain"
           color="primary"
@@ -311,18 +312,45 @@ const BuyPage = ({ style, sx }: BuyPageProps) => {
     />
   );
 
+  /** Sx for when a loading error occurs. */
+  const errorSx: SxProps = (theme: Theme) => ({
+    ...onlyBackgroundSx(theme),
+    margin: 0,
+    minHeight: minPageHeight,
+  });
+
+  /** Sx for the buyer page. */
+  const customSx: SxProps = (theme: Theme) => ({
+    ...onlyBackgroundSx(theme),
+    py: 5,
+    minWidth: minPageWidth,
+    minHeight: minPageHeight,
+  });
+
   /** UI layout for the profiles page. */
   return (
-    <Container id="BuyPage" style={style} sx={sx}>
+    <>
       {/* Display for the indicator while menu is loading. */}
       {isLoading && <LinearProgress size="lg" value={28} variant="soft" />}
 
       {/* Display for when the menu fails to load. */}
-      {showLoadingError && <p>Something went wrong. Please try again.</p>}
+      {showLoadingError && (
+        <Stack
+          id="ProfilesPage"
+          direction="row"
+          justifyContent="center"
+          gap={5}
+          py={10}
+          sx={errorSx}
+        >
+          <SentimentVeryDissatisfiedIcon sx={{ fontSize: "20vh" }} />
+          <SectionTitleText>Something went wrong. Please try again.</SectionTitleText>
+        </Stack>
+      )}
 
       {/* Display each menu item. */}
       {!isLoading && !showLoadingError && (
-        <>
+        <Container id="BuyPage" sx={customSx}>
           {/* Display for the snackbar. */}
           {Snackbar}
 
@@ -340,9 +368,9 @@ const BuyPage = ({ style, sx }: BuyPageProps) => {
             {/** Unsaved vendors section. */}
             {UnsavedCards}
           </Stack>
-        </>
+        </Container>
       )}
-    </Container>
+    </>
   );
 };
 

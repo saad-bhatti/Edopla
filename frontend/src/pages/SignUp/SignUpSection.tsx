@@ -1,3 +1,7 @@
+/**************************************************************************************************
+ * This file contains the UI for the sign up section of the sign up page.                         *
+ **************************************************************************************************/
+
 import EmailIcon from "@mui/icons-material/Email";
 import FacebookIcon from "@mui/icons-material/Facebook";
 import GoogleIcon from "@mui/icons-material/Google";

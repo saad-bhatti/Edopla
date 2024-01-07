@@ -1,6 +1,10 @@
+/**************************************************************************************************
+ * This file contains the UI for the meet section of the home page.                               *
+ **************************************************************************************************/
+
 import { AspectRatio, Container, Stack } from "@mui/joy";
 import developerImg from "../../images/developer.jpg";
-import { LargeBodyText, SectionTitleText } from "./Styling";
+import { LargeBodyText, SectionTitleText } from "../../styles/Text";
 
 /** UI for the HomePage's meet section. */
 const Meet = () => {

@@ -1,5 +1,11 @@
-import { Container, LinearProgress, Stack, Typography } from "@mui/joy";
-import { SxProps } from "@mui/joy/styles/types";
+/**************************************************************************************************
+ * This file contains the UI for the profiles page.                                               *
+ * This page is used to display and change the user, buyer, and vendor profile information.       *
+ **************************************************************************************************/
+
+import SentimentVeryDissatisfiedIcon from "@mui/icons-material/SentimentVeryDissatisfied";
+import { Container, LinearProgress, Stack } from "@mui/joy";
+import { SxProps, Theme } from "@mui/joy/styles/types";
 import { useContext, useEffect, useState } from "react";
 import BuyerProfileCard from "../components/card/BuyerProfileCard";
 import UserProfileCard from "../components/card/UserProfileCard";
@@ -10,16 +16,13 @@ import { Buyer } from "../models/users/buyer";
 import { Vendor } from "../models/users/vendor";
 import { getBuyer } from "../network/users/buyers_api";
 import { getVendor } from "../network/users/vendors_api";
+import { onlyBackgroundSx } from "../styles/PageSX";
+import { SectionTitleText } from "../styles/Text";
+import { minPageHeight, minPageWidth } from "../styles/constants";
 import { LoggedInUserContext, LoggedInUserContextProps } from "../utils/contexts";
 
-/** Props for the profiles page. */
-interface ProfilesPageProps {
-  style: React.CSSProperties;
-  sx: SxProps;
-}
-
 /** UI for the profiles page, depending on user's login status. */
-const ProfilesPage = ({ style, sx }: ProfilesPageProps) => {
+const ProfilesPage = () => {
   // Retrieve the logged in user from the context
   const { loggedInUser } = useContext<LoggedInUserContextProps | null>(LoggedInUserContext) || {};
   // State to track whether the page data is being loaded.
@@ -59,6 +62,21 @@ const ProfilesPage = ({ style, sx }: ProfilesPageProps) => {
     loadProfiles();
   }, [loggedInUser]);
 
+  /** Sx for when a loading error occurs. */
+  const errorSx: SxProps = (theme: Theme) => ({
+    ...onlyBackgroundSx(theme),
+    margin: 0,
+    minHeight: minPageHeight,
+  });
+
+  /** Sx for the profiles page. */
+  const customSx: SxProps = (theme: Theme) => ({
+    ...onlyBackgroundSx(theme),
+    py: 5,
+    minWidth: minPageWidth,
+    minHeight: minPageHeight,
+  });
+
   return (
     <>
       {/* Display for the indicator while vendors are loading. */}
@@ -66,21 +84,22 @@ const ProfilesPage = ({ style, sx }: ProfilesPageProps) => {
 
       {/* Display for when the profiles fail to load. */}
       {showLoadingError && (
-        <Stack alignItems="center">
-          <Typography level="h3">Something went wrong. Please try again.</Typography>
-        </Stack>
-      )}
-
-      {/* Display if the user is not logged in. */}
-      {!isLoading && !showLoadingError && !loggedInUser && (
-        <Stack alignItems="center">
-          <Typography level="h3">Please sign up or log in to see profile details.</Typography>
+        <Stack
+          id="ProfilesPage"
+          direction="row"
+          justifyContent="center"
+          gap={5}
+          py={10}
+          sx={errorSx}
+        >
+          <SentimentVeryDissatisfiedIcon sx={{ fontSize: "20vh" }} />
+          <SectionTitleText>Something went wrong. Please try again.</SectionTitleText>
         </Stack>
       )}
 
       {/* Display each profile's information. */}
       {!isLoading && !showLoadingError && loggedInUser && (
-        <Container id="ProfilesPage" style={style} sx={sx}>
+        <Container id="ProfilesPage" sx={customSx}>
           {/* Tabs for the profile page. */}
           <CustomTabs
             tabs={[

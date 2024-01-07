@@ -1,3 +1,10 @@
+/**************************************************************************************************
+ * This file contains the UI for the vendor information card.                                     *
+ * The vendor information card allows the buyer to view the vendor's information, toggle the      *
+ * vendor's saved status, and see the vendor's menu.                                              *
+ * The vendor information card is displayed in the buyer page.                                    *
+ **************************************************************************************************/
+
 import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
 import BookmarkIcon from "@mui/icons-material/Bookmark";
 import { Button } from "@mui/joy";

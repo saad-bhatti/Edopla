@@ -1,9 +1,9 @@
-import { Vendor } from "../../models/users/vendor";
-
 /**************************************************************************************************                                                                      *
  * This file contains the manipulation options for all vendors.                                   *
  * These manipulation options including searching, filtering, and sorting.                        *
  **************************************************************************************************/
+
+import { Vendor } from "../../models/users/vendor";
 
 /////////////////////////////////////////////// GENERAL ////////////////////////////////////////////
 /**

@@ -1,10 +1,16 @@
+/**************************************************************************************************
+ * This file contains the UI for the entire application.                                          *
+ * This file tracks the logged in user & their cart and provides the context.                     *
+ * This file creates the navigation bar and the routes for the application.                       *
+ **************************************************************************************************/
+
 import Container from "@mui/joy/Container";
 import CssBaseline from "@mui/joy/CssBaseline";
 import { CssVarsProvider } from "@mui/joy/styles";
 import { useEffect, useState } from "react";
 import { BrowserRouter } from "react-router-dom";
-import AppRoutes from "./components/navigation/AppRoutes";
-import NavBar from "./components/navigation/NavBar";
+import AppRoutes from "./routes/AppRoutes";
+import NavBar from "./navigation/NavBar";
 import { displayError } from "./errors/displayError";
 import { CartItem } from "./models/items/cartItem";
 import { User } from "./models/users/user";

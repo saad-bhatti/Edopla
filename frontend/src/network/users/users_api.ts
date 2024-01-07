@@ -1,3 +1,7 @@
+/**************************************************************************************************
+ * This file exports functions to make user profile related HTTP requests to the backend server.  *
+ **************************************************************************************************/
+
 import { User } from "../../models/users/user";
 import { fetchData } from "../../utils/fetchData";
 

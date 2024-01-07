@@ -1,7 +1,13 @@
+/**************************************************************************************************
+ * This file contains the UI for the custom counter component.                                    *
+ * This component is used to create a counter that can be used to increment or decrement a value  *
+ * or to set a value directly.
+ **************************************************************************************************/
+
 import Input from "@mui/joy/Input";
 import Stack from "@mui/joy/Stack";
-import { useState } from "react";
 import { SxProps } from "@mui/joy/styles/types";
+import { useState } from "react";
 
 /** Props of the custom counter component. */
 interface CustomCounterProps {

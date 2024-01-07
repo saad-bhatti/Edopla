@@ -1,3 +1,8 @@
+/**************************************************************************************************
+ * This file contains the contexts used in the application.                                       * 
+ * The current contexts are for the logged-in user and the cart.                                  *
+ **************************************************************************************************/
+
 import { createContext } from "react";
 import { CartItem } from "../models/items/cartItem";
 import { User } from "../models/users/user";

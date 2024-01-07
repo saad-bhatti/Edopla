@@ -1,3 +1,9 @@
+/**************************************************************************************************
+ * This file contains the UI for the custom tabs component.                                       *
+ * This component is used to create a tab panel with the provided tabs and panels.                *
+ * The tabs are displayed on the left side of the panel.                                          *
+ **************************************************************************************************/
+
 import { TabPanel } from "@mui/joy";
 import Tab, { tabClasses } from "@mui/joy/Tab";
 import TabList from "@mui/joy/TabList";

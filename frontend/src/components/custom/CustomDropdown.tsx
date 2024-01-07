@@ -1,3 +1,9 @@
+/**************************************************************************************************
+ * This file contains the UI for the custom dropdown component.                                   *
+ * This component is used to create a dropdown with the provided options that execute a specific  *
+ * function when clicked.                                                                         *
+ **************************************************************************************************/
+
 import ArrowDropDown from "@mui/icons-material/ArrowDropDown";
 import Dropdown from "@mui/joy/Dropdown";
 import Menu from "@mui/joy/Menu";
