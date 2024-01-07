@@ -1,6 +1,7 @@
 import CloseIcon from "@mui/icons-material/Close";
 import InfoOutlined from "@mui/icons-material/InfoOutlined";
 import { Button, Container, LinearProgress, Stack, Typography } from "@mui/joy";
+import { SxProps } from "@mui/joy/styles/types";
 import { useContext, useEffect, useState } from "react";
 import VendorInformationCard from "../../components/card/VendorInformationCard";
 import CustomDropdown from "../../components/custom/CustomDropdown";
@@ -21,8 +22,14 @@ import * as BuyPageHelper from "./BuyPageHelper";
  * The vendors can be searched, filtered, and sorted.                                              *
  **************************************************************************************************/
 
+/** Props for the buy page. */
+interface BuyPageProps {
+  style: React.CSSProperties;
+  sx: SxProps;
+}
+
 /** UI for the buy page. */
-const BuyPage = () => {
+const BuyPage = ({ style, sx }: BuyPageProps) => {
   // Retrieve the logged in user.
   const { loggedInUser } =
     useContext<Contexts.LoggedInUserContextProps | null>(Contexts.LoggedInUserContext) || {};
@@ -306,7 +313,7 @@ const BuyPage = () => {
 
   /** UI layout for the profiles page. */
   return (
-    <Container id="BuyPage">
+    <Container id="BuyPage" style={style} sx={sx}>
       {/* Display for the indicator while menu is loading. */}
       {isLoading && <LinearProgress size="lg" value={28} variant="soft" />}
 

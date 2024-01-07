@@ -1,6 +1,7 @@
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import InfoOutlined from "@mui/icons-material/InfoOutlined";
-import { Button, LinearProgress, Stack, Typography } from "@mui/joy";
+import { Button, Container, LinearProgress, Stack, Typography } from "@mui/joy";
+import { SxProps } from "@mui/joy/styles/types";
 import { useContext, useEffect, useState } from "react";
 import CartItemCard from "../../components/card/CartItemCard";
 import CustomDropdown from "../../components/custom/CustomDropdown";
@@ -17,8 +18,14 @@ import * as CartsManipulation from "./CartsManipulation";
  * The carts items can be searched and sorted.                                                     *
  **************************************************************************************************/
 
+/** Props for the carts page. */
+interface CartsPageProps {
+  style: React.CSSProperties;
+  sx: SxProps;
+}
+
 /** UI for the cart page. */
-const CartPage = () => {
+const CartPage = ({ style, sx }: CartsPageProps) => {
   // Retrieve the logged in user's cart from the context
   const { carts, setCarts } = useContext<CartsContextProps | null>(CartsContext) || {};
   // State to track whether the cart is being seperated.
@@ -341,7 +348,7 @@ const CartPage = () => {
   );
 
   return (
-    <>
+    <Container id="CartsPage" style={style} sx={sx}>
       {/* Snackbar. */}
       {snackbar}
 
@@ -406,7 +413,7 @@ const CartPage = () => {
           {laterCartsStack}
         </>
       )}
-    </>
+    </Container>
   );
 };
 

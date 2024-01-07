@@ -1,4 +1,5 @@
-import { LinearProgress, Stack, Typography } from "@mui/joy";
+import { Container, LinearProgress, Stack, Typography } from "@mui/joy";
+import { SxProps } from "@mui/joy/styles/types";
 import { useContext, useEffect, useState } from "react";
 import BuyerProfileCard from "../components/card/BuyerProfileCard";
 import UserProfileCard from "../components/card/UserProfileCard";
@@ -11,8 +12,14 @@ import { getBuyer } from "../network/users/buyers_api";
 import { getVendor } from "../network/users/vendors_api";
 import { LoggedInUserContext, LoggedInUserContextProps } from "../utils/contexts";
 
+/** Props for the profiles page. */
+interface ProfilesPageProps {
+  style: React.CSSProperties;
+  sx: SxProps;
+}
+
 /** UI for the profiles page, depending on user's login status. */
-const ProfilesPage = () => {
+const ProfilesPage = ({ style, sx }: ProfilesPageProps) => {
   // Retrieve the logged in user from the context
   const { loggedInUser } = useContext<LoggedInUserContextProps | null>(LoggedInUserContext) || {};
   // State to track whether the page data is being loaded.
@@ -73,7 +80,7 @@ const ProfilesPage = () => {
 
       {/* Display each profile's information. */}
       {!isLoading && !showLoadingError && loggedInUser && (
-        <>
+        <Container id="ProfilesPage" style={style} sx={sx}>
           {/* Tabs for the profile page. */}
           <CustomTabs
             tabs={[
@@ -95,7 +102,7 @@ const ProfilesPage = () => {
             ]}
             sx={{ marginBottom: "10px" }}
           />
-        </>
+        </Container>
       )}
     </>
   );

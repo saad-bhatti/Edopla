@@ -1,6 +1,7 @@
 import InfoOutlined from "@mui/icons-material/InfoOutlined";
 import { Container, Stack } from "@mui/joy";
 import { useColorScheme } from "@mui/joy/styles";
+import { SxProps } from "@mui/joy/styles/types";
 import { useContext, useState } from "react";
 import CustomSnackbar from "../../components/custom/CustomSnackbar";
 import CustomStepper from "../../components/custom/CustomStepper";
@@ -9,8 +10,14 @@ import CreateBuyerSection from "./CreateBuyerSection";
 import CreateVendorSection from "./CreateVendorSection";
 import SignUpSection from "./SignUpSection";
 
+/** Props for the sign up page. */
+interface SignUpPageProps {
+  style: React.CSSProperties;
+  sx: SxProps;
+}
+
 /** UI for the sign up page. */
-const SignUpPage = () => {
+const SignUpPage = ({ style, sx }: SignUpPageProps) => {
   // Get the current color scheme and the function to change it
   const { colorScheme } = useColorScheme();
 
@@ -131,7 +138,7 @@ const SignUpPage = () => {
 
   /** UI layout for the sign up page. */
   return (
-    <Stack id="SignUpPage" direction="row" spacing={1}>
+    <Stack id="SignUpPage" direction="row" spacing={1} style={style} sx={sx}>
       {/* Snackbar. */}
       {snackbar}
 

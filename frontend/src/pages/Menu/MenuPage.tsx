@@ -1,10 +1,13 @@
-import { LinearProgress, Stack } from "@mui/joy";
+import InfoOutlined from "@mui/icons-material/InfoOutlined";
+import { Container, LinearProgress, Stack } from "@mui/joy";
+import { SxProps } from "@mui/joy/styles/types";
 import { useContext, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import MenuItemCard from "../../components/card/MenuItemCard";
 import CustomDropdown from "../../components/custom/CustomDropdown";
 import CustomFilter from "../../components/custom/CustomFilter";
 import CustomSearch from "../../components/custom/CustomSearch";
+import CustomSnackbar from "../../components/custom/CustomSnackbar";
 import { displayError } from "../../errors/displayError";
 import { CartItem } from "../../models/items/cartItem";
 import { MenuItem } from "../../models/items/menuItem";
@@ -13,8 +16,6 @@ import { getMenu } from "../../network/items/menus_api";
 import * as Contexts from "../../utils/contexts";
 import * as MenuManipulation from "./MenuManipulation";
 import * as MenuPageHelper from "./MenuPageHelper";
-import CustomSnackbar from "../../components/custom/CustomSnackbar";
-import InfoOutlined from "@mui/icons-material/InfoOutlined";
 
 /***************************************************************************************************
  * This file contains the UI for the menu page.                                                    *
@@ -22,8 +23,14 @@ import InfoOutlined from "@mui/icons-material/InfoOutlined";
  * The menu items can be searched, filtered, and sorted.                                           *
  **************************************************************************************************/
 
+/** Props for the menu page. */
+interface MenuPageProps {
+  style: React.CSSProperties;
+  sx: SxProps;
+}
+
 /** UI for the menu page. */
-const MenuPage = () => {
+const MenuPage = ({ style, sx }: MenuPageProps) => {
   // Retrieve the vendor id from the URL path.
   const { vendorId } = useParams();
   // Retrieve the logged in user.
@@ -219,7 +226,7 @@ const MenuPage = () => {
 
       {/* Display each menu item. */}
       {!isLoading && !showLoadingError && vendorId && (
-        <>
+        <Container id="MenuPage" style={style} sx={sx}>
           {/* Display for the snackbar. */}
           {snackbar}
 
@@ -264,7 +271,7 @@ const MenuPage = () => {
 
           {/* Display for the menu items. */}
           {menuItemsStack}
-        </>
+        </Container>
       )}
     </>
   );
