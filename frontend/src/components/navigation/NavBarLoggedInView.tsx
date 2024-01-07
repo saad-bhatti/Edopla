@@ -10,6 +10,7 @@ import {
   MenuButton,
   MenuItem,
   Typography,
+  Stack,
 } from "@mui/joy";
 import Button from "@mui/joy/Button";
 import { useContext, useState } from "react";
@@ -17,6 +18,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { logout } from "../../network/users/users_api";
 import * as Context from "../../utils/contexts";
 import CustomSnackbar from "../custom/CustomSnackbar";
+import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import Badge from "@mui/joy/Badge";
 
 /** UI component for the logged in view of the navigation bar head. */
 export const NavBarLoggedInHead = () => {
@@ -105,7 +108,8 @@ export const NavBarLoggedInTail = () => {
   const { loggedInUser, setLoggedInUser } =
     useContext<Context.LoggedInUserContextProps | null>(Context.LoggedInUserContext) || {};
   // Retrieve the set cart function from the context
-  const { setCarts } = useContext<Context.CartsContextProps | null>(Context.CartsContext) || {};
+  const { carts, setCarts } =
+    useContext<Context.CartsContextProps | null>(Context.CartsContext) || {};
   // State to track whether the dropdown menu is visible.
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
 
@@ -153,6 +157,17 @@ export const NavBarLoggedInTail = () => {
     }
   }
 
+  /** UI layout for the cart button. */
+  const CartButton = (
+    <Link to="/carts">
+      <IconButton variant="plain" color="neutral" size="sm" sx={{ alignSelf: "center" }}>
+        <Badge badgeContent={carts?.length} size="sm">
+          <ShoppingCartIcon sx={{ fontSize: "large" }} />
+        </Badge>
+      </IconButton>
+    </Link>
+  );
+
   /** UI layout for the dropdown menu. */
   const DropDownMenu = (
     <Menu
@@ -194,29 +209,40 @@ export const NavBarLoggedInTail = () => {
       {/* Snackbar. */}
       {snackbar}
 
-      <Dropdown>
-        {/* Profile button. */}
-        <MenuButton
-          variant="plain"
-          size="sm"
-          sx={{ maxWidth: "32px", maxHeight: "32px", borderRadius: "9999999px" }}
-          onClick={() => {
-            setIsDropdownVisible(true);
-          }}
-        >
-          <IconButton
-            variant="plain"
-            color="neutral"
-            size="lg"
-            sx={{ alignSelf: "center", fontSize: "large" }}
-          >
-            <DensityMediumIcon />
-          </IconButton>
-        </MenuButton>
+      <Stack
+        direction="row"
+        alignItems="center"
+        spacing={1}
+        sx={{ display: { xs: "none", sm: "flex" } }}
+      >
+        {/* Cart button. */}
+        {CartButton}
 
         {/* Dropdown menu. */}
-        {isDropdownVisible && DropDownMenu}
-      </Dropdown>
+        <Dropdown>
+          {/* Profile button. */}
+          <MenuButton
+            variant="plain"
+            size="sm"
+            sx={{ maxWidth: "32px", maxHeight: "32px", borderRadius: "9999999px" }}
+            onClick={() => {
+              setIsDropdownVisible(true);
+            }}
+          >
+            <IconButton
+              variant="plain"
+              color="neutral"
+              size="lg"
+              sx={{ alignSelf: "center", fontSize: "large" }}
+            >
+              <DensityMediumIcon />
+            </IconButton>
+          </MenuButton>
+
+          {/* Dropdown menu. */}
+          {isDropdownVisible && DropDownMenu}
+        </Dropdown>
+      </Stack>
     </div>
   );
 };

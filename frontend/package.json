@@ -21,14 +21,16 @@
     "react-dom": "^18.2.0",
     "react-hook-form": "^7.46.2",
     "react-icons": "^4.11.0",
+    "react-intersection-observer": "^9.5.3",
     "react-router-dom": "^6.16.0",
     "react-scripts": "5.0.1",
+    "react-spring": "^9.7.3",
     "typescript": "^4.9.5",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
     "start": "REACT_APP_DEBUG=$DEBUG react-scripts start",
-    "build": "react-scripts build",
+    "build": "ts-node webpack.config.ts && react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
@@ -51,6 +53,7 @@
     ]
   },
   "devDependencies": {
-    "@babel/plugin-proposal-private-property-in-object": "^7.16.7"
+    "@babel/plugin-proposal-private-property-in-object": "^7.16.7",
+    "ts-node": "^10.9.2"
   }
 }

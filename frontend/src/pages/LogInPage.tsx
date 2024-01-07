@@ -14,6 +14,7 @@ import {
   Typography,
 } from "@mui/joy";
 import { useColorScheme } from "@mui/joy/styles";
+import { SxProps } from "@mui/joy/styles/types";
 import { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import CustomInput from "../components/custom/CustomInput";
@@ -24,8 +25,14 @@ import { getCarts } from "../network/items/carts_api";
 import { logIn } from "../network/users/users_api";
 import * as Context from "../utils/contexts";
 
+/** Props for the log in page. */
+interface LogInPageProps {
+  style: React.CSSProperties;
+  sx: SxProps;
+}
+
 /** UI for the log in page. */
-const LogInPage = () => {
+const LogInPage = ({ style, sx }: LogInPageProps) => {
   // Variable to navigate to other pages
   const navigate = useNavigate();
   // Get the current color scheme and the function to change it
@@ -253,7 +260,7 @@ const LogInPage = () => {
 
   /** UI layout for the login page. */
   return (
-    <Stack id="LoginPage" direction="row" spacing={1}>
+    <Stack id="LoginPage" direction="row" spacing={1} style={style} sx={sx}>
       {/* Snackbar. */}
       {snackbar}
 
