@@ -129,7 +129,7 @@ const LogInPage = () => {
       // Show snackbar to indicate failure.
       if (error instanceof Error) {
         setSnackbarFormat({
-          text: error.message.split(":")[2],
+          text: error.message,
           color: "danger",
         });
         setSnackbarVisible(true);

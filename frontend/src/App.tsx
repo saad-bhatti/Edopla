@@ -9,7 +9,7 @@ import CssBaseline from "@mui/joy/CssBaseline";
 import { CssVarsProvider } from "@mui/joy/styles";
 import { useEffect, useState } from "react";
 import { BrowserRouter } from "react-router-dom";
-import AppRoutes from "./AppRoutes";
+import AppRoutes from "./routes/AppRoutes";
 import NavBar from "./navigation/NavBar";
 import { displayError } from "./errors/displayError";
 import { CartItem } from "./models/items/cartItem";

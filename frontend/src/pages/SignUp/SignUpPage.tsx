@@ -49,7 +49,7 @@ const SignUpPage = () => {
       currentStep={currentStep}
       sx={{
         minWidth: "50vw",
-        minHeight: "14vh",
+        minHeight: "10vh",
         outline: "0.5px solid #E0E0E0",
         borderRadius: "6px",
         padding: "1% 0%",
