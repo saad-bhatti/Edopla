@@ -32,6 +32,8 @@ const SignUpPage = () => {
   const [currentStep, setCurrentStep] = useState<number>(0);
   // State to control the display of the snackbar.
   const [snackbarVisible, setSnackbarVisible] = useState<boolean>(false);
+  // State to track whether the client is a buyer or a vendor.
+  const [isBuyer, setIsBuyer] = useState<boolean>(true);
   // State to track the text and color of the snackbar.
   type possibleColors = "primary" | "neutral" | "danger" | "success" | "warning";
   const [snackbarFormat, setSnackbarFormat] = useState<{
@@ -45,11 +47,10 @@ const SignUpPage = () => {
   /** UI layout for the custom stepper. */
   const customStepper = (
     <CustomStepper
-      labels={["User Profile", "Buyer Profile", "Vendor Profile"]}
+      labels={["Sign Up", "Create Profile"]}
       currentStep={currentStep}
       sx={{
         minWidth: "50vw",
-        minHeight: "10vh",
         outline: "0.5px solid #E0E0E0",
         borderRadius: "6px",
         padding: "1% 0%",
@@ -61,6 +62,7 @@ const SignUpPage = () => {
   const signUpSection = (
     <SignUpSection
       setLoggedInUser={setLoggedInUser!}
+      setIsBuyer={setIsBuyer}
       setCarts={setCarts!}
       setStep={setCurrentStep}
       setSnackbarFormat={setSnackbarFormat}
@@ -72,7 +74,6 @@ const SignUpPage = () => {
   const createBuyerSection = (
     <CreateBuyerSection
       setLoggedInUser={setLoggedInUser!}
-      setStep={setCurrentStep}
       setSnackbarFormat={setSnackbarFormat}
       setSnackbarVisible={setSnackbarVisible}
     />
@@ -97,10 +98,10 @@ const SignUpPage = () => {
       {currentStep === 0 && signUpSection}
 
       {/* Buyer profile section. */}
-      {currentStep === 1 && createBuyerSection}
+      {currentStep === 1 && isBuyer && createBuyerSection}
 
       {/* Vendor profile section. */}
-      {currentStep === 2 && createVendorSection}
+      {currentStep === 1 && !isBuyer && createVendorSection}
     </Stack>
   );
 

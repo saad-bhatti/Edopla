@@ -13,11 +13,11 @@ import { displayError } from "../../errors/displayError";
 import { Buyer } from "../../models/users/buyer";
 import { User } from "../../models/users/user";
 import { createBuyer } from "../../network/users/buyers_api";
+import { useNavigate } from "react-router-dom";
 
 /** Props of the buyer profile section. */
 interface CreateBuyerSectionProps {
   setLoggedInUser: React.Dispatch<React.SetStateAction<User | null>>;
-  setStep: React.Dispatch<React.SetStateAction<number>>;
   setSnackbarFormat: React.Dispatch<
     React.SetStateAction<{
       text: string;
@@ -30,10 +30,11 @@ interface CreateBuyerSectionProps {
 /** UI for the create buyer section. */
 const CreateBuyerSection = ({
   setLoggedInUser,
-  setStep,
   setSnackbarFormat,
   setSnackbarVisible,
 }: CreateBuyerSectionProps) => {
+  // Variable to navigate to other pages
+  const navigate = useNavigate();
   // State to track the new buyer name input value.
   const [buyerName, setBuyerName] = useState<string>("");
   // State to track the new address input value.
@@ -76,8 +77,9 @@ const CreateBuyerSection = ({
       });
       setSnackbarVisible(true);
 
-      // Go to the next step.
-      setStep((prevStep) => prevStep + 1);
+      // Wait for 3 seconds and then navigate to the home page.
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+      navigate("/");
     } catch (error) {
       if (error instanceof Error) {
         setSnackbarFormat({

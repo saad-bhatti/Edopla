@@ -17,6 +17,8 @@ import { User } from "./models/users/user";
 import { getCarts } from "./network/items/carts_api";
 import * as UsersAPI from "./network/users/users_api";
 import { CartsContext, LoggedInUserContext } from "./utils/contexts";
+import { onlyBackgroundSx } from "./styles/PageSX";
+import { SxProps, Theme } from "@mui/joy/styles/types";
 
 function App() {
   // State to track the logged in user
@@ -38,13 +40,20 @@ function App() {
     fetchLoggedInUser();
   }, []);
 
+  
+  /** Sx for the application. */
+  const customSx: SxProps = (theme: Theme) => ({
+    ...onlyBackgroundSx(theme),
+    minWidth: "100%",
+  });
+
   return (
     <LoggedInUserContext.Provider value={{ loggedInUser, setLoggedInUser }}>
       <CartsContext.Provider value={{ carts, setCarts }}>
         <CssVarsProvider defaultMode="system">
           <CssBaseline />
           <BrowserRouter>
-            <Container id="App" style={{ padding: 0, margin: 0 }} sx={{ minWidth: "100%" }}>
+            <Container id="App" style={{ padding: 0, margin: 0 }} sx={customSx}>
               {/* Display for the navigation bar */}
               <NavBar />
 
