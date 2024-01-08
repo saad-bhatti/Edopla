@@ -14,8 +14,7 @@ import usersRoutes from "./routes/users/users";
 import vendorsRoutes from "./routes/users/vendors";
 import env from "./util/validateEnv";
 
-// Get necessary flags from the command line
-const isTest = process.argv[2].split("=")[1] === "test";
+// Get necessary flag from the command line
 const isDebug = process.argv[3].split("=")[1] === "true";
 
 // Initialize the app
@@ -28,16 +27,14 @@ app.use(morgan("dev"));
 app.use(express.json());
 
 // Add middleware to enable CORS
-!isTest
-  ? app.use(
-      cors({
-        origin: env.FRONTEND_URL,
-        credentials: true,
-        methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-        allowedHeaders: ["Content-Type", "Authorization"],
-      })
-    )
-  : app.use(cors());
+app.use(
+  cors({
+    origin: env.FRONTEND_URL,
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
 
 // Add middleware to set-up & handle sessions
 app.use(
