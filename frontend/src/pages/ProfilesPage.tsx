@@ -70,12 +70,11 @@ const ProfilesPage = () => {
   });
 
   /** Sx for the profiles page. */
-  const customSx: SxProps = (theme: Theme) => ({
-    ...onlyBackgroundSx(theme),
+  const customSx: SxProps = {
     py: 5,
     minWidth: minPageWidth,
     minHeight: minPageHeight,
-  });
+  };
 
   return (
     <>

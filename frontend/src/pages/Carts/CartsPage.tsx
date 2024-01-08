@@ -7,7 +7,7 @@
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import InfoOutlined from "@mui/icons-material/InfoOutlined";
 import { Button, Container, LinearProgress, Stack, Typography } from "@mui/joy";
-import { SxProps, Theme } from "@mui/joy/styles/types";
+import { SxProps } from "@mui/joy/styles/types";
 import { useContext, useEffect, useState } from "react";
 import CartItemCard from "../../components/card/CartItemCard";
 import CustomDropdown from "../../components/custom/CustomDropdown";
@@ -15,7 +15,6 @@ import CustomSearch from "../../components/custom/CustomSearch";
 import CustomSnackbar from "../../components/custom/CustomSnackbar";
 import { CartItem } from "../../models/items/cartItem";
 import * as CartsAPI from "../../network/items/carts_api";
-import { onlyBackgroundSx } from "../../styles/PageSX";
 import { minPageHeight, minPageWidth } from "../../styles/constants";
 import { CartsContext, CartsContextProps } from "../../utils/contexts";
 import * as CartsManipulation from "./CartsManipulation";
@@ -344,12 +343,11 @@ const CartPage = () => {
   );
 
   /** Sx for the carts page. */
-  const customSx: SxProps = (theme: Theme) => ({
-    ...onlyBackgroundSx(theme),
+  const customSx: SxProps = {
     py: 5,
     minWidth: minPageWidth,
     minHeight: minPageHeight,
-  });
+  };
 
   return (
     <Container id="CartsPage" sx={customSx}>

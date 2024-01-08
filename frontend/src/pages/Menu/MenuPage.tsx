@@ -7,7 +7,7 @@
 import InfoOutlined from "@mui/icons-material/InfoOutlined";
 import SentimentVeryDissatisfiedIcon from "@mui/icons-material/SentimentVeryDissatisfied";
 import { Container, LinearProgress, Stack } from "@mui/joy";
-import { SxProps, Theme } from "@mui/joy/styles/types";
+import { SxProps } from "@mui/joy/styles/types";
 import { useContext, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import MenuItemCard from "../../components/card/MenuItemCard";
@@ -20,7 +20,6 @@ import { CartItem } from "../../models/items/cartItem";
 import { MenuItem } from "../../models/items/menuItem";
 import { createCart, emptyCart, updateItem } from "../../network/items/carts_api";
 import { getMenu } from "../../network/items/menus_api";
-import { onlyBackgroundSx } from "../../styles/PageSX";
 import { SectionTitleText } from "../../styles/Text";
 import { minPageHeight, minPageWidth } from "../../styles/constants";
 import * as Contexts from "../../utils/contexts";
@@ -205,19 +204,17 @@ const MenuPage = () => {
   );
 
   /** Sx for when a loading error occurs. */
-  const errorSx: SxProps = (theme: Theme) => ({
-    ...onlyBackgroundSx(theme),
+  const errorSx: SxProps = {
     margin: 0,
     minHeight: minPageHeight,
-  });
+  };
 
   /** Sx for the menu page. */
-  const customSx: SxProps = (theme: Theme) => ({
-    ...onlyBackgroundSx(theme),
+  const customSx: SxProps = {
     py: 5,
     minWidth: minPageWidth,
     minHeight: minPageHeight,
-  });
+  };
 
   /** UI layout for the profiles page. */
   return (

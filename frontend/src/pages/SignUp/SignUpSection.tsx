@@ -28,12 +28,14 @@ import {
   calculateDescriptivePasswordStrength,
   calculateNumericalPasswordStrength,
 } from "../../utils/passwordStrength";
+import CustomDropdown from "../../components/custom/CustomDropdown";
 
 /** Props of the sign up section. */
 interface SignUpSectionProps {
   setLoggedInUser: React.Dispatch<React.SetStateAction<User | null>>;
   setCarts: React.Dispatch<React.SetStateAction<CartItem[]>>;
 
+  setIsBuyer: React.Dispatch<React.SetStateAction<boolean>>;
   setStep: React.Dispatch<React.SetStateAction<number>>;
 
   setSnackbarFormat: React.Dispatch<
@@ -49,6 +51,7 @@ interface SignUpSectionProps {
 const SignUpSection = ({
   setLoggedInUser,
   setCarts,
+  setIsBuyer,
   setStep,
   setSnackbarFormat,
   setSnackbarVisible,
@@ -67,7 +70,7 @@ const SignUpSection = ({
 
   /** UI layout for the third party signup options. */
   const thirdPartySignUp = (
-    <Stack direction="column" gap={4} alignSelf="center" minWidth="43%">
+    <Stack direction="row" gap={4} alignSelf="center" minWidth="43%">
       {/* Google sign up button. */}
       <Button
         variant="soft"
@@ -167,7 +170,7 @@ const SignUpSection = ({
         handleSignUp();
       }}
     >
-      <Stack gap={3} direction="column" alignItems="center">
+      <Stack gap={3.5} direction="column" alignItems="center">
         {/* Form error text. */}
         {formError.isError !== 0 && (
           <FormControl error>
@@ -275,6 +278,16 @@ const SignUpSection = ({
           Password requirements: Minimum of 8 characters, a number, and a special character.
         </FormHelperText>
 
+        {/* Role selection. */}
+        <CustomDropdown
+          label="I am a"
+          options={["Buyer", "Vendor"]}
+          onOptionClick={[() => setIsBuyer(true), null]}
+          variant="soft"
+          color="primary"
+          sx={{ minWidth: "47%" }}
+        />
+
         {/* Sign up button. */}
         <Button type="submit" variant="solid" color="primary" sx={{ minWidth: "47%" }}>
           Sign Up
@@ -289,7 +302,7 @@ const SignUpSection = ({
       id="SignUpSection"
       direction="column"
       alignItems="center"
-      gap={3}
+      gap={2}
       sx={{
         minWidth: "50vw",
         outline: "0.5px solid #E0E0E0",

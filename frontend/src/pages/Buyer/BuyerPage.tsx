@@ -19,10 +19,10 @@ import { displayError } from "../../errors/displayError";
 import { Vendor } from "../../models/users/vendor";
 import { getSavedVendors, toggleSavedVendor } from "../../network/users/buyers_api";
 import { getAllVendors } from "../../network/users/vendors_api";
+import { onlyBackgroundSx } from "../../styles/PageSX";
 import { SectionTitleText } from "../../styles/Text";
 import { minPageHeight, minPageWidth } from "../../styles/constants";
 import * as Contexts from "../../utils/contexts";
-import { onlyBackgroundSx } from "../../styles/PageSX";
 import * as BuyerPageHelper from "./BuyerPageHelper";
 import * as VendorListManipulation from "./VendorListManipulation";
 
@@ -320,12 +320,11 @@ const BuyPage = () => {
   });
 
   /** Sx for the buyer page. */
-  const customSx: SxProps = (theme: Theme) => ({
-    ...onlyBackgroundSx(theme),
+  const customSx: SxProps = {
     py: 5,
     minWidth: minPageWidth,
     minHeight: minPageHeight,
-  });
+  };
 
   /** UI layout for the profiles page. */
   return (
