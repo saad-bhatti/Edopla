@@ -1,11 +1,12 @@
 import { RequestHandler } from "express";
-import mongoose from "mongoose";
+import mongoose, { ObjectId } from "mongoose";
 import * as Http_Errors from "../../errors/http_errors";
 import CartModel from "../../models/items/cartItem";
 import BuyerModel from "../../models/users/buyer";
 import VendorModel from "../../models/users/vendor";
 import { assertIsDefined } from "../../util/assertIsDefined";
-import { B_CP1, CI_U } from "../../util/interfaces";
+import { Buyer, CartItem } from "../../util/interfaces";
+import { isCartItem, isObjectId } from "../../util/typeGuard";
 
 /** "Type" of the HTTP request parameters when retrieving a cart. */
 interface CartParams {
@@ -127,7 +128,7 @@ export const createCart: RequestHandler<unknown, unknown, CreateCartBody, unknow
   try {
     // Part 1: Verify the validity of buyer profile
     assertIsDefined(req.session.buyerId);
-    const buyer: B_CP1 | null = await BuyerModel.findById(req.session.buyerId)
+    const buyer: Buyer | null = await BuyerModel.findById(req.session.buyerId)
       .populate("carts")
       .lean();
     if (!buyer) throw new Http_Errors.NotFound("Buyer");
@@ -142,8 +143,12 @@ export const createCart: RequestHandler<unknown, unknown, CreateCartBody, unknow
     if (!verifiedVendor) throw new Http_Errors.NotFound("Vendor");
 
     // Verify that a cart with vendorId does not already exist in the carts
-    buyer.carts.forEach((cart: CI_U) => {
-      if (cart.vendorId.equals(verifiedVendor._id))
+    buyer.carts.forEach((cart: ObjectId | CartItem) => {
+      let verifiedCart: CartItem | null = null;
+      if (!isCartItem(cart)) throw new Error("Cart item is not a valid CartItem");
+      else verifiedCart = cart as CartItem;
+
+      if (verifiedCart.vendorId.toString() === verifiedVendor._id.toString())
         throw new Http_Errors.AlreadyExists("A cart with this vendor");
     });
 
@@ -201,7 +206,7 @@ export const updateCart: RequestHandler<CartParams, unknown, UpdateCartBody, unk
   try {
     // Part 1: Verify the validity of buyer profile
     assertIsDefined(req.session.buyerId);
-    const buyer: B_CP1 | null = await BuyerModel.findById(req.session.buyerId)
+    const buyer: Buyer | null = await BuyerModel.findById(req.session.buyerId)
       .populate({ path: "carts", match: { _id: unverifiedCartId } })
       .lean();
     if (!buyer) throw new Http_Errors.NotFound("Buyer");
@@ -211,7 +216,11 @@ export const updateCart: RequestHandler<CartParams, unknown, UpdateCartBody, unk
     if (!mongoose.isValidObjectId(unverifiedCartId)) throw new Http_Errors.InvalidField("cart id");
     // Verify that the cart belongs to the buyer
     if (!buyer.carts.length) throw new Http_Errors.Unauthorized("Buyer", "cart");
-    const verifiedCart = buyer.carts[0];
+
+    // Retrieve the cart
+    let verifiedCart: CartItem | null = null;
+    if (!isCartItem(buyer.carts[0])) throw new Error("Cart item is not a valid CartItem");
+    else verifiedCart = buyer.carts[0] as CartItem;
 
     // Part 3: Validate the existance of the provided field
     if (!items) throw new Http_Errors.MissingField();
@@ -271,7 +280,7 @@ export const updateItem: RequestHandler<CartParams, unknown, UpdateItemBody, unk
   try {
     // Part 1: Verify the validity of buyer profile
     assertIsDefined(req.session.buyerId);
-    const buyer: B_CP1 | null = await BuyerModel.findById(req.session.buyerId)
+    const buyer: Buyer | null = await BuyerModel.findById(req.session.buyerId)
       .populate({ path: "carts", match: { _id: unverifiedCartId } })
       .lean();
     if (!buyer) throw new Http_Errors.NotFound("Buyer");
@@ -281,7 +290,11 @@ export const updateItem: RequestHandler<CartParams, unknown, UpdateItemBody, unk
     if (!mongoose.isValidObjectId(unverifiedCartId)) throw new Http_Errors.InvalidField("cart id");
     // Verify that the cart belongs to the buyer
     if (!buyer.carts.length) throw new Http_Errors.Unauthorized("Buyer", "cart");
-    const verifiedCart = buyer.carts[0];
+
+    // Retrieve the cart
+    let verifiedCart: CartItem | null = null;
+    if (!isCartItem(buyer.carts[0])) throw new Error("Cart item is not a valid CartItem");
+    else verifiedCart = buyer.carts[0] as CartItem;
 
     // Part 3: Validate the existance of the provided field
     if (!requestItem) throw new Http_Errors.MissingField();
@@ -292,7 +305,7 @@ export const updateItem: RequestHandler<CartParams, unknown, UpdateItemBody, unk
     const verifiedVendor = await VendorModel.findById(verifiedCart.vendorId).select("menu").exec();
     if (!verifiedVendor) throw new Http_Errors.NotFound("Vendor");
 
-    // Verify validity of each item and its ownership to the vendor
+    // Verify validity of the item and its ownership to the vendor
     if (!mongoose.isValidObjectId(item)) throw new Http_Errors.InvalidField("item id");
     const verifiedItemId = new mongoose.Types.ObjectId(item);
     const index = verifiedVendor.menu.indexOf(verifiedItemId);
@@ -302,7 +315,8 @@ export const updateItem: RequestHandler<CartParams, unknown, UpdateItemBody, unk
     let found = false;
     // The item exists in the cart, update the item's quantity
     let updatedItems = verifiedCart.items.map((cartItem) => {
-      if (cartItem.item.equals(verifiedItemId)) {
+      if (!isObjectId(cartItem.item)) throw new Error("item is not a valid ObjectId");
+      if (cartItem.item.toString() === item) {
         found = true;
         // Update the item's quantity
         if (quantity !== 0) return { item: verifiedItemId, quantity: quantity };
@@ -352,14 +366,18 @@ export const toggleSaveForLater: RequestHandler<CartParams, unknown, unknown, un
 
     // Verify the validity of buyer profile
     assertIsDefined(req.session.buyerId);
-    const buyer: B_CP1 | null = await BuyerModel.findById(req.session.buyerId)
+    const buyer: Buyer | null = await BuyerModel.findById(req.session.buyerId)
       .populate({ path: "carts", match: { _id: unverifiedCartId } })
       .lean();
     if (!buyer) throw new Http_Errors.NotFound("Buyer");
 
     // Verify that the cart belongs to the buyer
     if (!buyer.carts.length) throw new Http_Errors.Unauthorized("Buyer", "cart");
-    const verifiedCart = buyer.carts[0];
+
+    // Retrieve the cart
+    let verifiedCart: CartItem | null = null;
+    if (!isCartItem(buyer.carts[0])) throw new Error("Cart item is not a valid CartItem");
+    else verifiedCart = buyer.carts[0] as CartItem;
 
     // Toggle the savedForLater field of the cart
     const updatedCart = await CartModel.findByIdAndUpdate(
