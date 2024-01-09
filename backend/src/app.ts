@@ -14,6 +14,9 @@ import usersRoutes from "./routes/users/users";
 import vendorsRoutes from "./routes/users/vendors";
 import env from "./util/validateEnv";
 
+// Get necessary flag from the command line
+const isDebug = process.argv[3].split("=")[1] === "true";
+
 // Initialize the app
 const app = express();
 
@@ -66,8 +69,9 @@ app.use((req, res, next) => {
 // Error handler
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 app.use((error: unknown, req: Request, res: Response, next: NextFunction) => {
-  const isDebug = process.env.DEBUG === "true";
+  // Log the error if in debug mode
   if (isDebug) console.error(error);
+
   // Initialize to internal server error
   let errorMessage = "An unknown error occurred";
   let statusCode = 500;

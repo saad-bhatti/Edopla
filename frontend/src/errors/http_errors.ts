@@ -1,3 +1,14 @@
+/**************************************************************************************************
+ * This file contains the custom HttpError class and its subclasses.                              *
+ **************************************************************************************************/
+
+/**
+ * Custom error class for HTTP errors.
+ * @param message The error message.
+ * @returns An instance of the HttpError class.
+ * @constructor Creates an instance of the HttpError class.
+ * @extends Error The base Error class.
+ */
 class HttpError extends Error {
   constructor(message?: string) {
     super(message);
@@ -20,3 +31,8 @@ export class ForbiddenError extends HttpError {}
  * with another resource.
  */
 export class ConflictError extends HttpError {}
+
+/**
+ * 422 status: error thrown when a request contains an invalid field.
+ */
+export class InvalidFieldError extends HttpError {}

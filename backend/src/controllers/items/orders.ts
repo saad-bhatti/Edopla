@@ -7,6 +7,7 @@ import BuyerModel from "../../models/users/buyer";
 import VendorModel from "../../models/users/vendor";
 import { assertIsDefined } from "../../util/assertIsDefined";
 import * as Interfaces from "../../util/interfaces";
+import { isCartItem, isMenuItem, isOrderItem } from "../../util/typeGuard";
 
 /** "Type" of the HTTP request parameters when interacting with an order. */
 interface OrderParams {
@@ -122,31 +123,28 @@ export const placeOrder: RequestHandler<unknown, unknown, OrderBody, unknown> = 
 
     // Verify the validity of buyer profile
     assertIsDefined(req.session.buyerId);
-    const buyer: Interfaces.B_CP2 | null = await BuyerModel.findById(req.session.buyerId)
+    const buyer: Interfaces.Buyer | null = await BuyerModel.findById(req.session.buyerId)
       .populate({
         path: "carts",
         match: { _id: unverifiedCartId },
-        populate: { path: "items", model: "MenuItem" },
+        populate: { path: "items.item", model: "MenuItem" },
       })
       .lean();
     if (!buyer) throw new Http_Errors.NotFound("Buyer");
 
     // Verify that the cart belongs to the buyer & retrieve the necessary data
     if (!buyer.carts.length) throw new Http_Errors.Unauthorized("Buyer", "cart");
-    const verifiedCart: Interfaces.CI_IP = buyer.carts[0];
-    const itemsMap = verifiedCart.items;
-    const itemsQuantityObject = verifiedCart.itemsQuantity;
-    const itemsQuantityMap = new Map(Object.entries(itemsQuantityObject));
-    /* Note that the mongoose request actually returns the itemsQuantity field
-       as type Object rather than type Map (as seen in this post facing a similar
-       problem: https://github.com/Automattic/mongoose/issues/9564). This is a
-       workaround the problem. */
+
+    // Retrieve the cart
+    let verifiedCart: Interfaces.CartItem | null = null;
+    if (!isCartItem(buyer.carts[0])) throw new Error("Cart item is not a valid CartItem");
+    else verifiedCart = buyer.carts[0] as Interfaces.CartItem;
+    const items = verifiedCart.items;
 
     // Calculate the total price of the cart
     let totalPrice = 0;
-    for (const key of itemsMap.keys()) {
-      const item = itemsMap.get(key)!;
-      const quantity = itemsQuantityMap.get(key)!;
+    for (const { item, quantity } of items) {
+      if (!isMenuItem(item)) throw new Error("Item is not a valid MenuItem");
       totalPrice += item.price * quantity;
     }
 
@@ -193,7 +191,7 @@ export const cancelOrder: RequestHandler<OrderParams, unknown, unknown, unknown>
 
     // Verify the validity of buyer profile
     assertIsDefined(req.session.buyerId);
-    const buyer: Interfaces.B_OP1 | null = await BuyerModel.findById(req.session.buyerId)
+    const buyer: Interfaces.Buyer | null = await BuyerModel.findById(req.session.buyerId)
       .populate({
         path: "orders",
         match: { _id: unverifiedOrderId },
@@ -203,7 +201,11 @@ export const cancelOrder: RequestHandler<OrderParams, unknown, unknown, unknown>
 
     // Verify that the order belongs to the buyer
     if (!buyer.orders.length) throw new Http_Errors.Unauthorized("Buyer", "order");
-    const verifiedOrder: Interfaces.OI_U = buyer.orders[0];
+
+    // Retrieve the order
+    let verifiedOrder: Interfaces.OrderItem | null = null;
+    if (!isOrderItem(buyer.orders[0])) throw new Error("Order item is not a valid OrderItem");
+    else verifiedOrder = buyer.orders[0] as Interfaces.OrderItem;
 
     // Verify that the order is in the "pending" status
     if (verifiedOrder.status !== 0)
@@ -325,13 +327,17 @@ export const processOrder: RequestHandler<OrderParams, unknown, ProcessOrderBody
     // Verify the validity of the order id and retrieve the order
     if (!mongoose.isValidObjectId(unverifiedOrderId))
       throw new Http_Errors.InvalidField("order id");
-    const verifiedOrder: Interfaces.OI_CP | null = await OrderModel.findById(unverifiedOrderId)
+    const verifiedOrder: Interfaces.OrderItem | null = await OrderModel.findById(unverifiedOrderId)
       .populate({ path: "cartId", select: "vendorId" })
       .lean();
     if (!verifiedOrder) throw new Http_Errors.NotFound("Order");
 
     // Verify that the order (from the cart) belongs to the vendor
-    if (!vendor._id.equals(verifiedOrder.cartId.vendorId))
+    let cart: Interfaces.CartItem | null = null;
+    if (!isCartItem(verifiedOrder.cartId)) throw new Error("Cart item is not a valid CartItem");
+    else cart = verifiedOrder.cartId as Interfaces.CartItem;
+
+    if (vendor._id.toString() !== cart.vendorId.toString())
       throw new Http_Errors.Unauthorized("Vendor", "order");
 
     // Verify the order status is pending
@@ -382,7 +388,7 @@ export const updateOrderStatus: RequestHandler<
 
     // Verify the validity of vendor profile
     assertIsDefined(req.session.vendorId);
-    const vendor: Interfaces.V_OP1 | null = await VendorModel.findById(req.session.vendorId)
+    const vendor: Interfaces.Vendor | null = await VendorModel.findById(req.session.vendorId)
       .populate({
         path: "orders",
         match: { _id: unverifiedOrderId },
@@ -391,7 +397,11 @@ export const updateOrderStatus: RequestHandler<
     if (!vendor) throw new Http_Errors.NotFound("Vendor");
 
     if (!vendor.orders.length) throw new Http_Errors.Unauthorized("Vendor", "order");
-    const verifiedOrder: Interfaces.OI_U = vendor.orders[0];
+
+    // Retrieve the order
+    let verifiedOrder: Interfaces.OrderItem | null = null;
+    if (!isOrderItem(vendor.orders[0])) throw new Error("Order item is not a valid OrderItem");
+    else verifiedOrder = vendor.orders[0] as Interfaces.OrderItem;
 
     // Verify the current order status is less than the new status
     if (verifiedOrder.status >= status) throw new Http_Errors.InvalidField("order status");

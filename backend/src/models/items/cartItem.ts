@@ -1,24 +1,28 @@
-import { InferSchemaType, model, Schema } from "mongoose";
+import mongoose, { Document, Schema } from "mongoose";
+
+interface CartItem {
+  vendorId: mongoose.Types.ObjectId;
+  savedForLater: boolean;
+  items: { item: mongoose.Types.ObjectId; quantity: number }[];
+}
+
+interface CartItemDocument extends CartItem, Document {}
 
 // Define a schema for the 'Cart' type
-const cartItemSchema = new Schema({
+const itemSchema = new Schema(
+  {
+    item: { type: Schema.Types.ObjectId, ref: "MenuItem", required: true },
+    quantity: { type: Number, required: true },
+  },
+  { _id: false }
+);
+
+const cartItemSchema = new Schema<CartItemDocument>({
   vendorId: { type: Schema.Types.ObjectId, ref: "Vendor", required: true },
-  items: {
-    type: Map,
-    of: Schema.Types.ObjectId,
-    ref: "MenuItem",
-    required: true,
-  },
-  itemsQuantity: {
-    type: Map,
-    of: Number,
-    required: true,
-  },
   savedForLater: { type: Boolean, required: true },
+  items: [itemSchema],
 });
 
-// Create a 'Cart' type from the schema
-type CartItem = InferSchemaType<typeof cartItemSchema>;
+const CartItemModel = mongoose.model<CartItemDocument>("CartItem", cartItemSchema);
 
-// Export the 'Order' collection
-export default model<CartItem>("CartItem", cartItemSchema);
+export default CartItemModel;

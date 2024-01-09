@@ -1,9 +1,15 @@
+/**************************************************************************************************
+ * This file contains the UI for the custom search component.                                     *
+ * This component is used to create a search bar with a search button that executes the function  *
+ * provided upon clicking or change of input.                                                     *
+ **************************************************************************************************/
+
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import Button from "@mui/joy/Button";
-import FormControl from "@mui/joy/FormControl";
-import Input from "@mui/joy/Input";
 import Stack from "@mui/joy/Stack";
+import { SxProps } from "@mui/joy/styles/types";
 import { useState } from "react";
+import CustomInput from "./CustomInput";
 
 /** Props of the custom search component. */
 interface CustomSearchProps {
@@ -11,32 +17,39 @@ interface CustomSearchProps {
   initialValue: string;
   activeSearch: boolean;
   onSearch: (searchValue: string) => void;
+  sx?: SxProps;
 }
 
 /** UI component for a custom search. */
-const CustomSearch = ({ placeholder, initialValue, activeSearch, onSearch }: CustomSearchProps) => {
+const CustomSearch = ({
+  placeholder,
+  initialValue,
+  activeSearch,
+  onSearch,
+  sx,
+}: CustomSearchProps) => {
   /** State to track the value of the search bar. */
   const [value, setValue] = useState<string>(initialValue);
+  const stackSX = { ...sx, border: "1px solid", borderRadius: "6px" };
 
   /** UI layout for the custom search. */
   return (
-    <Stack spacing={1} direction="row" sx={{ mb: 2 }}>
-      <FormControl sx={{ flex: 1 }}>
-        <Input
-          type="search"
-          placeholder={placeholder}
-          value={value}
-          onChange={(event) => {
-            const newValue = event.target.value;
-            setValue(newValue);
-            if (activeSearch) onSearch(newValue);
-          }}
-          startDecorator={<SearchRoundedIcon />}
-          aria-label="Search"
-        />
-      </FormControl>
+    <Stack direction="row" sx={stackSX}>
+      <CustomInput
+        type="search"
+        placeholder={placeholder}
+        value={value}
+        onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+          const newValue = event.target.value;
+          setValue(newValue);
+          if (activeSearch) onSearch(newValue);
+        }}
+        startDecorator={<SearchRoundedIcon />}
+        aria-label="Search"
+        sx={{ flex: 1 }}
+      />
       <Button
-        variant="solid"
+        variant="plain"
         color="primary"
         onClick={() => {
           onSearch(value);

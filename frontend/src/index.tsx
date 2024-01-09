@@ -1,7 +1,10 @@
+/**************************************************************************************************
+ * This file contains the UI for the entire application.                                          *
+ *************************************************************************************************/
+
 import "bootstrap/dist/css/bootstrap.min.css";
 import React from "react";
 import ReactDOM from "react-dom/client";
-import "./styles/global.css";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 

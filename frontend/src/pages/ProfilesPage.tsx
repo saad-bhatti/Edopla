@@ -1,33 +1,38 @@
+/**************************************************************************************************
+ * This file contains the UI for the profiles page.                                               *
+ * This page is used to display and change the user, buyer, and vendor profile information.       *
+ **************************************************************************************************/
+
+import SentimentVeryDissatisfiedIcon from "@mui/icons-material/SentimentVeryDissatisfied";
+import { Container, LinearProgress, Stack } from "@mui/joy";
+import { SxProps, Theme } from "@mui/joy/styles/types";
 import { useContext, useEffect, useState } from "react";
-import { Spinner } from "react-bootstrap";
-import { LoggedInUserContext, UserContextProps } from "../App";
-import BuyerProfileAccordion from "../components/accordion/BuyerProfileAccordion";
-import VendorProfileAccordion from "../components/accordion/VendorProfileAccordion";
-import BuyerProfileModal from "../components/modal/BuyerProfileModal";
-import VendorProfileModal from "../components/modal/VendorProfileModal";
+import BuyerProfileCard from "../components/card/BuyerProfileCard";
+import UserProfileCard from "../components/card/UserProfileCard";
+import VendorProfileCard from "../components/card/VendorProfileCard";
+import CustomTabs from "../components/custom/CustomTabs";
 import { displayError } from "../errors/displayError";
 import { Buyer } from "../models/users/buyer";
 import { Vendor } from "../models/users/vendor";
 import { getBuyer } from "../network/users/buyers_api";
 import { getVendor } from "../network/users/vendors_api";
-import styleUtils from "../styles/utils.module.css";
+import { onlyBackgroundSx } from "../styles/PageSX";
+import { SectionTitleText } from "../styles/Text";
+import { minPageHeight, minPageWidth } from "../styles/constants";
+import { LoggedInUserContext, LoggedInUserContextProps } from "../utils/contexts";
 
 /** UI for the profiles page, depending on user's login status. */
 const ProfilesPage = () => {
   // Retrieve the logged in user from the context
-  const { loggedInUser } = useContext<UserContextProps | undefined>(LoggedInUserContext) || {};
+  const { loggedInUser } = useContext<LoggedInUserContextProps | null>(LoggedInUserContext) || {};
   // State to track whether the page data is being loaded.
   const [isLoading, setIsLoading] = useState(true);
   // State to show an error message if the vendors fail to load.
   const [showLoadingError, setShowLoadingError] = useState(false);
   // State to track the user's buyer profile.
   const [buyer, setBuyer] = useState<Buyer | null>(null);
-  // State to control the display of the buyer profile modal.
-  const [showBuyerModal, setShowBuyerModal] = useState(false);
   // State to track the user's vendor profile.
   const [vendor, setVendor] = useState<Vendor | null>(null);
-  // State to control the display of the vendor profile modal.
-  const [showVendorModal, setShowVendorModal] = useState(false);
 
   /** Retrieve the buyer and vendor profiles only once before rendering the page. */
   useEffect(() => {
@@ -57,64 +62,65 @@ const ProfilesPage = () => {
     loadProfiles();
   }, [loggedInUser]);
 
+  /** Sx for when a loading error occurs. */
+  const errorSx: SxProps = (theme: Theme) => ({
+    ...onlyBackgroundSx(theme),
+    margin: 0,
+    minHeight: minPageHeight,
+  });
+
+  /** Sx for the profiles page. */
+  const customSx: SxProps = {
+    py: 5,
+    minWidth: minPageWidth,
+    minHeight: minPageHeight,
+  };
+
   return (
     <>
       {/* Display for the indicator while vendors are loading. */}
-      {isLoading && <Spinner animation="border" variant="primary" />}
+      {isLoading && <LinearProgress size="lg" value={28} variant="soft" />}
 
-      {/* Display for when the vendors fail to load. */}
-      {showLoadingError && <p>Something went wrong. Please try again.</p>}
-
-      {/* Display if the user is not logged in. */}
-      {!isLoading && !showLoadingError && !loggedInUser && (
-        <h2 className={styleUtils.flexCenter}>Please sign up or log in to see profile details.</h2>
+      {/* Display for when the profiles fail to load. */}
+      {showLoadingError && (
+        <Stack
+          id="ProfilesPage"
+          direction="row"
+          justifyContent="center"
+          gap={5}
+          py={10}
+          sx={errorSx}
+        >
+          <SentimentVeryDissatisfiedIcon sx={{ fontSize: "20vh" }} />
+          <SectionTitleText>Something went wrong. Please try again.</SectionTitleText>
+        </Stack>
       )}
 
       {/* Display each profile's information. */}
       {!isLoading && !showLoadingError && loggedInUser && (
-        <>
-          {/* Display the buyer profile accordion. */}
-          {buyer && (
-            <BuyerProfileAccordion
-              buyer={buyer}
-              onEditBuyerClicked={() => setShowBuyerModal(true)}
-              className="mb-3"
-            />
-          )}
-
-          {/* Edit the buyer profile modal. */}
-          {showBuyerModal && (
-            <BuyerProfileModal
-              buyer={buyer}
-              onSaveSuccessful={(buyer) => {
-                setBuyer(buyer);
-                setShowBuyerModal(false);
-              }}
-              onDismissed={() => setShowBuyerModal(false)}
-            />
-          )}
-
-          {/* Display the vendor profile accordion. */}
-          {vendor && (
-            <VendorProfileAccordion
-              vendor={vendor}
-              onEditVendorClicked={() => setShowVendorModal(true)}
-              className="mb-3"
-            />
-          )}
-
-          {/* Edit the vendor profile modal. */}
-          {showVendorModal && (
-            <VendorProfileModal
-              vendor={vendor}
-              onSaveSuccessful={(vendor) => {
-                setVendor(vendor);
-                setShowVendorModal(false);
-              }}
-              onDismissed={() => setShowVendorModal(false)}
-            />
-          )}
-        </>
+        <Container id="ProfilesPage" sx={customSx}>
+          {/* Tabs for the profile page. */}
+          <CustomTabs
+            tabs={[
+              // Display the user profile card.
+              { tab: "User", panel: loggedInUser && <UserProfileCard user={loggedInUser} /> },
+              // Display the buyer profile card.
+              {
+                tab: "Buyer",
+                panel: buyer && <BuyerProfileCard buyer={buyer} onBuyerUpdate={setBuyer} />,
+              },
+              // Display the vendor profile card.
+              {
+                tab: "Vendor",
+                panel: vendor && (
+                  // Display the vendor profile card.
+                  <VendorProfileCard vendor={vendor} onVendorUpdate={setVendor} />
+                ),
+              },
+            ]}
+            sx={{ marginBottom: "10px" }}
+          />
+        </Container>
       )}
     </>
   );
