@@ -7,13 +7,13 @@
 import BadgeIcon from "@mui/icons-material/Badge";
 import CloseIcon from "@mui/icons-material/Close";
 import InfoOutlined from "@mui/icons-material/InfoOutlined";
-import LocationOnIcon from "@mui/icons-material/LocationOn";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import PhoneIcon from "@mui/icons-material/Phone";
 import SaveIcon from "@mui/icons-material/Save";
 import { Button, CardContent, FormControl, FormHelperText, FormLabel, Textarea } from "@mui/joy";
 import Stack from "@mui/joy/Stack";
 import { SxProps } from "@mui/joy/styles/types";
+import { StandaloneSearchBox } from "@react-google-maps/api";
 import { useState } from "react";
 import { Vendor } from "../../models/users/vendor";
 import { updateVendor } from "../../network/users/vendors_api";
@@ -162,16 +162,28 @@ const VendorProfileCard = ({ vendor, onVendorUpdate, sx }: VendorProfileCardProp
         <FormLabel>Address</FormLabel>
         {/* Address input. */}
         <FormControl error={formError.isError === 2}>
-          <CustomInput
-            type="text"
-            placeholder="Address"
-            value={newAddress}
-            onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-              setNewAddress(event.target.value);
+          <StandaloneSearchBox
+            onLoad={(ref) => {
+              ref.addListener("places_changed", () => {
+                const places = ref.getPlaces();
+                if (!places || places.length === 0) return;
+                const place = places[0];
+                const address = place.formatted_address;
+                if (address) setNewAddress(address);
+              });
             }}
-            startDecorator={<LocationOnIcon fontSize="small" />}
-            required={true}
-          />
+          >
+            <CustomInput
+              type="text"
+              placeholder="Address"
+              value={newAddress}
+              onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                setNewAddress(event.target.value);
+              }}
+              startDecorator={<BadgeIcon fontSize="small" />}
+              required={true}
+            />
+          </StandaloneSearchBox>
         </FormControl>
 
         {/* Phone number section title. */}

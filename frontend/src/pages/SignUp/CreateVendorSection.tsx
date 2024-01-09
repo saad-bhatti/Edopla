@@ -5,10 +5,10 @@
 import BadgeIcon from "@mui/icons-material/Badge";
 import CloseIcon from "@mui/icons-material/Close";
 import InfoOutlined from "@mui/icons-material/InfoOutlined";
-import LocationOnIcon from "@mui/icons-material/LocationOn";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import PhoneIcon from "@mui/icons-material/Phone";
 import { Button, FormControl, FormHelperText, FormLabel, Stack, Textarea } from "@mui/joy";
+import { StandaloneSearchBox } from "@react-google-maps/api";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import CustomDropdown from "../../components/custom/CustomDropdown";
@@ -183,16 +183,28 @@ const CreateVendorSection = ({
             {/* Address section. */}
             <FormControl error={formError.isError === 2}>
               <FormLabel>Address *</FormLabel>
-              <CustomInput
-                type="address"
-                placeholder="Address"
-                value={address}
-                onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                  setAddress(event.target.value);
+              <StandaloneSearchBox
+                onLoad={(ref) => {
+                  ref.addListener("places_changed", () => {
+                    const places = ref.getPlaces();
+                    if (!places || places.length === 0) return;
+                    const place = places[0];
+                    const address = place.formatted_address;
+                    if (address) setAddress(address);
+                  });
                 }}
-                startDecorator={<LocationOnIcon fontSize="small" />}
-                required={true}
-              />
+              >
+                <CustomInput
+                  type="text"
+                  placeholder="Address"
+                  value={address}
+                  onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                    setAddress(event.target.value);
+                  }}
+                  startDecorator={<BadgeIcon fontSize="small" />}
+                  required={true}
+                />
+              </StandaloneSearchBox>
             </FormControl>
 
             {/* Price range section. */}

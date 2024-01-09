@@ -4,16 +4,16 @@
 
 import BadgeIcon from "@mui/icons-material/Badge";
 import InfoOutlined from "@mui/icons-material/InfoOutlined";
-import LocationOnIcon from "@mui/icons-material/LocationOn";
 import PhoneIcon from "@mui/icons-material/Phone";
 import { Button, FormControl, FormHelperText, FormLabel, Stack } from "@mui/joy";
+import { StandaloneSearchBox } from "@react-google-maps/api";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import CustomInput from "../../components/custom/CustomInput";
 import { displayError } from "../../errors/displayError";
 import { Buyer } from "../../models/users/buyer";
 import { User } from "../../models/users/user";
 import { createBuyer } from "../../network/users/buyers_api";
-import { useNavigate } from "react-router-dom";
 
 /** Props of the buyer profile section. */
 interface CreateBuyerSectionProps {
@@ -94,13 +94,13 @@ const CreateBuyerSection = ({
   /** UI layout for the buyer creation form. */
   const buyerCreationForm = (
     <form
-      style={{ width: "100%", margin: "auto", padding: "0% 5%" }}
+      style={{ minWidth: "100%", margin: "auto", padding: "0% 5%" }}
       onSubmit={(event) => {
         event.preventDefault();
         handleBuyerCreation();
       }}
     >
-      <Stack gap={3} direction="column" alignItems="center">
+      <Stack gap={5} direction="column" alignItems="center">
         {/* Form error text. */}
         {formError.isError !== 0 && (
           <FormControl error>
@@ -124,23 +124,36 @@ const CreateBuyerSection = ({
             startDecorator={<BadgeIcon fontSize="small" />}
             required={true}
             error={formError.isError === 1}
+            sx={{ minWidth: "30vw" }}
           />
         </FormControl>
 
         {/* Address section. */}
         <FormControl>
           <FormLabel>Address *</FormLabel>
-          <CustomInput
-            type="address"
-            placeholder="Address"
-            value={address}
-            onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-              setAddress(event.target.value);
+          <StandaloneSearchBox
+            onLoad={(ref) => {
+              ref.addListener("places_changed", () => {
+                const places = ref.getPlaces();
+                if (!places || places.length === 0) return;
+                const place = places[0];
+                const address = place.formatted_address;
+                if (address) setAddress(address);
+              });
             }}
-            startDecorator={<LocationOnIcon fontSize="small" />}
-            required={true}
-            error={formError.isError === 2}
-          />
+          >
+            <CustomInput
+              type="text"
+              placeholder="Address"
+              value={address}
+              onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                setAddress(event.target.value);
+              }}
+              startDecorator={<BadgeIcon fontSize="small" />}
+              required={true}
+              sx={{ minWidth: "30vw" }}
+            />
+          </StandaloneSearchBox>
         </FormControl>
 
         {/* Phone number section. */}
@@ -154,11 +167,12 @@ const CreateBuyerSection = ({
               setPhoneNumber(event.target.value);
             }}
             startDecorator={<PhoneIcon fontSize="small" />}
+            sx={{ minWidth: "30vw" }}
           />
         </FormControl>
 
         {/* Create profile button. */}
-        <Button type="submit" variant="solid" color="primary" sx={{ minWidth: "35%" }}>
+        <Button type="submit" variant="solid" color="primary" sx={{ minWidth: "20vw" }}>
           Create Profile
         </Button>
       </Stack>

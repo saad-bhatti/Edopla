@@ -6,12 +6,12 @@
 
 import BadgeIcon from "@mui/icons-material/Badge";
 import InfoOutlined from "@mui/icons-material/InfoOutlined";
-import LocationOnIcon from "@mui/icons-material/LocationOn";
 import PhoneIcon from "@mui/icons-material/Phone";
 import SaveIcon from "@mui/icons-material/Save";
 import { Button, CardContent, FormControl, FormHelperText, FormLabel } from "@mui/joy";
 import Stack from "@mui/joy/Stack";
 import { SxProps } from "@mui/joy/styles/types";
+import { StandaloneSearchBox } from "@react-google-maps/api";
 import { useState } from "react";
 import { Buyer } from "../../models/users/buyer";
 import { updateBuyer } from "../../network/users/buyers_api";
@@ -96,6 +96,95 @@ const BuyerProfileCard = ({ buyer, onBuyerUpdate, sx }: BuyerProfileCardProps) =
     }
   }
 
+  /** UI layout for the buyer name section. */
+  const BuyerNameSection = (
+    <>
+      {/* Buyer name section title. */}
+      <FormLabel>Buyer Name</FormLabel>
+      {/* Buyer name input. */}
+      <FormControl error={formError.isError === 1}>
+        <CustomInput
+          type="text"
+          placeholder="Name"
+          value={newBuyerName}
+          onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+            setNewBuyerName(event.target.value);
+          }}
+          startDecorator={<BadgeIcon fontSize="small" />}
+          required={true}
+        />
+      </FormControl>
+      {/* Buyer name helper text. */}
+      <FormHelperText>
+        <InfoOutlined fontSize="small" />
+        Your name will be visible to vendors.
+      </FormHelperText>
+    </>
+  );
+
+  /** UI layout for the address section. */
+  const AddressSection = (
+    <>
+      {/* Address section title. */}
+      <FormLabel>Address</FormLabel>
+      {/* Address input. */}
+      <FormControl error={formError.isError === 2}>
+        <StandaloneSearchBox
+          onLoad={(ref) => {
+            ref.addListener("places_changed", () => {
+              const places = ref.getPlaces();
+              if (!places || places.length === 0) return;
+              const place = places[0];
+              const address = place.formatted_address;
+              if (address) setNewAddress(address);
+            });
+          }}
+        >
+          <CustomInput
+            type="text"
+            placeholder="Address"
+            value={newAddress}
+            onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+              setNewAddress(event.target.value);
+            }}
+            startDecorator={<BadgeIcon fontSize="small" />}
+            required={true}
+          />
+        </StandaloneSearchBox>
+      </FormControl>
+      {/* Address helper text. */}
+      <FormHelperText>
+        <InfoOutlined fontSize="small" />
+        Your address is not visible to any vendor or buyer.
+      </FormHelperText>
+    </>
+  );
+
+  /** UI layout for the phone number section. */
+  const PhoneNumberSection = (
+    <>
+      {/* Phone number section title. */}
+      <FormLabel>Phone Number</FormLabel>
+      {/* Phone number input. */}
+      <FormControl error={formError.isError === 3}>
+        <CustomInput
+          type="tel"
+          placeholder="Phone Number"
+          value={newPhoneNumber}
+          onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+            setNewPhoneNumber(event.target.value);
+          }}
+          startDecorator={<PhoneIcon fontSize="small" />}
+        />
+      </FormControl>
+      {/* Phone number helper text. */}
+      <FormHelperText>
+        <InfoOutlined fontSize="small" />
+        Your phone number is not visible to any vendor or buyer.
+      </FormHelperText>
+    </>
+  );
+
   /** UI layout for the change buyer information form. */
   const changeBuyerInfoForm = (
     <form
@@ -115,67 +204,14 @@ const BuyerProfileCard = ({ buyer, onBuyerUpdate, sx }: BuyerProfileCardProps) =
           </FormControl>
         )}
 
-        {/* Buyer name section title. */}
-        <FormLabel>Buyer Name</FormLabel>
-        {/* Buyer name input. */}
-        <FormControl error={formError.isError === 1}>
-          <CustomInput
-            type="text"
-            placeholder="Name"
-            value={newBuyerName}
-            onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-              setNewBuyerName(event.target.value);
-            }}
-            startDecorator={<BadgeIcon fontSize="small" />}
-            required={true}
-          />
-        </FormControl>
-        {/* Buyer name helper text. */}
-        <FormHelperText>
-          <InfoOutlined fontSize="small" />
-          Your name will be visible to vendors.
-        </FormHelperText>
+        {/* Buyer name section. */}
+        {BuyerNameSection}
 
-        {/* Address section title. */}
-        <FormLabel>Address</FormLabel>
-        {/* Address input. */}
-        <FormControl error={formError.isError === 2}>
-          <CustomInput
-            type="text"
-            placeholder="Address"
-            value={newAddress}
-            onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-              setNewAddress(event.target.value);
-            }}
-            startDecorator={<LocationOnIcon fontSize="small" />}
-            required={true}
-          />
-        </FormControl>
-        {/* Address helper text. */}
-        <FormHelperText>
-          <InfoOutlined fontSize="small" />
-          Your address is not visible to any vendor or buyer.
-        </FormHelperText>
+        {/* Address section. */}
+        {AddressSection}
 
-        {/* Phone number section title. */}
-        <FormLabel>Phone Number</FormLabel>
-        {/* Phone number input. */}
-        <FormControl error={formError.isError === 3}>
-          <CustomInput
-            type="tel"
-            placeholder="Phone Number"
-            value={newPhoneNumber}
-            onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-              setNewPhoneNumber(event.target.value);
-            }}
-            startDecorator={<PhoneIcon fontSize="small" />}
-          />
-        </FormControl>
-        {/* Phone number helper text. */}
-        <FormHelperText>
-          <InfoOutlined fontSize="small" />
-          Your phone number is not visible to any vendor or buyer.
-        </FormHelperText>
+        {/* Phone number section. */}
+        {PhoneNumberSection}
 
         {/* Submit button. */}
         {isChange() && (
