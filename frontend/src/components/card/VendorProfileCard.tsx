@@ -7,6 +7,7 @@
 import BadgeIcon from "@mui/icons-material/Badge";
 import CloseIcon from "@mui/icons-material/Close";
 import InfoOutlined from "@mui/icons-material/InfoOutlined";
+import LocationOnIcon from '@mui/icons-material/LocationOn';
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import PhoneIcon from "@mui/icons-material/Phone";
 import SaveIcon from "@mui/icons-material/Save";
@@ -180,7 +181,7 @@ const VendorProfileCard = ({ vendor, onVendorUpdate, sx }: VendorProfileCardProp
               onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                 setNewAddress(event.target.value);
               }}
-              startDecorator={<BadgeIcon fontSize="small" />}
+              startDecorator={<LocationOnIcon fontSize="small" />}
               required={true}
             />
           </StandaloneSearchBox>

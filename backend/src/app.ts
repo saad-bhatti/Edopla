@@ -32,7 +32,7 @@ app.use(
     origin: [env.FRONTEND_URL, "https://maps.googleapis.com/maps/api/*"],
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization", "SameSite"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 

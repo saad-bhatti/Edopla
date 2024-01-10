@@ -4,6 +4,7 @@
 
 import BadgeIcon from "@mui/icons-material/Badge";
 import InfoOutlined from "@mui/icons-material/InfoOutlined";
+import LocationOnIcon from '@mui/icons-material/LocationOn';
 import PhoneIcon from "@mui/icons-material/Phone";
 import { Button, FormControl, FormHelperText, FormLabel, Stack } from "@mui/joy";
 import { StandaloneSearchBox } from "@react-google-maps/api";
@@ -149,7 +150,7 @@ const CreateBuyerSection = ({
               onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                 setAddress(event.target.value);
               }}
-              startDecorator={<BadgeIcon fontSize="small" />}
+              startDecorator={<LocationOnIcon fontSize="small" />}
               required={true}
               sx={{ minWidth: "30vw" }}
             />

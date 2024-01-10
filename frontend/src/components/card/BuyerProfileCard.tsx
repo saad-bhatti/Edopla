@@ -6,6 +6,7 @@
 
 import BadgeIcon from "@mui/icons-material/Badge";
 import InfoOutlined from "@mui/icons-material/InfoOutlined";
+import LocationOnIcon from "@mui/icons-material/LocationOn";
 import PhoneIcon from "@mui/icons-material/Phone";
 import SaveIcon from "@mui/icons-material/Save";
 import { Button, CardContent, FormControl, FormHelperText, FormLabel } from "@mui/joy";
@@ -147,7 +148,7 @@ const BuyerProfileCard = ({ buyer, onBuyerUpdate, sx }: BuyerProfileCardProps) =
             onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
               setNewAddress(event.target.value);
             }}
-            startDecorator={<BadgeIcon fontSize="small" />}
+            startDecorator={<LocationOnIcon fontSize="small" />}
             required={true}
           />
         </StandaloneSearchBox>

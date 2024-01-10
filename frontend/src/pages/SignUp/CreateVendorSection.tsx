@@ -5,6 +5,7 @@
 import BadgeIcon from "@mui/icons-material/Badge";
 import CloseIcon from "@mui/icons-material/Close";
 import InfoOutlined from "@mui/icons-material/InfoOutlined";
+import LocationOnIcon from "@mui/icons-material/LocationOn";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import PhoneIcon from "@mui/icons-material/Phone";
 import { Button, FormControl, FormHelperText, FormLabel, Stack, Textarea } from "@mui/joy";
@@ -201,7 +202,7 @@ const CreateVendorSection = ({
                   onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                     setAddress(event.target.value);
                   }}
-                  startDecorator={<BadgeIcon fontSize="small" />}
+                  startDecorator={<LocationOnIcon fontSize="small" />}
                   required={true}
                 />
               </StandaloneSearchBox>
