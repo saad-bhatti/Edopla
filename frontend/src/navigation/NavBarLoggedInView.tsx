@@ -233,14 +233,7 @@ export const NavBarLoggedInTail = () => {
               setIsDropdownVisible(true);
             }}
           >
-            <IconButton
-              variant="plain"
-              color="neutral"
-              size="lg"
-              sx={{ alignSelf: "center", fontSize: "large" }}
-            >
-              <DensityMediumIcon />
-            </IconButton>
+            <DensityMediumIcon />
           </MenuButton>
 
           {/* Dropdown menu. */}

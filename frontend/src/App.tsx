@@ -4,21 +4,26 @@
  * This file creates the navigation bar and the routes for the application.                       *
  **************************************************************************************************/
 
+import { Library } from "@googlemaps/js-api-loader";
 import Container from "@mui/joy/Container";
 import CssBaseline from "@mui/joy/CssBaseline";
 import { CssVarsProvider } from "@mui/joy/styles";
+import { SxProps, Theme } from "@mui/joy/styles/types";
+import { LoadScript } from "@react-google-maps/api";
 import { useEffect, useState } from "react";
 import { BrowserRouter } from "react-router-dom";
-import AppRoutes from "./routes/AppRoutes";
-import NavBar from "./navigation/NavBar";
 import { displayError } from "./errors/displayError";
 import { CartItem } from "./models/items/cartItem";
 import { User } from "./models/users/user";
+import NavBar from "./navigation/NavBar";
 import { getCarts } from "./network/items/carts_api";
 import * as UsersAPI from "./network/users/users_api";
-import { CartsContext, LoggedInUserContext } from "./utils/contexts";
+import AppRoutes from "./routes/AppRoutes";
 import { onlyBackgroundSx } from "./styles/PageSX";
-import { SxProps, Theme } from "@mui/joy/styles/types";
+import { CartsContext, LoggedInUserContext } from "./utils/contexts";
+
+// Google Maps API libraries to load
+const apiLibaries = ["places" as Library] as Library[];
 
 function App() {
   // State to track the logged in user
@@ -40,7 +45,6 @@ function App() {
     fetchLoggedInUser();
   }, []);
 
-  
   /** Sx for the application. */
   const customSx: SxProps = (theme: Theme) => ({
     ...onlyBackgroundSx(theme),
@@ -57,8 +61,14 @@ function App() {
               {/* Display for the navigation bar */}
               <NavBar />
 
-              {/* Available routes. */}
-              <AppRoutes />
+              {/* Load the Google Maps API */}
+              <LoadScript
+                googleMapsApiKey={process.env.REACT_APP_GOOGLE_API_KEY as string}
+                libraries={apiLibaries}
+              >
+                {/* Available routes. */}
+                <AppRoutes />
+              </LoadScript>
             </Container>
           </BrowserRouter>
         </CssVarsProvider>
