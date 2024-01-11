@@ -15,6 +15,11 @@ export interface UserCredentials {
   password: string;
 }
 
+/** Interface for the input to authenticate with a token. */
+export interface TokenCredentials {
+  token: string;
+}
+
 /**
  * Function to retrieve the currently logged in user.
  * @param None
@@ -44,12 +49,44 @@ export async function signUp(credentials: UserCredentials): Promise<User> {
 }
 
 /**
+ * Function to create a new user with Google.
+ * @param credentials the new user's token.
+ * @returns A promise that resolves to the new user object.
+ */
+export async function signUpGoogle(credentials: TokenCredentials): Promise<User> {
+  const response = await fetchData(`${endpoint}/signup/google`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(credentials),
+  });
+  return response.json();
+}
+
+/**
  * Function to login in a user.
  * @param credentials the user's email and password.
  * @returns A promise that resolves to the user object.
  */
 export async function logIn(credentials: UserCredentials): Promise<User> {
   const response = await fetchData(`${endpoint}/login`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(credentials),
+  });
+  return response.json();
+}
+
+/**
+ * Function to login in a user with Google.
+ * @param credentials the user's token.
+ * @returns A promise that resolves to the user object.
+ */
+export async function logInGoogle(credentials: TokenCredentials): Promise<User> {
+  const response = await fetchData(`${endpoint}/login/google`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

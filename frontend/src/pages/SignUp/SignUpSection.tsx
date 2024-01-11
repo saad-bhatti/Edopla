@@ -4,7 +4,6 @@
 
 import EmailIcon from "@mui/icons-material/Email";
 import FacebookIcon from "@mui/icons-material/Facebook";
-import GoogleIcon from "@mui/icons-material/Google";
 import InfoOutlined from "@mui/icons-material/InfoOutlined";
 import Key from "@mui/icons-material/Key";
 import {
@@ -18,17 +17,18 @@ import {
   Typography,
 } from "@mui/joy";
 import { useState } from "react";
+import GoogleButton from "../../components/GoogleButton";
+import CustomDropdown from "../../components/custom/CustomDropdown";
 import CustomInput from "../../components/custom/CustomInput";
 import { displayError } from "../../errors/displayError";
 import { ConflictError } from "../../errors/http_errors";
 import { CartItem } from "../../models/items/cartItem";
 import { User } from "../../models/users/user";
-import { signUp } from "../../network/users/users_api";
+import { signUp, signUpGoogle } from "../../network/users/users_api";
 import {
   calculateDescriptivePasswordStrength,
   calculateNumericalPasswordStrength,
 } from "../../utils/passwordStrength";
-import CustomDropdown from "../../components/custom/CustomDropdown";
 
 /** Props of the sign up section. */
 interface SignUpSectionProps {
@@ -68,24 +68,103 @@ const SignUpSection = ({
     error: "",
   });
 
+  /** Function to validate the sign up form. */
+  function validateFormSignUp() {
+    // Validate the password
+    if (calculateNumericalPasswordStrength(password) < 3) {
+      setFormError({
+        isError: 2,
+        error: "The password does not meet the specified requirements",
+      });
+      return;
+    }
+
+    // Match the password and confirm password
+    if (password !== confirmPassword) {
+      setFormError({ isError: 3, error: "Passwords do not match" });
+      return;
+    }
+
+    // Reset the form error state.
+    setFormError({ isError: 0, error: "" });
+  }
+
+  /**
+   * Function to handle sign up submission.
+   * @param thirdPartyToken
+   *    The third party token to sign up with.
+   *    Empty string if the sign up is through the form.
+   * @returns Nothing.
+   */
+  async function handleSignUp(thirdPartyToken: string): Promise<void> {
+    // Validate the form if the sign up is through the form.
+    if (!thirdPartyToken.length) validateFormSignUp();
+
+    try {
+      let newUser: User;
+      // Sign up done using the sign up form.
+      if (!thirdPartyToken.length) {
+        const requestDetails = {
+          email: email,
+          password: password,
+        };
+        newUser = await signUp(requestDetails);
+      }
+      // Sign up done using third party sign up.
+      else {
+        const requestDetails = {
+          token: thirdPartyToken,
+        };
+        newUser = await signUpGoogle(requestDetails);
+      }
+      // Set the logged in user.
+      setLoggedInUser!(newUser);
+
+      // Initialize the user's cart.
+      setCarts!([]);
+
+      // Set the snackbar to display a success message.
+      setSnackbarFormat({
+        text: "Successfully created your account!",
+        color: "success",
+      });
+      setSnackbarVisible(true);
+
+      // Increment the step.
+      setStep((prevStep) => prevStep + 1);
+    } catch (error) {
+      if (error instanceof ConflictError)
+        thirdPartyToken.length
+          ? setSnackbarFormat({ text: error.message, color: "danger" })
+          : setFormError({
+              isError: 1,
+              error: error.message,
+            });
+      else if (error instanceof Error) {
+        setSnackbarFormat({
+          text: error.message,
+          color: "danger",
+        });
+        setSnackbarVisible(true);
+      } else displayError(error);
+    }
+  }
+
   /** UI layout for the third party signup options. */
-  const thirdPartySignUp = (
+  const ThirdPartySignUp = (
     <Stack direction="row" gap={4} alignSelf="center" minWidth="43%">
-      {/* Google sign up button. */}
-      <Button
-        variant="soft"
-        color="primary"
-        startDecorator={<GoogleIcon />}
-        onClick={() => {
+      {/* Google log in button. */}
+      <GoogleButton
+        isLogIn={false}
+        onSuccess={(jwtToken: string) => handleSignUp(jwtToken)}
+        onError={() => {
           setSnackbarFormat({
-            text: "This feature is coming soon! Thank you for your patience.",
-            color: "primary",
+            text: "An error occurred while signing up with Google. Please try again.",
+            color: "danger",
           });
           setSnackbarVisible(true);
         }}
-      >
-        Sign up with Google
-      </Button>
+      />
 
       {/* Facebook sign up button. */}
       <Button
@@ -105,69 +184,12 @@ const SignUpSection = ({
     </Stack>
   );
 
-  /** Function to handle sign up submission. */
-  async function handleSignUp() {
-    // Validate the password
-    if (calculateNumericalPasswordStrength(password) < 3) {
-      setFormError({
-        isError: 2,
-        error: "The password does not meet the specified requirements",
-      });
-      return;
-    }
-
-    // Match the password and confirm password
-    if (password !== confirmPassword) {
-      setFormError({ isError: 3, error: "Passwords do not match" });
-      return;
-    }
-
-    // Reset the form error state.
-    setFormError({ isError: 0, error: "" });
-
-    try {
-      // Send request to backend to create the new user.
-      const requestDetails = {
-        email: email,
-        password: password,
-      };
-      const newUser: User = await signUp(requestDetails);
-      setLoggedInUser!(newUser);
-
-      // Initialize the user's cart.
-      setCarts!([]);
-
-      // Set the snackbar to display a success message.
-      setSnackbarFormat({
-        text: "Successfully created your account!",
-        color: "success",
-      });
-      setSnackbarVisible(true);
-
-      // Increment the step.
-      setStep((prevStep) => prevStep + 1);
-    } catch (error) {
-      if (error instanceof ConflictError)
-        setFormError({
-          isError: 1,
-          error: error.message,
-        });
-      else if (error instanceof Error) {
-        setSnackbarFormat({
-          text: error.message,
-          color: "danger",
-        });
-        setSnackbarVisible(true);
-      } else displayError(error);
-    }
-  }
-
   /** UI layout for the sign up form. */
-  const signUpForm = (
+  const SignUpForm = (
     <form
       onSubmit={(event) => {
         event.preventDefault();
-        handleSignUp();
+        handleSignUp("");
       }}
     >
       <Stack gap={3.5} direction="column" alignItems="center">
@@ -315,7 +337,7 @@ const SignUpSection = ({
       <Typography level="title-lg">Welcome to Edopla!</Typography>
 
       {/* Third party sign up options. */}
-      {thirdPartySignUp}
+      {ThirdPartySignUp}
 
       {/* Or separator. */}
       <Divider orientation="horizontal" sx={{ padding: "0% 10%" }}>
@@ -323,7 +345,7 @@ const SignUpSection = ({
       </Divider>
 
       {/* Sign up form. */}
-      {signUpForm}
+      {SignUpForm}
     </Stack>
   );
 };

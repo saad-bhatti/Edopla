@@ -21,6 +21,7 @@ import * as UsersAPI from "./network/users/users_api";
 import AppRoutes from "./routes/AppRoutes";
 import { onlyBackgroundSx } from "./styles/PageSX";
 import { CartsContext, LoggedInUserContext } from "./utils/contexts";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 
 // Google Maps API libraries to load
 const apiLibaries = ["places" as Library] as Library[];
@@ -52,28 +53,30 @@ function App() {
   });
 
   return (
-    <LoggedInUserContext.Provider value={{ loggedInUser, setLoggedInUser }}>
-      <CartsContext.Provider value={{ carts, setCarts }}>
-        <CssVarsProvider defaultMode="system">
-          <CssBaseline />
-          <BrowserRouter>
-            <Container id="App" style={{ padding: 0, margin: 0 }} sx={customSx}>
-              {/* Display for the navigation bar */}
-              <NavBar />
+    <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID as string}>
+      <LoggedInUserContext.Provider value={{ loggedInUser, setLoggedInUser }}>
+        <CartsContext.Provider value={{ carts, setCarts }}>
+          <CssVarsProvider defaultMode="system">
+            <CssBaseline />
+            <BrowserRouter>
+              <Container id="App" style={{ padding: 0, margin: 0 }} sx={customSx}>
+                {/* Display for the navigation bar */}
+                <NavBar />
 
-              {/* Load the Google Maps API */}
-              <LoadScript
-                googleMapsApiKey={process.env.REACT_APP_GOOGLE_API_KEY as string}
-                libraries={apiLibaries}
-              >
-                {/* Available routes. */}
-                <AppRoutes />
-              </LoadScript>
-            </Container>
-          </BrowserRouter>
-        </CssVarsProvider>
-      </CartsContext.Provider>
-    </LoggedInUserContext.Provider>
+                {/* Load the Google Maps API */}
+                <LoadScript
+                  googleMapsApiKey={process.env.REACT_APP_GOOGLE_PLACES_KEY as string}
+                  libraries={apiLibaries}
+                >
+                  {/* Available routes. */}
+                  <AppRoutes />
+                </LoadScript>
+              </Container>
+            </BrowserRouter>
+          </CssVarsProvider>
+        </CartsContext.Provider>
+      </LoggedInUserContext.Provider>
+    </GoogleOAuthProvider>
   );
 }
 

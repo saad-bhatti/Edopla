@@ -6,7 +6,6 @@
 
 import EmailIcon from "@mui/icons-material/Email";
 import FacebookIcon from "@mui/icons-material/Facebook";
-import GoogleIcon from "@mui/icons-material/Google";
 import InfoOutlined from "@mui/icons-material/InfoOutlined";
 import Key from "@mui/icons-material/Key";
 import {
@@ -14,21 +13,21 @@ import {
   Container,
   Divider,
   FormControl,
-  FormHelperText,
   FormLabel,
   Stack,
-  Typography,
+  Typography
 } from "@mui/joy";
 import { useColorScheme } from "@mui/joy/styles";
 import { SxProps } from "@mui/joy/styles/types";
 import { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import GoogleButton from "../components/GoogleButton";
 import CustomInput from "../components/custom/CustomInput";
 import CustomSnackbar from "../components/custom/CustomSnackbar";
 import { displayError } from "../errors/displayError";
 import { User } from "../models/users/user";
 import { getCarts } from "../network/items/carts_api";
-import { logIn } from "../network/users/users_api";
+import { logIn, logInGoogle } from "../network/users/users_api";
 import { simpleSx } from "../styles/PageSX";
 import { minPageHeight } from "../styles/constants";
 import * as Context from "../utils/contexts";
@@ -50,12 +49,6 @@ const LogInPage = () => {
   // State to track the password input.
   const [password, setPassword] = useState<string>("");
 
-  // State to control errors on the buyer information form.
-  const [formError, setFormError] = useState<{ isError: boolean; error: string }>({
-    isError: false,
-    error: "",
-  });
-
   // State to control the display of the snackbar.
   const [snackbarVisible, setSnackbarVisible] = useState<boolean>(false);
   // State to track the text and color of the snackbar.
@@ -68,55 +61,25 @@ const LogInPage = () => {
     color: "primary",
   });
 
-  /** UI layout for the third party login options. */
-  const thirdPartyLogIn = (
-    <Stack direction="column" gap={4} alignSelf="center" minWidth="43%">
-      {/* Google log in button. */}
-      <Button
-        variant="soft"
-        color="primary"
-        startDecorator={<GoogleIcon />}
-        onClick={() => {
-          setSnackbarFormat({
-            text: "This feature is coming soon! Thank you for your patience.",
-            color: "primary",
-          });
-          setSnackbarVisible(true);
-        }}
-      >
-        Continue with Google
-      </Button>
-
-      {/* Facebook log in button. */}
-      <Button
-        variant="soft"
-        color="primary"
-        startDecorator={<FacebookIcon />}
-        onClick={() => {
-          setSnackbarFormat({
-            text: "This feature is coming soon! Thank you for your patience.",
-            color: "primary",
-          });
-          setSnackbarVisible(true);
-        }}
-      >
-        Continue with Facebook
-      </Button>
-    </Stack>
-  );
-
   /** Function to handle log in submission. */
-  async function handleLogIn() {
-    // Reset the form error state.
-    setFormError({ isError: false, error: "" });
-
+  async function handleLogIn(thirdPartyToken: string): Promise<void> {
     try {
-      // Retrieve the user's information from the backend.
-      const requestDetails = {
-        email: email,
-        password: password,
-      };
-      const user: User = await logIn(requestDetails);
+      let user: User;
+      // Log in done using the log in form.
+      if (!thirdPartyToken.length) {
+        const requestDetails = {
+          email: email,
+          password: password,
+        };
+        user = await logIn(requestDetails);
+      }
+      // Log in done using third party log in.
+      else {
+        const requestDetails = {
+          token: thirdPartyToken,
+        };
+        user = await logInGoogle(requestDetails);
+      }
       setLoggedInUser!(user);
 
       // Retrieve the user's cart from the backend.
@@ -139,25 +102,49 @@ const LogInPage = () => {
     }
   }
 
+  /** UI layout for the third party login options. */
+  const ThirdPartyLogIn = (
+    <Stack direction="row" gap={4} alignSelf="center" minWidth="43%">
+      {/* Google log in button. */}
+      <GoogleButton
+        isLogIn={true}
+        onSuccess={(jwtToken: string) => handleLogIn(jwtToken)}
+        onError={() => {
+          setSnackbarFormat({
+            text: "An error occurred while logging in with Google. Please try again.",
+            color: "danger",
+          });
+          setSnackbarVisible(true);
+        }}
+      />
+
+      {/* Facebook log in button. */}
+      <Button
+        variant="soft"
+        color="primary"
+        startDecorator={<FacebookIcon />}
+        onClick={() => {
+          setSnackbarFormat({
+            text: "This feature is coming soon! Thank you for your patience.",
+            color: "primary",
+          });
+          setSnackbarVisible(true);
+        }}
+      >
+        Continue with Facebook
+      </Button>
+    </Stack>
+  );
+
   /** UI layout for the card content. */
-  const logInForm = (
+  const LogInForm = (
     <form
       onSubmit={(event) => {
         event.preventDefault();
-        handleLogIn();
+        handleLogIn("");
       }}
     >
       <Stack gap={4} direction="column" alignItems="center">
-        {/* Form error text. */}
-        {formError.isError && (
-          <FormControl error>
-            <FormHelperText>
-              <InfoOutlined fontSize="small" />
-              {formError.error}
-            </FormHelperText>
-          </FormControl>
-        )}
-
         {/* Email input. */}
         <FormControl>
           <FormLabel>Email</FormLabel>
@@ -197,7 +184,7 @@ const LogInPage = () => {
   );
 
   /** UI layout for the login section. */
-  const logInSection = (
+  const LogInSection = (
     <Stack
       direction="column"
       alignItems="center"
@@ -214,7 +201,7 @@ const LogInPage = () => {
       <Typography level="title-lg">Welcome back!</Typography>
 
       {/* Third party login options. */}
-      {thirdPartyLogIn}
+      {ThirdPartyLogIn}
 
       {/* Or separator. */}
       <Divider orientation="horizontal" sx={{ padding: "0% 10%" }}>
@@ -222,12 +209,12 @@ const LogInPage = () => {
       </Divider>
 
       {/* Log in form. */}
-      {logInForm}
+      {LogInForm}
     </Stack>
   );
 
   /** UI layout for the side image. */
-  const sideImage = (
+  const SideImage = (
     <Container
       sx={(theme) => ({
         [theme.getColorSchemeSelector("light")]: {
@@ -248,7 +235,7 @@ const LogInPage = () => {
   );
 
   /** UI layout for the snackbar. */
-  const snackbar = (
+  const Snackbar = (
     <CustomSnackbar
       content={snackbarFormat.text}
       color={snackbarFormat.color}
@@ -270,16 +257,16 @@ const LogInPage = () => {
   return (
     <Stack id="LoginPage" direction="row" spacing={1} sx={customSx}>
       {/* Snackbar. */}
-      {snackbar}
+      {Snackbar}
 
       {/* Log in section and side image. */}
       {colorScheme === "light" ? (
         <>
-          {logInSection} {sideImage}
+          {LogInSection} {SideImage}
         </>
       ) : (
         <>
-          {sideImage} {logInSection}
+          {SideImage} {LogInSection}
         </>
       )}
     </Stack>

@@ -3,7 +3,8 @@ import { InferSchemaType, model, Schema } from "mongoose";
 // Define a schema for the 'User' type
 const userSchema = new Schema({
   email: { type: String, required: true, unique: true },
-  password: { type: String, required: true, select: false },
+  thirdParty: { type: Boolean, required: true },
+  password: { type: String, select: false },
   _buyer: { type: Schema.Types.ObjectId, ref: "Buyer" },
   _vendor: { type: Schema.Types.ObjectId, ref: "Vendor" },
 });
