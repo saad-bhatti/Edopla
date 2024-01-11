@@ -12,15 +12,15 @@ import LogInPage from "../pages/LogInPage";
 import MenuPage from "../pages/Menu/MenuPage";
 import NotFoundPage from "../pages/NotFoundPage";
 import ProfilesPage from "../pages/ProfilesPage";
-import SignUpPage from "../pages/SignUp/SignUpPage";
-import { LoggedInUserContext, LoggedInUserContextProps } from "../utils/contexts";
+import SignUpPage from "../pages/SignUpPage";
+import { UserContext, UserContextProps } from "../utils/contexts";
 import BuyerProtectedRoute from "./BuyerProtectedRoute";
 import UserProtectedRoute from "./UserProtectedRoute";
 
 /** UI component for the routes of the application. */
 const AppRoutes = () => {
   // Retrieve the logged in user.
-  const { loggedInUser } = useContext<LoggedInUserContextProps | null>(LoggedInUserContext) || {};
+  const { user: loggedInUser } = useContext<UserContextProps | null>(UserContext) || {};
 
   return (
     <Routes>

@@ -5,6 +5,7 @@
 /** "Type" for User object. */
 export interface User {
   email: string;
+  thirdParty: boolean;
   _buyer: string;
   _vendor: string;
 }

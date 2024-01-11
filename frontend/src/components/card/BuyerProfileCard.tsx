@@ -16,19 +16,20 @@ import { StandaloneSearchBox } from "@react-google-maps/api";
 import { useState } from "react";
 import { Buyer } from "../../models/users/buyer";
 import { updateBuyer } from "../../network/users/buyers_api";
+import { snackBarColor } from "../../utils/contexts";
 import CustomCard from "../custom/CustomCard";
 import CustomInput from "../custom/CustomInput";
-import CustomSnackbar from "../custom/CustomSnackbar";
 
 /** Props of the buyer profile card component. */
 interface BuyerProfileCardProps {
   buyer: Buyer;
   onBuyerUpdate: (buyer: Buyer) => void;
+  updateSnackbar: (text: string, color: snackBarColor, visible: boolean) => void;
   sx?: SxProps;
 }
 
 /** UI component for a buyer profile card. */
-const BuyerProfileCard = ({ buyer, onBuyerUpdate, sx }: BuyerProfileCardProps) => {
+const BuyerProfileCard = ({ buyer, onBuyerUpdate, updateSnackbar, sx }: BuyerProfileCardProps) => {
   // Retrieve buyer info from props.
   const { buyerName, address, phoneNumber } = buyer;
   // State to track the new buyer name input value.
@@ -37,24 +38,6 @@ const BuyerProfileCard = ({ buyer, onBuyerUpdate, sx }: BuyerProfileCardProps) =
   const [newAddress, setNewAddress] = useState<string>(address);
   // State to track the new phone number input value.
   const [newPhoneNumber, setNewPhoneNumber] = useState<string>(phoneNumber || "");
-
-  // State to control errors on the buyer information form.
-  const [formError, setFormError] = useState<{ isError: number; error: string }>({
-    isError: 0,
-    error: "",
-  });
-
-  // State to control the display of the snackbar.
-  const [snackbarVisible, setSnackbarVisible] = useState<boolean>(false);
-  // State to track the text and color of the snackbar.
-  type possibleColors = "primary" | "neutral" | "danger" | "success" | "warning";
-  const [snackbarFormat, setSnackbarFormat] = useState<{
-    text: string;
-    color: possibleColors;
-  }>({
-    text: "",
-    color: "primary",
-  });
 
   /** Function to check whether any changes to the buyer info have been made. */
   function isChange(): boolean {
@@ -65,11 +48,9 @@ const BuyerProfileCard = ({ buyer, onBuyerUpdate, sx }: BuyerProfileCardProps) =
   async function handleProfileChange() {
     // Check that the phone number is valid, checking that it only contains numbers.
     if (!newPhoneNumber.match(/^[0-9]+$/)) {
-      setFormError({ isError: 3, error: "Please enter a valid phone number." });
+      updateSnackbar("Please enter a valid phone number.", "warning", true);
       return;
     }
-    // If there are no errors, reset the form error state.
-    setFormError({ isError: 0, error: "" });
 
     try {
       // Send request to backend to update buyer info.
@@ -81,19 +62,11 @@ const BuyerProfileCard = ({ buyer, onBuyerUpdate, sx }: BuyerProfileCardProps) =
       const updatedBuyer: Buyer = await updateBuyer(requestDetails);
       onBuyerUpdate(updatedBuyer);
 
-      // Show snackbar to indicate success.
-      setSnackbarFormat({
-        text: "Buyer profile updated successfully!",
-        color: "success",
-      });
-      setSnackbarVisible(true);
+      // Show success snackbar.
+      updateSnackbar("Buyer profile updated successfully!", "success", true);
     } catch (error) {
-      // Show snackbar to indicate failure.
-      setSnackbarFormat({
-        text: "Failed to update buyer profile.",
-        color: "danger",
-      });
-      setSnackbarVisible(true);
+      // Show error snackbar.
+      updateSnackbar("Failed to update buyer profile.", "warning", true);
     }
   }
 
@@ -103,7 +76,7 @@ const BuyerProfileCard = ({ buyer, onBuyerUpdate, sx }: BuyerProfileCardProps) =
       {/* Buyer name section title. */}
       <FormLabel>Buyer Name</FormLabel>
       {/* Buyer name input. */}
-      <FormControl error={formError.isError === 1}>
+      <FormControl>
         <CustomInput
           type="text"
           placeholder="Name"
@@ -129,7 +102,7 @@ const BuyerProfileCard = ({ buyer, onBuyerUpdate, sx }: BuyerProfileCardProps) =
       {/* Address section title. */}
       <FormLabel>Address</FormLabel>
       {/* Address input. */}
-      <FormControl error={formError.isError === 2}>
+      <FormControl>
         <StandaloneSearchBox
           onLoad={(ref) => {
             ref.addListener("places_changed", () => {
@@ -167,7 +140,7 @@ const BuyerProfileCard = ({ buyer, onBuyerUpdate, sx }: BuyerProfileCardProps) =
       {/* Phone number section title. */}
       <FormLabel>Phone Number</FormLabel>
       {/* Phone number input. */}
-      <FormControl error={formError.isError === 3}>
+      <FormControl>
         <CustomInput
           type="tel"
           placeholder="Phone Number"
@@ -187,7 +160,7 @@ const BuyerProfileCard = ({ buyer, onBuyerUpdate, sx }: BuyerProfileCardProps) =
   );
 
   /** UI layout for the change buyer information form. */
-  const changeBuyerInfoForm = (
+  const ChangeBuyerInfoForm = (
     <form
       onSubmit={(event) => {
         event.preventDefault();
@@ -195,16 +168,6 @@ const BuyerProfileCard = ({ buyer, onBuyerUpdate, sx }: BuyerProfileCardProps) =
       }}
     >
       <Stack spacing={1} direction="column" marginBottom={1} sx={{ maxWidth: "40%" }}>
-        {/* Form error text. */}
-        {formError.isError !== 0 && (
-          <FormControl error>
-            <FormHelperText>
-              <InfoOutlined fontSize="small" />
-              {formError.error}
-            </FormHelperText>
-          </FormControl>
-        )}
-
         {/* Buyer name section. */}
         {BuyerNameSection}
 
@@ -231,31 +194,10 @@ const BuyerProfileCard = ({ buyer, onBuyerUpdate, sx }: BuyerProfileCardProps) =
   );
 
   /** UI layout for the buyer profile card. */
-  const cardContent = <CardContent>{changeBuyerInfoForm}</CardContent>;
-
-  /** UI layout for the buyer info snackbar. */
-  const snackbar = (
-    <CustomSnackbar
-      content={snackbarFormat.text}
-      color={snackbarFormat.color}
-      open={snackbarVisible}
-      onClose={() => {
-        setSnackbarVisible(false);
-      }}
-      startDecorator={<InfoOutlined fontSize="small" />}
-    />
-  );
+  const BuyerCardContent = <CardContent>{ChangeBuyerInfoForm}</CardContent>;
 
   /** UI layout for the card. */
-  return (
-    <>
-      {/* Display the password snackbar. */}
-      {snackbar}
-
-      {/* Display the buyer profile card. */}
-      <CustomCard cardContent={cardContent} sx={sx} />
-    </>
-  );
+  return <CustomCard cardContent={BuyerCardContent} sx={sx} />;
 };
 
 export default BuyerProfileCard;

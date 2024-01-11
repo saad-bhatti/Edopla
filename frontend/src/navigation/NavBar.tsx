@@ -12,7 +12,7 @@ import { useContext } from "react";
 import { Link } from "react-router-dom";
 import CustomSearch from "../components/custom/CustomSearch";
 import * as Constants from "../styles/constants";
-import { LoggedInUserContext, LoggedInUserContextProps } from "../utils/contexts";
+import { UserContext, UserContextProps } from "../utils/contexts";
 import ColorSchemeToggle from "./ColorSchemeToggle";
 import { NavBarLoggedInHead, NavBarLoggedInTail } from "./NavBarLoggedInView";
 import { NavBarLoggedOutHead, NavBarLoggedOutTail } from "./NavBarLoggedOutView";
@@ -20,7 +20,7 @@ import { NavBarLoggedOutHead, NavBarLoggedOutTail } from "./NavBarLoggedOutView"
 /** UI component for a custom navigation. */
 const NavBar = () => {
   // Retrieve the logged in user from the context
-  const { loggedInUser } = useContext<LoggedInUserContextProps | null>(LoggedInUserContext) || {};
+  const { user: loggedInUser } = useContext<UserContextProps | null>(UserContext) || {};
   /** Sx for the navigation bar. */
   const customSx: SxProps = {
     minWidth: Constants.minPageWidth,

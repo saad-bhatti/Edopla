@@ -5,7 +5,6 @@
  **************************************************************************************************/
 
 import CloseIcon from "@mui/icons-material/Close";
-import InfoOutlined from "@mui/icons-material/InfoOutlined";
 import SentimentVeryDissatisfiedIcon from "@mui/icons-material/SentimentVeryDissatisfied";
 import { Button, Container, LinearProgress, Stack, Typography } from "@mui/joy";
 import { SxProps, Theme } from "@mui/joy/styles/types";
@@ -14,7 +13,6 @@ import VendorInformationCard from "../../components/card/VendorInformationCard";
 import CustomDropdown from "../../components/custom/CustomDropdown";
 import CustomFilter from "../../components/custom/CustomFilter";
 import CustomSearch from "../../components/custom/CustomSearch";
-import CustomSnackbar from "../../components/custom/CustomSnackbar";
 import { displayError } from "../../errors/displayError";
 import { Vendor } from "../../models/users/vendor";
 import { getSavedVendors, toggleSavedVendor } from "../../network/users/buyers_api";
@@ -29,10 +27,11 @@ import * as VendorListManipulation from "./VendorListManipulation";
 /** UI for the buy page. */
 const BuyPage = () => {
   // Retrieve the logged in user.
-  const { loggedInUser } =
-    useContext<Contexts.LoggedInUserContextProps | null>(Contexts.LoggedInUserContext) || {};
+  const { user } = useContext(Contexts.UserContext) || {};
   // Retrieve the user's cart.
-  const { carts } = useContext<Contexts.CartsContextProps | null>(Contexts.CartsContext) || {};
+  const { carts } = useContext(Contexts.CartsContext) || {};
+  // Retrieve the snackbar from the context
+  const { setSnackbar } = useContext(Contexts.SnackbarContext) || {};
   // State to track whether the page data is being loaded.
   const [isLoading, setIsLoading] = useState(true);
   // State to show an error message if the vendors fail to load.
@@ -48,20 +47,8 @@ const BuyPage = () => {
   const [savedVendorList, setSavedVendorList] = useState<Vendor[]>([]);
   // State to contain information of the unsaved vendors.
   const [unsavedVendorList, setUnsavedVendorList] = useState<Vendor[]>([]);
-
   // State to track the search value.
   const [searchValue, setSearchValue] = useState<string>("");
-  // State to control the display of the snackbar.
-  const [snackbarVisible, setSnackbarVisible] = useState<boolean>(false);
-  // State to track the text and color of the snackbar.
-  type possibleColors = "primary" | "neutral" | "danger" | "success" | "warning";
-  const [snackbarFormat, setSnackbarFormat] = useState<{
-    text: string;
-    color: possibleColors;
-  }>({
-    text: "",
-    color: "primary",
-  });
 
   /** Set the necessary states before rendering the page. */
   useEffect(() => {
@@ -102,7 +89,7 @@ const BuyPage = () => {
     }
     loadVendors();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loggedInUser, carts, activeVendorList]);
+  }, [user, carts, activeVendorList]);
 
   /** Function to search the complete vendor list by its name, categories, or price range. */
   function handleVendorSearch(searchValue: string): void {
@@ -113,11 +100,11 @@ const BuyPage = () => {
     );
     if (filteredList.length) setActiveVendorList(filteredList);
     else {
-      setSnackbarFormat({
+      setSnackbar!({
         text: "No vendor matching the search was found.",
         color: "warning",
+        visible: true,
       });
-      setSnackbarVisible(true);
       setActiveVendorList(completeVendorList);
     }
   }
@@ -144,11 +131,11 @@ const BuyPage = () => {
     // Update the activeVendorList state with the filtered vendor list
     if (filteredList.length) setActiveVendorList(filteredList);
     else {
-      setSnackbarFormat({
+      setSnackbar!({
         text: "No vendor matching the filter was found.",
         color: "warning",
+        visible: true,
       });
-      setSnackbarVisible(true);
       setActiveVendorList(completeVendorList);
     }
   }
@@ -235,21 +222,21 @@ const BuyPage = () => {
       else setUnsavedVendorList([...unsavedVendorList, vendorToToggle]);
 
       // Show snackbar to indicate success.
-      setSnackbarFormat({
+      setSnackbar!({
         text:
           updatedLength > initialLength
             ? "Vendor successfully saved!"
             : "Vendor successfully unsaved!",
         color: "success",
+        visible: true,
       });
     } catch (error) {
       // Show snackbar to indicate failure.
-      setSnackbarFormat({
-        text: "Failed to add or update the item to the cart.",
+      setSnackbar!({
+        text: "Failed to save or unsave the vendor.",
         color: "danger",
+        visible: true,
       });
-    } finally {
-      setSnackbarVisible(true);
     }
   }
 
@@ -299,19 +286,6 @@ const BuyPage = () => {
     </Stack>
   ) : null;
 
-  /** UI layout for the snackbar. */
-  const Snackbar = (
-    <CustomSnackbar
-      content={snackbarFormat.text}
-      color={snackbarFormat.color}
-      open={snackbarVisible}
-      onClose={() => {
-        setSnackbarVisible(false);
-      }}
-      startDecorator={<InfoOutlined fontSize="small" />}
-    />
-  );
-
   /** Sx for when a loading error occurs. */
   const errorSx: SxProps = (theme: Theme) => ({
     ...onlyBackgroundSx(theme),
@@ -350,9 +324,6 @@ const BuyPage = () => {
       {/* Display each menu item. */}
       {!isLoading && !showLoadingError && (
         <Container id="BuyPage" sx={customSx}>
-          {/* Display for the snackbar. */}
-          {Snackbar}
-
           {/* Display for the vendor view options. */}
           {VendorListViewOptions}
 

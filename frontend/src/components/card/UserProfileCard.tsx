@@ -22,61 +22,45 @@ import {
 import { SxProps } from "@mui/joy/styles/types";
 import { useState } from "react";
 import { User } from "../../models/users/user";
+import { snackBarColor } from "../../utils/contexts";
 import {
   calculateDescriptivePasswordStrength,
   calculateNumericalPasswordStrength,
 } from "../../utils/passwordStrength";
 import CustomCard from "../custom/CustomCard";
 import CustomInput from "../custom/CustomInput";
-import CustomSnackbar from "../custom/CustomSnackbar";
 
 /** Props of the user profile card component. */
 interface UserProfileCardProps {
   user: User;
+  updateSnackbar: (text: string, color: snackBarColor, visible: boolean) => void;
   sx?: SxProps;
 }
 
 /** UI component for a user profile card. */
-const UserProfileCard = ({ user, sx }: UserProfileCardProps) => {
+const UserProfileCard = ({ user, updateSnackbar, sx }: UserProfileCardProps) => {
   // Retrieve the email from the User object
   const { email } = user;
   // State to track the new email input value.
   const [newEmail, setNewEmail] = useState<string>(email);
-  // State to control the display of the snackbar.
-  const [emailSnackbarVisible, setEmailSnackbarVisible] = useState<boolean>(false);
-  // State to control errors on the email form.
-  const [emailError] = useState<{ isError: boolean; error: string }>({
-    isError: false,
-    error: "",
-  });
-
   // State to track the current password input value.
   const [currentPassword, setCurrentPassword] = useState<string>("");
   // State to track the new password input value.
   const [newPassword, setNewPassword] = useState<string>("");
   // State to track the confirm password input value.
   const [confirmPassword, setConfirmPassword] = useState<string>("");
-  // State to control the display of the snackbar.
-  const [passwordSnackbarVisible, setPasswordSnackbarVisible] = useState<boolean>(false);
-  // State to control errors on the password form.
-  const [passwordError, setPasswordError] = useState<{ isError: number; error: string }>({
-    isError: 0,
-    error: "",
-  });
 
   /** Function to handle an email change request. */
   function handleEmailChange(): void {
-    // TODO: Send request to change email to backend
-
     // Upon success, display the email snackbar
-    setEmailSnackbarVisible(true);
+    updateSnackbar("This feature is coming soon! Thank you for your patience.", "primary", true);
 
     // Reset the email field
     setNewEmail(email);
   }
 
   /** UI layout for the change email form. */
-  const changeEmailForm = (
+  const ChangeEmailForm = (
     <form
       onSubmit={(event) => {
         event.preventDefault();
@@ -84,21 +68,11 @@ const UserProfileCard = ({ user, sx }: UserProfileCardProps) => {
       }}
     >
       <Stack spacing={1} direction="column" marginBottom={1}>
-        {/* Email error text. */}
-        {emailError.isError && (
-          <FormControl error>
-            <FormHelperText>
-              <InfoOutlined fontSize="small" />
-              {emailError.error}
-            </FormHelperText>
-          </FormControl>
-        )}
-
         {/* Email section title. */}
         <FormLabel>Email</FormLabel>
 
         {/* Email input. */}
-        <FormControl error={emailError.isError}>
+        <FormControl>
           <CustomInput
             type="email"
             placeholder="Email"
@@ -130,50 +104,31 @@ const UserProfileCard = ({ user, sx }: UserProfileCardProps) => {
     </form>
   );
 
-  /** UI layout for the email snackbar. */
-  const emailSnackbar = (
-    <CustomSnackbar
-      content="This feature is coming soon! Thank you for your patience."
-      color="primary"
-      open={emailSnackbarVisible}
-      onClose={() => {
-        setEmailSnackbarVisible(false);
-      }}
-      startDecorator={<InfoOutlined fontSize="small" />}
-    />
-  );
-
   /** Function to handle a password change request. */
   function handlePasswordChange(): void {
     // Validate the password
     if (calculateNumericalPasswordStrength(newPassword) < 3) {
-      setPasswordError({
-        isError: 2,
-        error: "The new password does not meet the requirements",
-      });
+      updateSnackbar("The new password does not meet the requirements", "warning", true);
       return;
     }
 
     // Match the new password and confirm password
     if (newPassword !== confirmPassword) {
-      setPasswordError({ isError: 3, error: "Passwords do not match" });
+      updateSnackbar("Passwords do not match", "warning", true);
       return;
     }
 
-    // TODO: Conditions met, send request to backend
-
     // Upon success, display the password snackbar
-    setPasswordSnackbarVisible(true);
+    updateSnackbar("This feature is coming soon! Thank you for your patience.", "primary", true);
 
     // Reset the password fields and error state
     setCurrentPassword("");
     setNewPassword("");
     setConfirmPassword("");
-    setPasswordError({ isError: 0, error: "" });
   }
 
   /** UI layout for the change password form. */
-  const changePasswordForm = (
+  const ChangePasswordForm = (
     <form
       onSubmit={(event) => {
         event.preventDefault();
@@ -181,16 +136,6 @@ const UserProfileCard = ({ user, sx }: UserProfileCardProps) => {
       }}
     >
       <Stack spacing={2} direction="column" marginBottom={2}>
-        {/* Password error text. */}
-        {passwordError.isError !== 0 && (
-          <FormControl error>
-            <FormHelperText>
-              <InfoOutlined fontSize="small" />
-              {passwordError.error}
-            </FormHelperText>
-          </FormControl>
-        )}
-
         {/* Current password input. */}
         <FormControl>
           <FormLabel>Current Password</FormLabel>
@@ -202,7 +147,6 @@ const UserProfileCard = ({ user, sx }: UserProfileCardProps) => {
               setCurrentPassword(event.target.value);
             }}
             startDecorator={<Key fontSize="small" sx={{ alignSelf: "center" }} />}
-            error={passwordError.isError === 1}
           />
         </FormControl>
 
@@ -225,7 +169,6 @@ const UserProfileCard = ({ user, sx }: UserProfileCardProps) => {
                 setNewPassword(event.target.value);
               }}
               startDecorator={<Key fontSize="small" sx={{ alignSelf: "center" }} />}
-              error={passwordError.isError === 2}
             />
             {/* Password strength indicator. */}
             <LinearProgress
@@ -263,7 +206,6 @@ const UserProfileCard = ({ user, sx }: UserProfileCardProps) => {
                 setConfirmPassword(event.target.value);
               }}
               startDecorator={<Key fontSize="small" sx={{ alignSelf: "center" }} />}
-              error={passwordError.isError === 3}
             />
 
             {/* Password match text. */}
@@ -305,21 +247,8 @@ const UserProfileCard = ({ user, sx }: UserProfileCardProps) => {
     </form>
   );
 
-  /** UI layout for the password snackbar. */
-  const passwordSnackbar = (
-    <CustomSnackbar
-      content="This feature is coming soon! Thank you for your patience."
-      color="primary"
-      open={passwordSnackbarVisible}
-      onClose={() => {
-        setPasswordSnackbarVisible(false);
-      }}
-      startDecorator={<InfoOutlined fontSize="small" />}
-    />
-  );
-
   /** UI layout for the user profile card. */
-  const cardContent = (
+  const UserCardContent = (
     <CardContent>
       <Stack
         spacing={2}
@@ -329,7 +258,7 @@ const UserProfileCard = ({ user, sx }: UserProfileCardProps) => {
         sx={{ maxWidth: "51%" }}
       >
         {/* Change email form. */}
-        {changeEmailForm}
+        {ChangeEmailForm}
 
         {/* Divider. */}
         <Divider sx={{ border: "1px solid #000" }} />
@@ -338,22 +267,13 @@ const UserProfileCard = ({ user, sx }: UserProfileCardProps) => {
         <Typography level="title-lg">Change Password</Typography>
 
         {/* Change password form. */}
-        {changePasswordForm}
+        {ChangePasswordForm}
       </Stack>
     </CardContent>
   );
 
   /** UI layout for the card. */
-  return (
-    <>
-      {/* Display the email snackbar. */}
-      {emailSnackbar}
-      {/* Display the password snackbar. */}
-      {passwordSnackbar}
-      {/* Display the user profile card. */}
-      <CustomCard cardContent={cardContent} sx={sx} />
-    </>
-  );
+  return <CustomCard cardContent={UserCardContent} sx={sx} />;
 };
 
 export default UserProfileCard;

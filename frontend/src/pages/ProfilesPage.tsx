@@ -19,12 +19,14 @@ import { getVendor } from "../network/users/vendors_api";
 import { onlyBackgroundSx } from "../styles/PageSX";
 import { SectionTitleText } from "../styles/Text";
 import { minPageHeight, minPageWidth } from "../styles/constants";
-import { LoggedInUserContext, LoggedInUserContextProps } from "../utils/contexts";
+import { SnackbarContext, UserContext, snackBarColor } from "../utils/contexts";
 
 /** UI for the profiles page, depending on user's login status. */
 const ProfilesPage = () => {
   // Retrieve the logged in user from the context
-  const { loggedInUser } = useContext<LoggedInUserContextProps | null>(LoggedInUserContext) || {};
+  const { user } = useContext(UserContext) || {};
+  // Retrieve the snackbar from the context
+  const { setSnackbar } = useContext(SnackbarContext) || {};
   // State to track whether the page data is being loaded.
   const [isLoading, setIsLoading] = useState(true);
   // State to show an error message if the vendors fail to load.
@@ -38,16 +40,16 @@ const ProfilesPage = () => {
   useEffect(() => {
     async function loadProfiles() {
       try {
-        if (loggedInUser) {
+        if (user) {
           setShowLoadingError(false);
-          setIsLoading(true); // Show the loading indicator
+          setIsLoading(true);
 
-          if (loggedInUser._buyer) {
+          if (user._buyer) {
             const buyer = await getBuyer();
             setBuyer(buyer);
           }
 
-          if (loggedInUser._vendor) {
+          if (user._vendor) {
             const vendor = await getVendor();
             setVendor(vendor);
           }
@@ -60,7 +62,12 @@ const ProfilesPage = () => {
       }
     }
     loadProfiles();
-  }, [loggedInUser]);
+  }, [user]);
+
+  /** Function to update the snackbar. */
+  function updateSnackbar(text: string, color: snackBarColor, visible: boolean) {
+    setSnackbar!({ text, color, visible });
+  }
 
   /** Sx for when a loading error occurs. */
   const errorSx: SxProps = (theme: Theme) => ({
@@ -97,24 +104,36 @@ const ProfilesPage = () => {
       )}
 
       {/* Display each profile's information. */}
-      {!isLoading && !showLoadingError && loggedInUser && (
+      {!isLoading && !showLoadingError && user && (
         <Container id="ProfilesPage" sx={customSx}>
           {/* Tabs for the profile page. */}
           <CustomTabs
             tabs={[
               // Display the user profile card.
-              { tab: "User", panel: loggedInUser && <UserProfileCard user={loggedInUser} /> },
+              {
+                tab: "User",
+                panel: user && <UserProfileCard user={user} updateSnackbar={updateSnackbar} />,
+              },
               // Display the buyer profile card.
               {
                 tab: "Buyer",
-                panel: buyer && <BuyerProfileCard buyer={buyer} onBuyerUpdate={setBuyer} />,
+                panel: buyer && (
+                  <BuyerProfileCard
+                    buyer={buyer}
+                    onBuyerUpdate={setBuyer}
+                    updateSnackbar={updateSnackbar}
+                  />
+                ),
               },
               // Display the vendor profile card.
               {
                 tab: "Vendor",
                 panel: vendor && (
-                  // Display the vendor profile card.
-                  <VendorProfileCard vendor={vendor} onVendorUpdate={setVendor} />
+                  <VendorProfileCard
+                    vendor={vendor}
+                    onVendorUpdate={setVendor}
+                    updateSnackbar={updateSnackbar}
+                  />
                 ),
               },
             ]}

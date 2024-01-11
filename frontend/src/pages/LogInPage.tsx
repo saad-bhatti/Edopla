@@ -6,24 +6,14 @@
 
 import EmailIcon from "@mui/icons-material/Email";
 import FacebookIcon from "@mui/icons-material/Facebook";
-import InfoOutlined from "@mui/icons-material/InfoOutlined";
 import Key from "@mui/icons-material/Key";
-import {
-  Button,
-  Container,
-  Divider,
-  FormControl,
-  FormLabel,
-  Stack,
-  Typography
-} from "@mui/joy";
+import { Button, Container, Divider, FormControl, FormLabel, Stack, Typography } from "@mui/joy";
 import { useColorScheme } from "@mui/joy/styles";
 import { SxProps } from "@mui/joy/styles/types";
 import { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import GoogleButton from "../components/GoogleButton";
 import CustomInput from "../components/custom/CustomInput";
-import CustomSnackbar from "../components/custom/CustomSnackbar";
 import { displayError } from "../errors/displayError";
 import { User } from "../models/users/user";
 import { getCarts } from "../network/items/carts_api";
@@ -40,26 +30,16 @@ const LogInPage = () => {
   const { colorScheme } = useColorScheme();
 
   // Retrieve the set logged in user function from the context
-  const { setLoggedInUser } =
-    useContext<Context.LoggedInUserContextProps | null>(Context.LoggedInUserContext) || {};
+  const { setUser: setLoggedInUser } =
+    useContext<Context.UserContextProps | null>(Context.UserContext) || {};
   // Retrieve the set cart function from the context
   const { setCarts } = useContext<Context.CartsContextProps | null>(Context.CartsContext) || {};
+  // Retrieve the snackbar from the context
+  const { setSnackbar } = useContext(Context.SnackbarContext) || {};
   // State to track the email input.
   const [email, setEmail] = useState<string>("");
   // State to track the password input.
   const [password, setPassword] = useState<string>("");
-
-  // State to control the display of the snackbar.
-  const [snackbarVisible, setSnackbarVisible] = useState<boolean>(false);
-  // State to track the text and color of the snackbar.
-  type possibleColors = "primary" | "neutral" | "danger" | "success" | "warning";
-  const [snackbarFormat, setSnackbarFormat] = useState<{
-    text: string;
-    color: possibleColors;
-  }>({
-    text: "",
-    color: "primary",
-  });
 
   /** Function to handle log in submission. */
   async function handleLogIn(thirdPartyToken: string): Promise<void> {
@@ -86,16 +66,23 @@ const LogInPage = () => {
       const carts = await getCarts();
       setCarts!(carts);
 
+      // Display a success message.
+      setSnackbar!({
+        text: "Successfully logged in.",
+        color: "success",
+        visible: true,
+      });
+
       // Redirect to home page.
       navigate("/");
     } catch (error) {
       // Show snackbar to indicate failure.
       if (error instanceof Error) {
-        setSnackbarFormat({
+        setSnackbar!({
           text: error.message,
-          color: "danger",
+          color: "warning",
+          visible: true,
         });
-        setSnackbarVisible(true);
       } else {
         displayError(error);
       }
@@ -110,11 +97,11 @@ const LogInPage = () => {
         isLogIn={true}
         onSuccess={(jwtToken: string) => handleLogIn(jwtToken)}
         onError={() => {
-          setSnackbarFormat({
+          setSnackbar!({
             text: "An error occurred while logging in with Google. Please try again.",
             color: "danger",
+            visible: true,
           });
-          setSnackbarVisible(true);
         }}
       />
 
@@ -124,11 +111,11 @@ const LogInPage = () => {
         color="primary"
         startDecorator={<FacebookIcon />}
         onClick={() => {
-          setSnackbarFormat({
+          setSnackbar!({
             text: "This feature is coming soon! Thank you for your patience.",
             color: "primary",
+            visible: true,
           });
-          setSnackbarVisible(true);
         }}
       >
         Continue with Facebook
@@ -234,19 +221,6 @@ const LogInPage = () => {
     />
   );
 
-  /** UI layout for the snackbar. */
-  const Snackbar = (
-    <CustomSnackbar
-      content={snackbarFormat.text}
-      color={snackbarFormat.color}
-      open={snackbarVisible}
-      onClose={() => {
-        setSnackbarVisible(false);
-      }}
-      startDecorator={<InfoOutlined fontSize="small" />}
-    />
-  );
-
   /** Sx for the log in page. */
   const customSx: SxProps = {
     ...simpleSx,
@@ -256,9 +230,6 @@ const LogInPage = () => {
   /** UI layout for the login page. */
   return (
     <Stack id="LoginPage" direction="row" spacing={1} sx={customSx}>
-      {/* Snackbar. */}
-      {Snackbar}
-
       {/* Log in section and side image. */}
       {colorScheme === "light" ? (
         <>

@@ -5,24 +5,24 @@
  **************************************************************************************************/
 
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
-import InfoOutlined from "@mui/icons-material/InfoOutlined";
 import { Button, Container, LinearProgress, Stack, Typography } from "@mui/joy";
 import { SxProps } from "@mui/joy/styles/types";
 import { useContext, useEffect, useState } from "react";
 import CartItemCard from "../../components/card/CartItemCard";
 import CustomDropdown from "../../components/custom/CustomDropdown";
 import CustomSearch from "../../components/custom/CustomSearch";
-import CustomSnackbar from "../../components/custom/CustomSnackbar";
 import { CartItem } from "../../models/items/cartItem";
 import * as CartsAPI from "../../network/items/carts_api";
 import { minPageHeight, minPageWidth } from "../../styles/constants";
-import { CartsContext, CartsContextProps } from "../../utils/contexts";
+import { CartsContext, SnackbarContext } from "../../utils/contexts";
 import * as CartsManipulation from "./CartsManipulation";
 
 /** UI for the cart page. */
 const CartPage = () => {
   // Retrieve the logged in user's cart from the context
-  const { carts, setCarts } = useContext<CartsContextProps | null>(CartsContext) || {};
+  const { carts, setCarts } = useContext(CartsContext) || {};
+  // Retrieve the snackbar from the context
+  const { setSnackbar } = useContext(SnackbarContext) || {};
   // State to track whether the cart is being seperated.
   const [isSeperating, setIsSeperating] = useState(true);
   // State to track the active carts.
@@ -33,18 +33,6 @@ const CartPage = () => {
   const [laterCarts, setLaterCarts] = useState<CartItem[]>([]);
   // State to track whether the carts are being searched.
   const [isSearching, setIsSearching] = useState(false);
-
-  // State to control the display of the snackbar.
-  const [snackbarVisible, setSnackbarVisible] = useState<boolean>(false);
-  // State to track the text and color of the snackbar.
-  type possibleColors = "primary" | "neutral" | "danger" | "success" | "warning";
-  const [snackbarFormat, setSnackbarFormat] = useState<{
-    text: string;
-    color: possibleColors;
-  }>({
-    text: "",
-    color: "primary",
-  });
 
   /** Seperate the cart by "savedForLater" only once before rendering the page. */
   useEffect(() => {
@@ -100,18 +88,19 @@ const CartPage = () => {
       setCarts!([]);
       setActiveCarts([]);
 
-      setSnackbarFormat({
+      // Show snackbar to indicate success.
+      setSnackbar!({
         text: "All carts emptied successfully!",
         color: "success",
+        visible: true,
       });
     } catch (error) {
       // Show snackbar to indicate failure.
-      setSnackbarFormat({
+      setSnackbar!({
         text: "Failed to empty all carts.",
         color: "danger",
+        visible: true,
       });
-    } finally {
-      setSnackbarVisible(true);
     }
   }
 
@@ -136,18 +125,18 @@ const CartPage = () => {
         : setNowCarts(nowCarts.filter((cartItem) => cartItem._id !== cartItemToEmpty._id));
 
       // Show snackbar to indicate success.
-      setSnackbarFormat({
+      setSnackbar!({
         text: "Cart emptied successfully!",
         color: "success",
+        visible: true,
       });
     } catch (error) {
       // Show snackbar to indicate failure.
-      setSnackbarFormat({
+      setSnackbar!({
         text: "Failed to empty cart.",
         color: "danger",
+        visible: true,
       });
-    } finally {
-      setSnackbarVisible(true);
     }
   }
 
@@ -183,18 +172,18 @@ const CartPage = () => {
       );
 
       // Show snackbar to indicate success.
-      setSnackbarFormat({
+      setSnackbar!({
         text: "Cart updated successfully!",
         color: "success",
+        visible: true,
       });
     } catch (error) {
       // Show snackbar to indicate failure.
-      setSnackbarFormat({
+      setSnackbar!({
         text: "Failed to update cart.",
         color: "danger",
+        visible: true,
       });
-    } finally {
-      setSnackbarVisible(true);
     }
   }
 
@@ -229,19 +218,19 @@ const CartPage = () => {
         );
 
         // Show snackbar to indicate success.
-        setSnackbarFormat({
+        setSnackbar!({
           text: "Item deleted successfully!",
           color: "success",
+          visible: true,
         });
       }
     } catch (error) {
       // Show snackbar to indicate failure.
-      setSnackbarFormat({
-        text: "Failed to delete item",
+      setSnackbar!({
+        text: "Failed to delete item.",
         color: "danger",
+        visible: true,
       });
-    } finally {
-      setSnackbarVisible(true);
     }
   }
 
@@ -272,18 +261,18 @@ const CartPage = () => {
       );
 
       // Show snackbar to indicate success.
-      setSnackbarFormat({
+      setSnackbar!({
         text: "Successfully updated the cart!",
         color: "success",
+        visible: true,
       });
     } catch (error) {
       // Show snackbar to indicate failure.
-      setSnackbarFormat({
+      setSnackbar!({
         text: "Failed to update cart.",
         color: "danger",
+        visible: true,
       });
-    } finally {
-      setSnackbarVisible(true);
     }
   }
 
@@ -329,19 +318,6 @@ const CartPage = () => {
       </Typography>
     );
 
-  /** UI layout for the snackbar. */
-  const snackbar = (
-    <CustomSnackbar
-      content={snackbarFormat.text}
-      color={snackbarFormat.color}
-      open={snackbarVisible}
-      onClose={() => {
-        setSnackbarVisible(false);
-      }}
-      startDecorator={<InfoOutlined fontSize="small" />}
-    />
-  );
-
   /** Sx for the carts page. */
   const customSx: SxProps = {
     py: 5,
@@ -351,9 +327,6 @@ const CartPage = () => {
 
   return (
     <Container id="CartsPage" sx={customSx}>
-      {/* Snackbar. */}
-      {snackbar}
-
       <Stack
         useFlexGap
         direction="row"

@@ -4,48 +4,45 @@
  * party account.                                                                                 *
  **************************************************************************************************/
 
-import InfoOutlined from "@mui/icons-material/InfoOutlined";
 import { Container, Stack } from "@mui/joy";
 import { useColorScheme } from "@mui/joy/styles";
 import { SxProps } from "@mui/joy/styles/types";
 import { useContext, useState } from "react";
-import CustomSnackbar from "../../components/custom/CustomSnackbar";
-import CustomStepper from "../../components/custom/CustomStepper";
-import { simpleSx } from "../../styles/PageSX";
-import { minPageHeight } from "../../styles/constants";
-import * as Context from "../../utils/contexts";
-import CreateBuyerSection from "./CreateBuyerSection";
-import CreateVendorSection from "./CreateVendorSection";
-import SignUpSection from "./SignUpSection";
+import CustomStepper from "../components/custom/CustomStepper";
+import { simpleSx } from "../styles/PageSX";
+import { minPageHeight } from "../styles/constants";
+import * as Context from "../utils/contexts";
+import CreateBuyerSection from "../components/section/CreateBuyerSection";
+import CreateVendorSection from "../components/section/CreateVendorSection";
+import CreateUserSection from "../components/section/CreateUserSection";
 
 /** UI for the sign up page. */
 const SignUpPage = () => {
   // Get the current color scheme and the function to change it
   const { colorScheme } = useColorScheme();
-
   // Retrieve the set logged in user function from the context
-  const { setLoggedInUser } =
-    useContext<Context.LoggedInUserContextProps | null>(Context.LoggedInUserContext) || {};
+  const { setUser } = useContext(Context.UserContext) || {};
   // Retrieve the set cart function from the context
-  const { setCarts } = useContext<Context.CartsContextProps | null>(Context.CartsContext) || {};
+  const { setCarts } = useContext(Context.CartsContext) || {};
+  // Retrieve the snackbar from the context
+  const { setSnackbar } = useContext(Context.SnackbarContext) || {};
   // State to control the current step of the sign up process.
   const [currentStep, setCurrentStep] = useState<number>(0);
-  // State to control the display of the snackbar.
-  const [snackbarVisible, setSnackbarVisible] = useState<boolean>(false);
   // State to track whether the client is a buyer or a vendor.
   const [isBuyer, setIsBuyer] = useState<boolean>(true);
-  // State to track the text and color of the snackbar.
-  type possibleColors = "primary" | "neutral" | "danger" | "success" | "warning";
-  const [snackbarFormat, setSnackbarFormat] = useState<{
-    text: string;
-    color: possibleColors;
-  }>({
-    text: "",
-    color: "primary",
-  });
+
+  /**
+   * Function to set the snackbar format and its visibility.
+   * @param text The text to display in the snackbar.
+   * @param color The color of the snackbar.
+   * @param visible Whether the snackbar is visible or not.
+   */
+  function updateSnackbar(text: string, color: Context.snackBarColor, visible: boolean): void {
+    setSnackbar!({ text, color, visible });
+  }
 
   /** UI layout for the custom stepper. */
-  const customStepper = (
+  const Stepper = (
     <CustomStepper
       labels={["Sign Up", "Create Profile"]}
       currentStep={currentStep}
@@ -59,54 +56,45 @@ const SignUpPage = () => {
   );
 
   /** UI layout for the sign up section. */
-  const signUpSection = (
-    <SignUpSection
-      setLoggedInUser={setLoggedInUser!}
+  const CreateUser = (
+    <CreateUserSection
+      setUser={setUser!}
       setIsBuyer={setIsBuyer}
       setCarts={setCarts!}
       setStep={setCurrentStep}
-      setSnackbarFormat={setSnackbarFormat}
-      setSnackbarVisible={setSnackbarVisible}
+      updateSnackbar={updateSnackbar}
     />
   );
 
   /** UI layout for the buyer profile section. */
-  const createBuyerSection = (
-    <CreateBuyerSection
-      setLoggedInUser={setLoggedInUser!}
-      setSnackbarFormat={setSnackbarFormat}
-      setSnackbarVisible={setSnackbarVisible}
-    />
+  const CreateBuyer = (
+    <CreateBuyerSection setUser={setUser!} updateSnackbar={updateSnackbar} />
   );
 
   /** UI layout for the vendor profile section. */
-  const createVendorSection = (
-    <CreateVendorSection
-      setLoggedInUser={setLoggedInUser!}
-      setSnackbarFormat={setSnackbarFormat}
-      setSnackbarVisible={setSnackbarVisible}
-    />
+  const CreateVendor = (
+    <CreateVendorSection setUser={setUser!} updateSnackbar={updateSnackbar} />
   );
 
   /** UI layout for the all sections container. */
-  const sectionContainer = (
+  const SectionContainer = (
     <Stack id="SignUpPageSection" direction="column" spacing={1}>
       {/* Custom stepper. */}
-      {customStepper}
+      {Stepper}
 
       {/* Sign up section. */}
-      {currentStep === 0 && signUpSection}
+      {currentStep === 0 && CreateUser}
 
       {/* Buyer profile section. */}
-      {currentStep === 1 && isBuyer && createBuyerSection}
+      {currentStep === 1 && isBuyer && CreateBuyer}
 
       {/* Vendor profile section. */}
-      {currentStep === 1 && !isBuyer && createVendorSection}
+      {currentStep === 1 && !isBuyer && CreateVendor}
     </Stack>
   );
 
   /** UI layout for the side image. */
-  const sideImage = (
+  const SideImage = (
     <Container
       sx={(theme) => ({
         [theme.getColorSchemeSelector("light")]: {
@@ -126,19 +114,6 @@ const SignUpPage = () => {
     />
   );
 
-  /** UI layout for the snackbar. */
-  const snackbar = (
-    <CustomSnackbar
-      content={snackbarFormat.text}
-      color={snackbarFormat.color}
-      open={snackbarVisible}
-      onClose={() => {
-        setSnackbarVisible(false);
-      }}
-      startDecorator={<InfoOutlined fontSize="small" />}
-    />
-  );
-
   /** Sx for the log in page. */
   const customSx: SxProps = {
     ...simpleSx,
@@ -148,17 +123,14 @@ const SignUpPage = () => {
   /** UI layout for the sign up page. */
   return (
     <Stack id="SignUpPage" direction="row" spacing={1} sx={customSx}>
-      {/* Snackbar. */}
-      {snackbar}
-
       {/* Sections and side image. */}
       {colorScheme === "light" ? (
         <>
-          {sideImage} {sectionContainer}
+          {SideImage} {SectionContainer}
         </>
       ) : (
         <>
-          {sectionContainer} {sideImage}
+          {SectionContainer} {SideImage}
         </>
       )}
     </Stack>

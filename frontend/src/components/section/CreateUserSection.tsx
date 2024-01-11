@@ -17,44 +17,35 @@ import {
   Typography,
 } from "@mui/joy";
 import { useState } from "react";
-import GoogleButton from "../../components/GoogleButton";
-import CustomDropdown from "../../components/custom/CustomDropdown";
-import CustomInput from "../../components/custom/CustomInput";
 import { displayError } from "../../errors/displayError";
-import { ConflictError } from "../../errors/http_errors";
 import { CartItem } from "../../models/items/cartItem";
 import { User } from "../../models/users/user";
 import { signUp, signUpGoogle } from "../../network/users/users_api";
+import { snackBarColor } from "../../utils/contexts";
 import {
   calculateDescriptivePasswordStrength,
   calculateNumericalPasswordStrength,
 } from "../../utils/passwordStrength";
+import GoogleButton from "../GoogleButton";
+import CustomDropdown from "../custom/CustomDropdown";
+import CustomInput from "../custom/CustomInput";
 
 /** Props of the sign up section. */
 interface SignUpSectionProps {
-  setLoggedInUser: React.Dispatch<React.SetStateAction<User | null>>;
+  setUser: React.Dispatch<React.SetStateAction<User | null>>;
   setCarts: React.Dispatch<React.SetStateAction<CartItem[]>>;
-
   setIsBuyer: React.Dispatch<React.SetStateAction<boolean>>;
   setStep: React.Dispatch<React.SetStateAction<number>>;
-
-  setSnackbarFormat: React.Dispatch<
-    React.SetStateAction<{
-      text: string;
-      color: "primary" | "neutral" | "danger" | "success" | "warning";
-    }>
-  >;
-  setSnackbarVisible: React.Dispatch<React.SetStateAction<boolean>>;
+  updateSnackbar: (text: string, color: snackBarColor, visible: boolean) => void;
 }
 
 /** UI for the sign up section. */
 const SignUpSection = ({
-  setLoggedInUser,
+  setUser,
   setCarts,
   setIsBuyer,
   setStep,
-  setSnackbarFormat,
-  setSnackbarVisible,
+  updateSnackbar,
 }: SignUpSectionProps) => {
   // State to track the email input.
   const [email, setEmail] = useState<string>("");
@@ -118,35 +109,18 @@ const SignUpSection = ({
         newUser = await signUpGoogle(requestDetails);
       }
       // Set the logged in user.
-      setLoggedInUser!(newUser);
+      setUser!(newUser);
 
       // Initialize the user's cart.
       setCarts!([]);
 
       // Set the snackbar to display a success message.
-      setSnackbarFormat({
-        text: "Successfully created your account!",
-        color: "success",
-      });
-      setSnackbarVisible(true);
+      updateSnackbar("Successfully created your account!", "success", true);
 
       // Increment the step.
       setStep((prevStep) => prevStep + 1);
     } catch (error) {
-      if (error instanceof ConflictError)
-        thirdPartyToken.length
-          ? setSnackbarFormat({ text: error.message, color: "danger" })
-          : setFormError({
-              isError: 1,
-              error: error.message,
-            });
-      else if (error instanceof Error) {
-        setSnackbarFormat({
-          text: error.message,
-          color: "danger",
-        });
-        setSnackbarVisible(true);
-      } else displayError(error);
+      error instanceof Error ? updateSnackbar(error.message, "danger", true) : displayError(error);
     }
   }
 
@@ -158,11 +132,11 @@ const SignUpSection = ({
         isLogIn={false}
         onSuccess={(jwtToken: string) => handleSignUp(jwtToken)}
         onError={() => {
-          setSnackbarFormat({
-            text: "An error occurred while signing up with Google. Please try again.",
-            color: "danger",
-          });
-          setSnackbarVisible(true);
+          updateSnackbar(
+            "An error occurred while signing up with Google. Please try again.",
+            "danger",
+            true
+          );
         }}
       />
 
@@ -172,11 +146,11 @@ const SignUpSection = ({
         color="primary"
         startDecorator={<FacebookIcon />}
         onClick={() => {
-          setSnackbarFormat({
-            text: "This feature is coming soon! Thank you for your patience.",
-            color: "primary",
-          });
-          setSnackbarVisible(true);
+          updateSnackbar(
+            "This feature is coming soon! Thank you for your patience.",
+            "primary",
+            true
+          );
         }}
       >
         Sign up with Facebook

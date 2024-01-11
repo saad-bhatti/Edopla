@@ -18,25 +18,16 @@ import { displayError } from "../../errors/displayError";
 import { User } from "../../models/users/user";
 import { Vendor } from "../../models/users/vendor";
 import { createVendor } from "../../network/users/vendors_api";
+import { snackBarColor } from "../../utils/contexts";
 
 /** Props of the vendor profile section. */
 interface CreateVendorSectionProps {
-  setLoggedInUser: React.Dispatch<React.SetStateAction<User | null>>;
-  setSnackbarFormat: React.Dispatch<
-    React.SetStateAction<{
-      text: string;
-      color: "primary" | "neutral" | "danger" | "success" | "warning";
-    }>
-  >;
-  setSnackbarVisible: React.Dispatch<React.SetStateAction<boolean>>;
+  setUser: React.Dispatch<React.SetStateAction<User | null>>;
+  updateSnackbar: (text: string, color: snackBarColor, visible: boolean) => void;
 }
 
 /** UI for the create vendor section. */
-const CreateVendorSection = ({
-  setLoggedInUser,
-  setSnackbarFormat,
-  setSnackbarVisible,
-}: CreateVendorSectionProps) => {
+const CreateVendorSection = ({ setUser, updateSnackbar }: CreateVendorSectionProps) => {
   // Variable to navigate to other pages
   const navigate = useNavigate();
   // State to track the vendor name input value.
@@ -81,29 +72,18 @@ const CreateVendorSection = ({
         cuisineTypes: cuisineTypes,
       };
       const newVendor: Vendor = await createVendor(requestDetails);
-      setLoggedInUser((user: User | null) => {
+      setUser((user: User | null) => {
         user!._vendor = newVendor._id;
         return user;
       });
 
       // Show success snackbar.
-      setSnackbarFormat({
-        text: "Successfully created a vendor profile!",
-        color: "success",
-      });
-      setSnackbarVisible(true);
+      updateSnackbar("Successfully created a vendor profile!", "success", true);
 
-      // Wait for 3 seconds and then navigate to the home page.
-      await new Promise((resolve) => setTimeout(resolve, 3000));
+      // Navigate to the home page.
       navigate("/");
     } catch (error) {
-      if (error instanceof Error) {
-        setSnackbarFormat({
-          text: error.message,
-          color: "danger",
-        });
-        setSnackbarVisible(true);
-      } else displayError(error);
+      error instanceof Error ? updateSnackbar(error.message, "danger", true) : displayError(error);
     }
   }
 
