@@ -108,13 +108,13 @@ const UserProfileCard = ({ user, updateSnackbar, sx }: UserProfileCardProps) => 
   function handlePasswordChange(): void {
     // Validate the password
     if (calculateNumericalPasswordStrength(newPassword) < 3) {
-      updateSnackbar("The new password does not meet the requirements", "warning", true);
+      updateSnackbar("The new password does not meet the requirements", "danger", true);
       return;
     }
 
     // Match the new password and confirm password
     if (newPassword !== confirmPassword) {
-      updateSnackbar("Passwords do not match", "warning", true);
+      updateSnackbar("Passwords do not match", "danger", true);
       return;
     }
 

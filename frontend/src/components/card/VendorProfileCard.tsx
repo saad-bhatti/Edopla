@@ -71,7 +71,7 @@ const VendorProfileCard = ({
   async function handleProfileChange() {
     // Check that the phone number is valid, checking that it only contains numbers.
     if (!newPhoneNumber.match(/^[0-9]+$/)) {
-      updateSnackbar("Please enter a valid phone number.", "warning", true);
+      updateSnackbar("Please enter a valid phone number.", "danger", true);
       return;
     }
 
@@ -92,7 +92,7 @@ const VendorProfileCard = ({
       updateSnackbar("Vendor profile updated successfully!", "success", true);
     } catch (error) {
       // Show snackbar to indicate failure.
-      updateSnackbar("Failed to update vendor profile.", "warning", true);
+      updateSnackbar("Failed to update vendor profile.", "danger", true);
     }
   }
 
@@ -241,7 +241,7 @@ const VendorProfileCard = ({
             onClick={() => {
               // Check if the cuisine type is already in the list.
               if (newCuisineTypes.includes(newCuisine)) {
-                updateSnackbar("Cuisine type already exists.", "warning", true);
+                updateSnackbar("Cuisine type already exists.", "danger", true);
                 return;
               }
               // Otherwise, add the cuisine type to the list and reset error state.

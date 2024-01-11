@@ -80,7 +80,7 @@ const LogInPage = () => {
       if (error instanceof Error) {
         setSnackbar!({
           text: error.message,
-          color: "warning",
+          color: "danger",
           visible: true,
         });
       } else {

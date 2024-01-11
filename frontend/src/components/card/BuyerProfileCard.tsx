@@ -48,7 +48,7 @@ const BuyerProfileCard = ({ buyer, onBuyerUpdate, updateSnackbar, sx }: BuyerPro
   async function handleProfileChange() {
     // Check that the phone number is valid, checking that it only contains numbers.
     if (!newPhoneNumber.match(/^[0-9]+$/)) {
-      updateSnackbar("Please enter a valid phone number.", "warning", true);
+      updateSnackbar("Please enter a valid phone number.", "danger", true);
       return;
     }
 
@@ -66,7 +66,7 @@ const BuyerProfileCard = ({ buyer, onBuyerUpdate, updateSnackbar, sx }: BuyerPro
       updateSnackbar("Buyer profile updated successfully!", "success", true);
     } catch (error) {
       // Show error snackbar.
-      updateSnackbar("Failed to update buyer profile.", "warning", true);
+      updateSnackbar("Failed to update buyer profile.", "danger", true);
     }
   }
 

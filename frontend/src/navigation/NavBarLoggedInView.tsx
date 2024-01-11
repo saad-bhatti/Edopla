@@ -22,6 +22,7 @@ import { useContext, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { logout } from "../network/users/users_api";
 import * as Context from "../utils/contexts";
+import { googleLogout } from "@react-oauth/google";
 
 /** UI component for the logged in view of the navigation bar head. */
 export const NavBarLoggedInHead = () => {
@@ -94,6 +95,9 @@ export const NavBarLoggedInTail = () => {
   /** Function to handle logging out request. */
   async function logOut(): Promise<void> {
     try {
+      // Log out from Google
+      if (user?.thirdParty) googleLogout();
+
       // Execute the logout request
       await logout();
       setUser!(null);
@@ -111,7 +115,7 @@ export const NavBarLoggedInTail = () => {
     } catch (error) {
       setSnackbar!({
         text: "Failed to log out. Please try again later.",
-        color: "warning",
+        color: "danger",
         visible: true,
       });
     }

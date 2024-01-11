@@ -102,7 +102,7 @@ const BuyPage = () => {
     else {
       setSnackbar!({
         text: "No vendor matching the search was found.",
-        color: "warning",
+        color: "danger",
         visible: true,
       });
       setActiveVendorList(completeVendorList);
@@ -133,7 +133,7 @@ const BuyPage = () => {
     else {
       setSnackbar!({
         text: "No vendor matching the filter was found.",
-        color: "warning",
+        color: "danger",
         visible: true,
       });
       setActiveVendorList(completeVendorList);
@@ -161,7 +161,7 @@ const BuyPage = () => {
         {searchValue && (
           <Button
             variant="solid"
-            color="warning"
+            color="danger"
             onClick={() => handleVendorSearch("")}
             endDecorator={<CloseIcon />}
           >

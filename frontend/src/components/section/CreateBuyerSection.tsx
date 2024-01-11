@@ -68,7 +68,7 @@ const CreateBuyerSection = ({ setUser, updateSnackbar }: CreateBuyerSectionProps
       // Navigate to the home page.
       navigate("/");
     } catch (error) {
-      error instanceof Error ? updateSnackbar(error.message, "warning", true) : displayError(error);
+      error instanceof Error ? updateSnackbar(error.message, "danger", true) : displayError(error);
     }
   }
 
