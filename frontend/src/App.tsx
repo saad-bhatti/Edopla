@@ -15,7 +15,6 @@ import { GoogleOAuthProvider } from "@react-oauth/google";
 import { useEffect, useState } from "react";
 import { BrowserRouter } from "react-router-dom";
 import CustomSnackbar from "./components/custom/CustomSnackbar";
-import { displayError } from "./errors/displayError";
 import { CartItem } from "./models/items/cartItem";
 import { User } from "./models/users/user";
 import NavBar from "./navigation/NavBar";
@@ -51,9 +50,7 @@ function App() {
         const user = await UsersAPI.getLoggedInUser();
         setUser(user);
         setCarts(await getCarts());
-      } catch (error) {
-        displayError(error);
-      }
+      } catch (error) {}
     }
     fetchLoggedInUser();
   }, []);

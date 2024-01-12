@@ -15,7 +15,6 @@ interface GoogleButtonProps {
 const GoogleButton = ({ isLogIn, onSuccess, onError }: GoogleButtonProps) => {
   return (
     <GoogleLogin
-      useOneTap
       onSuccess={(credentialResponse: CredentialResponse) => {
         const jwtToken: string = credentialResponse.credential!;
         onSuccess(jwtToken);

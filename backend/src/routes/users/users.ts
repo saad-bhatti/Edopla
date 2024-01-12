@@ -9,10 +9,9 @@ const router = express.Router();
 router.get("/", requiresAuth, UsersController.getAuthenticatedUser);
 
 // Routing for signing up, logging in, logging out
-router.post("/signup", UsersController.signUp);
-router.post("/signup/google", UsersController.signUpGoogle);
-router.post("/login", UsersController.login);
-router.post("/login/google", UsersController.loginGoogle);
-router.post("/logout", requiresAuth, UsersController.logout);
+router.post("/authenticate/form", UsersController.authenticationForm);
+router.post("/authenticate/google", UsersController.authenticationGoogle);
+router.post("/authenticate/github", UsersController.authenticateGitHub);
+router.post("/logout", requiresAuth, UsersController.logOut);
 
 export default router;

@@ -5,7 +5,7 @@
  **************************************************************************************************/
 
 import EmailIcon from "@mui/icons-material/Email";
-import FacebookIcon from "@mui/icons-material/Facebook";
+import GitHubIcon from "@mui/icons-material/GitHub";
 import Key from "@mui/icons-material/Key";
 import { Button, Container, Divider, FormControl, FormLabel, Stack, Typography } from "@mui/joy";
 import { useColorScheme } from "@mui/joy/styles";
@@ -17,7 +17,11 @@ import CustomInput from "../components/custom/CustomInput";
 import { displayError } from "../errors/displayError";
 import { User } from "../models/users/user";
 import { getCarts } from "../network/items/carts_api";
-import { logIn, logInGoogle } from "../network/users/users_api";
+import {
+  authenticateForm,
+  authenticateGitHub,
+  authenticateGoogle,
+} from "../network/users/users_api";
 import { simpleSx } from "../styles/PageSX";
 import { minPageHeight } from "../styles/constants";
 import * as Context from "../utils/contexts";
@@ -42,23 +46,40 @@ const LogInPage = () => {
   const [password, setPassword] = useState<string>("");
 
   /** Function to handle log in submission. */
-  async function handleLogIn(thirdPartyToken: string): Promise<void> {
+  async function handleLogIn(identifierType: number, token: string): Promise<void> {
     try {
+      let requestDetails: any;
       let user: User;
-      // Log in done using the log in form.
-      if (!thirdPartyToken.length) {
-        const requestDetails = {
-          email: email,
-          password: password,
-        };
-        user = await logIn(requestDetails);
-      }
-      // Log in done using third party log in.
-      else {
-        const requestDetails = {
-          token: thirdPartyToken,
-        };
-        user = await logInGoogle(requestDetails);
+      switch (identifierType) {
+        // Log in done using the log in form.
+        case 0:
+          requestDetails = {
+            isSignUp: false,
+            email: email,
+            password: password,
+          };
+          user = await authenticateForm(requestDetails);
+          break;
+        // Log in done using google.
+        case 1:
+          console.log(`In google section: ${token}`);
+          requestDetails = {
+            isSignUp: false,
+            token: token,
+          };
+          user = await authenticateGoogle(requestDetails);
+          break;
+        // Log in done using GitHub.
+        case 2:
+          requestDetails = {
+            isSignUp: false,
+            token: token,
+          };
+          user = await authenticateGitHub(requestDetails);
+          break;
+        // Invalid identifier type.
+        default:
+          throw new Error("Invalid identifier type.");
       }
       setLoggedInUser!(user);
 
@@ -95,7 +116,7 @@ const LogInPage = () => {
       {/* Google log in button. */}
       <GoogleButton
         isLogIn={true}
-        onSuccess={(jwtToken: string) => handleLogIn(jwtToken)}
+        onSuccess={(jwtToken: string) => handleLogIn(1, jwtToken)}
         onError={() => {
           setSnackbar!({
             text: "An error occurred while logging in with Google. Please try again.",
@@ -105,20 +126,18 @@ const LogInPage = () => {
         }}
       />
 
-      {/* Facebook log in button. */}
+      {/* GitHub sign up button. */}
       <Button
         variant="soft"
         color="primary"
-        startDecorator={<FacebookIcon />}
+        startDecorator={<GitHubIcon />}
         onClick={() => {
-          setSnackbar!({
-            text: "This feature is coming soon! Thank you for your patience.",
-            color: "primary",
-            visible: true,
-          });
+          window.location.href =
+            "https://github.com/login/oauth/authorize?client_id=" +
+            process.env.REACT_APP_GITHUB_CLIENT_ID;
         }}
       >
-        Continue with Facebook
+        Sign up with GitHub
       </Button>
     </Stack>
   );
@@ -128,7 +147,7 @@ const LogInPage = () => {
     <form
       onSubmit={(event) => {
         event.preventDefault();
-        handleLogIn("");
+        handleLogIn(0, "");
       }}
     >
       <Stack gap={4} direction="column" alignItems="center">

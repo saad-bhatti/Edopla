@@ -9,15 +9,22 @@ import { fetchData } from "../../utils/fetchData";
 const apiUrl = process.env.REACT_APP_API_URL;
 const endpoint = `${apiUrl}/api/users`;
 
-/** Interface for the input to sign up or login. */
-export interface UserCredentials {
+/** Interface for the input to authenticate using a form. */
+export interface FormCredentials {
+  isSignUp: boolean;
   email: string;
   password: string;
 }
 
-/** Interface for the input to authenticate with a token. */
-export interface TokenCredentials {
+/** Interface for the input to authenticate with a google JWT token. */
+export interface GoogleCredentials {
+  isSignUp: boolean;
   token: string;
+}
+
+/** Interface for the input to authenticate with a GitHub code. */
+export interface GitHubCredentials {
+  code: string;
 }
 
 /**
@@ -33,44 +40,12 @@ export async function getLoggedInUser(): Promise<User> {
 }
 
 /**
- * Function to create a new user.
- * @param credentials the new user's email and password.
- * @returns A promise that resolves to the new user object.
- */
-export async function signUp(credentials: UserCredentials): Promise<User> {
-  const response = await fetchData(`${endpoint}/signup`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(credentials),
-  });
-  return response.json();
-}
-
-/**
- * Function to create a new user with Google.
- * @param credentials the new user's token.
- * @returns A promise that resolves to the new user object.
- */
-export async function signUpGoogle(credentials: TokenCredentials): Promise<User> {
-  const response = await fetchData(`${endpoint}/signup/google`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(credentials),
-  });
-  return response.json();
-}
-
-/**
- * Function to login in a user.
- * @param credentials the user's email and password.
+ * Function to authenticate the client with a form.
+ * @param credentials isSignUp: boolean, email: string, password: string
  * @returns A promise that resolves to the user object.
  */
-export async function logIn(credentials: UserCredentials): Promise<User> {
-  const response = await fetchData(`${endpoint}/login`, {
+export async function authenticateForm(credentials: FormCredentials): Promise<User> {
+  const response = await fetchData(`${endpoint}//authenticate/form`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -81,12 +56,28 @@ export async function logIn(credentials: UserCredentials): Promise<User> {
 }
 
 /**
- * Function to login in a user with Google.
- * @param credentials the user's token.
+ * Function to authenticate the client with Google oauth.
+ * @param credentials isSignUp: boolean, token: string
  * @returns A promise that resolves to the user object.
  */
-export async function logInGoogle(credentials: TokenCredentials): Promise<User> {
-  const response = await fetchData(`${endpoint}/login/google`, {
+export async function authenticateGoogle(credentials: GoogleCredentials): Promise<User> {
+  const response = await fetchData(`${endpoint}/authenticate/google`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(credentials),
+  });
+  return response.json();
+}
+
+/**
+ * Function to authenticate the client with GitHub oauth.
+ * @param credentials isSignUp: boolean, token: string
+ * @returns A promise that resolves to the user object.
+ */
+export async function authenticateGitHub(credentials: GitHubCredentials): Promise<User> {
+  const response = await fetchData(`${endpoint}/authenticate/github`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

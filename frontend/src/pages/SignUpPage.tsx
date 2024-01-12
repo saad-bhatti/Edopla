@@ -8,13 +8,12 @@ import { Container, Stack } from "@mui/joy";
 import { useColorScheme } from "@mui/joy/styles";
 import { SxProps } from "@mui/joy/styles/types";
 import { useContext, useState } from "react";
-import CustomStepper from "../components/custom/CustomStepper";
+import CreateBuyerSection from "../components/section/CreateBuyerSection";
+import CreateUserSection from "../components/section/CreateUserSection";
+import CreateVendorSection from "../components/section/CreateVendorSection";
 import { simpleSx } from "../styles/PageSX";
 import { minPageHeight } from "../styles/constants";
 import * as Context from "../utils/contexts";
-import CreateBuyerSection from "../components/section/CreateBuyerSection";
-import CreateVendorSection from "../components/section/CreateVendorSection";
-import CreateUserSection from "../components/section/CreateUserSection";
 
 /** UI for the sign up page. */
 const SignUpPage = () => {
@@ -41,20 +40,6 @@ const SignUpPage = () => {
     setSnackbar!({ text, color, visible });
   }
 
-  /** UI layout for the custom stepper. */
-  const Stepper = (
-    <CustomStepper
-      labels={["Sign Up", "Create Profile"]}
-      currentStep={currentStep}
-      sx={{
-        minWidth: "50vw",
-        outline: "0.5px solid #E0E0E0",
-        borderRadius: "6px",
-        padding: "1% 0%",
-      }}
-    />
-  );
-
   /** UI layout for the sign up section. */
   const CreateUser = (
     <CreateUserSection
@@ -79,9 +64,6 @@ const SignUpPage = () => {
   /** UI layout for the all sections container. */
   const SectionContainer = (
     <Stack id="SignUpPageSection" direction="column" spacing={1}>
-      {/* Custom stepper. */}
-      {Stepper}
-
       {/* Sign up section. */}
       {currentStep === 0 && CreateUser}
 

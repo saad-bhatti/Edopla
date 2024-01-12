@@ -3,7 +3,7 @@
  **************************************************************************************************/
 
 import EmailIcon from "@mui/icons-material/Email";
-import FacebookIcon from "@mui/icons-material/Facebook";
+import GitHubIcon from "@mui/icons-material/GitHub";
 import InfoOutlined from "@mui/icons-material/InfoOutlined";
 import Key from "@mui/icons-material/Key";
 import {
@@ -16,11 +16,11 @@ import {
   Stack,
   Typography,
 } from "@mui/joy";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { displayError } from "../../errors/displayError";
 import { CartItem } from "../../models/items/cartItem";
 import { User } from "../../models/users/user";
-import { signUp, signUpGoogle } from "../../network/users/users_api";
+import { authenticateForm, authenticateGitHub, authenticateGoogle } from "../../network/users/users_api";
 import { snackBarColor } from "../../utils/contexts";
 import {
   calculateDescriptivePasswordStrength,
@@ -59,25 +59,61 @@ const SignUpSection = ({
     error: "",
   });
 
+  /** After GitHub oauth redirect, retrieve the code from the url. */
+  useEffect(() => {
+    async function signUpWithGitHub(code: string) {
+      try {
+        // Send a request to sign up with GitHub.
+        const requestDetails = {
+          code: code,
+        };
+        const user: User = await authenticateGitHub(requestDetails);
+
+        // Set the necessary contexts.
+        setUser(user);
+        setCarts([]);
+
+        // Set the snackbar to display a success message.
+        updateSnackbar("Successfully created your account!", "success", true);
+
+        // Increment the step.
+        setStep((prevStep) => prevStep + 1);
+      } catch (error) {
+        error instanceof Error
+          ? updateSnackbar(error.message, "danger", true)
+          : displayError(error);
+      }
+    }
+    // Retrieve the code from the url.
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+    const codeParam = urlParams.get("code");
+
+    // If the code is present, send a request to sign up with GitHub.
+    if (codeParam) signUpWithGitHub(codeParam);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   /** Function to validate the sign up form. */
-  function validateFormSignUp() {
+  function validateFormSignUp(): boolean {
     // Validate the password
     if (calculateNumericalPasswordStrength(password) < 3) {
       setFormError({
         isError: 2,
         error: "The password does not meet the specified requirements",
       });
-      return;
+      return false;
     }
 
     // Match the password and confirm password
     if (password !== confirmPassword) {
       setFormError({ isError: 3, error: "Passwords do not match" });
-      return;
+      return false;
     }
 
     // Reset the form error state.
     setFormError({ isError: 0, error: "" });
+    return true;
   }
 
   /**
@@ -87,26 +123,45 @@ const SignUpSection = ({
    *    Empty string if the sign up is through the form.
    * @returns Nothing.
    */
-  async function handleSignUp(thirdPartyToken: string): Promise<void> {
+  async function handleSignUp(identifierType: number, token: string): Promise<void> {
     // Validate the form if the sign up is through the form.
-    if (!thirdPartyToken.length) validateFormSignUp();
+    if (!identifierType) {
+      const passedValidation: boolean = validateFormSignUp();
+      if (!passedValidation) return;
+    }
 
     try {
+      let requestDetails: any;
       let newUser: User;
-      // Sign up done using the sign up form.
-      if (!thirdPartyToken.length) {
-        const requestDetails = {
-          email: email,
-          password: password,
-        };
-        newUser = await signUp(requestDetails);
-      }
-      // Sign up done using third party sign up.
-      else {
-        const requestDetails = {
-          token: thirdPartyToken,
-        };
-        newUser = await signUpGoogle(requestDetails);
+      switch (identifierType) {
+        // Log in done using the log in form.
+        case 0:
+          requestDetails = {
+            isSignUp: true,
+            email: email,
+            password: password,
+          };
+          newUser = await authenticateForm(requestDetails);
+          break;
+        // Log in done using google.
+        case 1:
+          requestDetails = {
+            isSignUp: true,
+            token: token,
+          };
+          newUser = await authenticateGoogle(requestDetails);
+          break;
+        // Log in done using GitHub.
+        case 2:
+          requestDetails = {
+            isSignUp: true,
+            token: token,
+          };
+          newUser = await authenticateGitHub(requestDetails);
+          break;
+        // Invalid identifier type.
+        default:
+          throw new Error("Invalid identifier type.");
       }
       // Set the logged in user.
       setUser!(newUser);
@@ -130,7 +185,7 @@ const SignUpSection = ({
       {/* Google log in button. */}
       <GoogleButton
         isLogIn={false}
-        onSuccess={(jwtToken: string) => handleSignUp(jwtToken)}
+        onSuccess={(jwtToken: string) => handleSignUp(1, jwtToken)}
         onError={() => {
           updateSnackbar(
             "An error occurred while signing up with Google. Please try again.",
@@ -140,20 +195,18 @@ const SignUpSection = ({
         }}
       />
 
-      {/* Facebook sign up button. */}
+      {/* GitHub sign up button. */}
       <Button
         variant="soft"
         color="primary"
-        startDecorator={<FacebookIcon />}
+        startDecorator={<GitHubIcon />}
         onClick={() => {
-          updateSnackbar(
-            "This feature is coming soon! Thank you for your patience.",
-            "primary",
-            true
-          );
+          window.location.href =
+            "https://github.com/login/oauth/authorize?client_id=" +
+            process.env.REACT_APP_GITHUB_CLIENT_ID;
         }}
       >
-        Sign up with Facebook
+        Sign up with GitHub
       </Button>
     </Stack>
   );
@@ -163,10 +216,10 @@ const SignUpSection = ({
     <form
       onSubmit={(event) => {
         event.preventDefault();
-        handleSignUp("");
+        handleSignUp(0, "");
       }}
     >
-      <Stack gap={3.5} direction="column" alignItems="center">
+      <Stack gap={3} direction="column" alignItems="center">
         {/* Form error text. */}
         {formError.isError !== 0 && (
           <FormControl error>
@@ -304,7 +357,7 @@ const SignUpSection = ({
         outline: "0.5px solid #E0E0E0",
         borderRadius: "6px",
         padding: "1% 0%",
-        minHeight: "75vh",
+        minHeight: "85vh",
       }}
     >
       {/* Welcome message. */}

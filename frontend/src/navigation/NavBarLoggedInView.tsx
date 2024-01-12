@@ -84,6 +84,9 @@ export const NavBarLoggedInTail = () => {
   const navigate = useNavigate();
   // Retrieve the logged in user from the context
   const { user, setUser } = useContext<Context.UserContextProps | null>(Context.UserContext) || {};
+  // Retrieve the identification from the user context
+  const identification =
+    user?.identification.email || user?.identification.googleId || user?.identification.gitHubId;
   // Retrieve the set cart function from the context
   const { carts, setCarts } =
     useContext<Context.CartsContextProps | null>(Context.CartsContext) || {};
@@ -96,7 +99,7 @@ export const NavBarLoggedInTail = () => {
   async function logOut(): Promise<void> {
     try {
       // Log out from Google
-      if (user?.thirdParty) googleLogout();
+      if (user?.identification.googleId) googleLogout();
 
       // Execute the logout request
       await logout();
@@ -144,7 +147,7 @@ export const NavBarLoggedInTail = () => {
     >
       {/* User email. */}
       <MenuItem>
-        <Typography level="body-xs">{user?.email}</Typography>
+        <Typography level="body-xs">{identification}</Typography>
       </MenuItem>
 
       <ListDivider />

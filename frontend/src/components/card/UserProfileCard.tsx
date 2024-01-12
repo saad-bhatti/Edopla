@@ -39,10 +39,12 @@ interface UserProfileCardProps {
 
 /** UI component for a user profile card. */
 const UserProfileCard = ({ user, updateSnackbar, sx }: UserProfileCardProps) => {
-  // Retrieve the email from the User object
-  const { email } = user;
+  // Retrieve the identification from the User object
+  const { identification } = user;
+  const mainIdentification =
+    identification.email || identification.googleId || identification.gitHubId || "";
   // State to track the new email input value.
-  const [newEmail, setNewEmail] = useState<string>(email);
+  const [newEmail, setNewEmail] = useState<string>(mainIdentification);
   // State to track the current password input value.
   const [currentPassword, setCurrentPassword] = useState<string>("");
   // State to track the new password input value.
@@ -56,7 +58,7 @@ const UserProfileCard = ({ user, updateSnackbar, sx }: UserProfileCardProps) => 
     updateSnackbar("This feature is coming soon! Thank you for your patience.", "primary", true);
 
     // Reset the email field
-    setNewEmail(email);
+    setNewEmail(mainIdentification);
   }
 
   /** UI layout for the change email form. */
@@ -89,7 +91,7 @@ const UserProfileCard = ({ user, updateSnackbar, sx }: UserProfileCardProps) => 
         <FormHelperText>Your email is not visible to any vendor or buyer.</FormHelperText>
 
         {/* Submit button. */}
-        {newEmail !== email && (
+        {newEmail !== mainIdentification && (
           <Button
             type="submit"
             variant="solid"

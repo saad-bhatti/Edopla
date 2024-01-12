@@ -5,21 +5,22 @@ import UserModel from "../../models/users/user";
 import { assertIsDefined } from "../../util/assertIsDefined";
 import { LoginTicket, OAuth2Client, TokenPayload } from "google-auth-library";
 
-/** "Type" of the HTTP request body when signing up. */
-interface SignUpBody {
+/** "Type" of the HTTP request body when authenticating with a form. */
+interface FormBody {
+  isSignUp?: boolean;
   email?: string;
   password?: string;
 }
 
-/** "Type" of the HTTP request body when logging in. */
-interface LogInBody {
-  email?: string;
-  password?: string;
-}
-
-/** "Type" of the HTTP request body when authenticating with a token. */
-interface TokenBody {
+/** "Type" of the HTTP request body when authenticating with a google JWT token. */
+interface GoogleBody {
+  isSignUp?: boolean;
   token?: string;
+}
+
+/** "Type" of the HTTP request body when authenticating with a GitHub code. */
+interface GitHubBody {
+  code?: string;
 }
 
 /**
@@ -46,183 +47,186 @@ export const getAuthenticatedUser: RequestHandler<unknown, unknown, unknown, unk
 };
 
 /**
- * Add a new user to the database and log them in.
- *  - Prerequisite: An existing user with the same email must not exist in the database.
+ * Given the mode and credentials, either sign up and create a user or log in to an existing user
+ * into the session.
+ *  - Prerequisite: For sign up, a user with the same email must not already exist.
  *  - Params: None
- *  - Body: email, password
+ *  - Body: isSignUp: boolean, email: string, password: string
  *  - Return: User
  */
-export const signUp: RequestHandler<unknown, unknown, SignUpBody, unknown> = async (
+export const authenticationForm: RequestHandler<unknown, unknown, FormBody, unknown> = async (
   req,
   res,
   next
 ) => {
+  const isSignUp = req.body.isSignUp;
   const email = req.body.email;
   const passwordRaw = req.body.password;
   try {
-    // Validate the existance of the credentials
-    if (!email || !passwordRaw) throw new Http_Errors.MissingField();
+    // Part 1: Validate the existance of the arguments
+    if (isSignUp === undefined || !email || !passwordRaw) throw new Http_Errors.MissingField();
 
-    // Check if the email is already in use
-    const existingEmail = await UserModel.findOne({ email: email });
-    if (existingEmail) throw new Http_Errors.AlreadyExists("User with this email");
+    // Part 2: Retrieve any user with a matching email
+    const searchedUser = await UserModel.findOne({ "identification.email": email })
+      .select("+password")
+      .exec();
 
-    // Hash the password
-    const hashedPassword = await bcrypt.hash(passwordRaw, 10);
+    let returnUser;
+    // Part 3: Handle the sign up case, by creating a new user
+    if (isSignUp) {
+      if (searchedUser) throw new Http_Errors.AlreadyExists("User with this email");
+      const hashedPassword = await bcrypt.hash(passwordRaw, 10);
 
-    // Send the request to create the user
-    const newUser = await UserModel.create({
-      email: email,
-      thirdParty: false,
-      password: hashedPassword,
-      _buyer: null,
-      _vendor: null,
-    });
+      returnUser = await UserModel.create({
+        identification: { email: email, googleId: null, gitHubId: null },
+        password: hashedPassword,
+        _buyer: null,
+        _vendor: null,
+      });
+    }
 
-    // Set up a session
-    req.session.userId = newUser._id;
-    req.session.buyerId = newUser._buyer;
-    req.session.vendorId = newUser._vendor;
+    // Part 4: Handle the log in case, by checking the password
+    else {
+      if (!searchedUser) throw new Http_Errors.InvalidField("credentials");
+      const isValidPassword = await bcrypt.compare(passwordRaw, searchedUser.password!);
+      if (!isValidPassword) throw new Http_Errors.InvalidField("credentials");
 
-    res.status(201).json(newUser);
-  } catch (error) {
-    next(error);
-  }
-};
-
-/**
- * Add a new user to the database given Google's JWT token and log them in.
- *  - Prerequisite: An existing user with the same email must not exist in the database.
- *  - Params: None
- *  - Body: token
- *  - Return: User
- */
-export const signUpGoogle: RequestHandler<unknown, unknown, TokenBody, unknown> = async (
-  req,
-  res,
-  next
-) => {
-  const token = req.body.token;
-  try {
-    // Part 1: Verify existance and validity of the token
-    if (!token) throw new Http_Errors.MissingField();
-
-    const client = new OAuth2Client();
-    const ticket: LoginTicket = await client.verifyIdToken({
-      idToken: token,
-      audience: process.env.GOOGLE_CLIENT_ID,
-    });
-
-    // Part 2: Retrieve the user's email
-    const payload: TokenPayload | undefined = ticket.getPayload();
-    const email: string | undefined = payload?.email;
-    if (!email) throw new Http_Errors.InvalidField("token");
-
-    // Part 3: Check if the email is already in use
-    const existingEmail = await UserModel.findOne({ email: email });
-    if (existingEmail) throw new Http_Errors.AlreadyExists("User with this email");
-
-    // Part 4: Send the request to create the user
-    const newUser = await UserModel.create({
-      email: email,
-      thirdParty: true,
-      password: null,
-      _buyer: null,
-      _vendor: null,
-    });
-
-    // Part 5: Set up a session and return the new user
-    req.session.userId = newUser._id;
-    req.session.buyerId = newUser._buyer;
-    req.session.vendorId = newUser._vendor;
-
-    res.status(201).json(newUser);
-  } catch (error) {
-    next(error);
-  }
-};
-
-/**
- * Login an existing user by creating a new session.
- *  - Prerequisite: None
- *  - Params: None
- *  - Body: email, password
- *  - Return: User
- */
-export const login: RequestHandler<unknown, unknown, LogInBody, unknown> = async (
-  req,
-  res,
-  next
-) => {
-  const email = req.body.email;
-  const passwordRaw = req.body.password;
-  try {
-    // Validate the existance of the credentials
-    if (!email || !passwordRaw) throw new Http_Errors.MissingField();
-
-    // Check if the user exists
-    const user = await UserModel.findOne({ email: email }).select("+password").exec();
-    if (!user) throw new Http_Errors.InvalidField("credentials");
-
-    // If the user is a third party and a custom password has not been set, throw an error
-    if (!user.password)
-      throw new Http_Errors.CustomError("Please login using the relevant third party option", 400);
-
-    // Check if the password is correct
-    const isValidPassword = await bcrypt.compare(passwordRaw, user.password);
-    if (!isValidPassword) throw new Http_Errors.InvalidField("credentials");
-
-    // Set up a session
-    req.session.userId = user._id;
-    req.session.buyerId = user._buyer;
-    req.session.vendorId = user._vendor;
-
-    // Prepare the return object
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { password, ...userWithoutPassword } = user;
-    res.status(200).json(userWithoutPassword);
-  } catch (error) {
-    next(error);
-  }
-};
-
-/**
- * Login an existing user using  by creating a new session.
- *  - Prerequisite: None
- *  - Params: None
- *  - Body: token
- *  - Return: User
- */
-export const loginGoogle: RequestHandler<unknown, unknown, TokenBody, unknown> = async (
-  req,
-  res,
-  next
-) => {
-  const token = req.body.token;
-  try {
-    // Part 1: Verify existance and validity of the token
-    if (!token) throw new Http_Errors.MissingField();
-
-    const client = new OAuth2Client();
-    const ticket: LoginTicket = await client.verifyIdToken({
-      idToken: token,
-      audience: process.env.GOOGLE_CLIENT_ID,
-    });
-
-    // Part 2: Retrieve the user's email
-    const payload: TokenPayload | undefined = ticket.getPayload();
-    const email: string | undefined = payload?.email;
-    if (!email) throw new Http_Errors.InvalidField("token");
-
-    // Part 3: Retrieve the user
-    const user = await UserModel.findOne({ email: email }).exec();
-    if (!user) throw new Http_Errors.InvalidField("token");
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { password, ...userWithoutPassword } = searchedUser;
+      returnUser = userWithoutPassword;
+    }
 
     // Part 5: Set up a session and return the user
-    req.session.userId = user._id;
-    req.session.buyerId = user._buyer;
-    req.session.vendorId = user._vendor;
-    res.status(201).json(user);
+    req.session.userId = returnUser._id;
+    req.session.buyerId = returnUser._buyer;
+    req.session.vendorId = returnUser._vendor;
+    res.status(201).json(returnUser);
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Given the mode and google jwt token, either sign up and create a user or log in to an existing
+ * user into the session.
+ *  - Prerequisite: For sign up, a user with the same google id must not already exist.
+ *  - Params: None
+ *  - Body: isSignUp: boolean, token: string
+ *  - Return: User
+ */
+export const authenticationGoogle: RequestHandler<unknown, unknown, GoogleBody, unknown> = async (
+  req,
+  res,
+  next
+) => {
+  const isSignUp = req.body.isSignUp;
+  const token = req.body.token;
+  try {
+    // Part 1: Verify existance and validity of the arguments
+    if (isSignUp === undefined || !token) throw new Http_Errors.MissingField();
+
+    const client = new OAuth2Client();
+    const ticket: LoginTicket = await client.verifyIdToken({
+      idToken: token,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+
+    // Part 2: Retrieve the user's unique Google ID
+    const payload: TokenPayload | undefined = ticket.getPayload();
+    const sub: string | undefined = payload?.sub;
+    if (!sub) throw new Http_Errors.InvalidField("token");
+
+    // Part 3: Retrieve any user with a matching sub
+    const searchedUser = await UserModel.findOne({ "identification.googleId": sub });
+
+    let returnUser;
+    // Part 4: Handle the sign up case, by creating a new user
+    if (isSignUp) {
+      if (searchedUser) throw new Http_Errors.AlreadyExists("User with this google account");
+      returnUser = await UserModel.create({
+        identification: { email: null, googleId: sub, gitHubId: null },
+        password: null,
+        _buyer: null,
+        _vendor: null,
+      });
+    }
+    // Part 5: Handle the log in case
+    else {
+      if (!searchedUser) throw new Http_Errors.InvalidField("token");
+      returnUser = searchedUser;
+    }
+
+    // Part 6: Set up a session and return the user
+    req.session.userId = returnUser._id;
+    req.session.buyerId = returnUser._buyer;
+    req.session.vendorId = returnUser._vendor;
+    res.status(201).json(returnUser);
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Add a new user to the database given GitHub's code and log them in.
+ *  - Prerequisite: An existing user with the same email must not exist in the database.
+ *  - Params: None
+ *  - Body: token
+ *  - Return: User
+ */
+export const authenticateGitHub: RequestHandler<unknown, unknown, GitHubBody, unknown> = async (
+  req,
+  res,
+  next
+) => {
+  const code = req.body.code;
+  let requestUrl: string;
+  try {
+    // Part 1: Verify existance of the code
+    if (!code) throw new Http_Errors.MissingField();
+
+    // Part 2: Send request to GitHub to retrieve the token
+    const params =
+      `?client_id=${process.env.GITHUB_CLIENT_ID}` +
+      `&client_secret=${process.env.GITHUB_CLIENT_SECRET}` +
+      `&code=${code}`;
+    requestUrl = `https://github.com/login/oauth/access_token${params}`;
+    const accessResponse = await fetch(requestUrl, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+      },
+    });
+    const accessData = await accessResponse.json();
+
+    // Part 3: Retrieve the user's GitHub ID
+    requestUrl = "https://api.github.com/user";
+    const userResponse = await fetch(requestUrl, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${accessData.access_token}`,
+      },
+    });
+    const userData = await userResponse.json();
+    const gitHubId = userData.id;
+
+    let returnUser;
+    // Part 4: Retrieve any user with a matching GitHub ID, create a new user if none exists
+    const searchedUser = await UserModel.findOne({ "identification.gitHubId": gitHubId }); 
+    if (!searchedUser) {
+      returnUser = await UserModel.create({
+        identification: { email: null, googleId: null, gitHubId: gitHubId },
+        password: null,
+        _buyer: null,
+        _vendor: null,
+      });
+    }
+    else returnUser = searchedUser;
+    
+    // Part 5: Set up a session and return the user
+    req.session.userId = returnUser._id;
+    req.session.buyerId = returnUser._buyer;
+    req.session.vendorId = returnUser._vendor;
+    res.status(201).json(returnUser);
   } catch (error) {
     next(error);
   }
@@ -235,7 +239,7 @@ export const loginGoogle: RequestHandler<unknown, unknown, TokenBody, unknown> =
  *  - Body: None
  *  - Return: String
  */
-export const logout: RequestHandler<unknown, unknown, unknown, unknown> = async (
+export const logOut: RequestHandler<unknown, unknown, unknown, unknown> = async (
   req,
   res,
   next

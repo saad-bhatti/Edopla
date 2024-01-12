@@ -291,7 +291,7 @@ const CreateVendorSection = ({ setUser, updateSnackbar }: CreateVendorSectionPro
         minWidth: "50vw",
         outline: "0.5px solid #E0E0E0",
         borderRadius: "6px",
-        minHeight: "75vh",
+        minHeight: "85vh",
       }}
     >
       {vendorCreationForm}

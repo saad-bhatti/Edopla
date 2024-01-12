@@ -171,7 +171,7 @@ const CreateBuyerSection = ({ setUser, updateSnackbar }: CreateBuyerSectionProps
         outline: "0.5px solid #E0E0E0",
         borderRadius: "6px",
         padding: "1% 0%",
-        minHeight: "75vh",
+        minHeight: "85vh",
       }}
     >
       {BuyerCreationForm}
