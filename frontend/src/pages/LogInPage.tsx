@@ -4,241 +4,44 @@
  * party account.                                                                                 *
  **************************************************************************************************/
 
-import EmailIcon from "@mui/icons-material/Email";
-import GitHubIcon from "@mui/icons-material/GitHub";
-import Key from "@mui/icons-material/Key";
-import { Button, Container, Divider, FormControl, FormLabel, Stack, Typography } from "@mui/joy";
+import { Stack } from "@mui/joy";
 import { useColorScheme } from "@mui/joy/styles";
 import { SxProps } from "@mui/joy/styles/types";
-import { useContext, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import GoogleButton from "../components/GoogleButton";
-import CustomInput from "../components/custom/CustomInput";
-import { displayError } from "../errors/displayError";
-import { User } from "../models/users/user";
-import { getCarts } from "../network/items/carts_api";
-import {
-  authenticateForm,
-  authenticateGitHub,
-  authenticateGoogle,
-} from "../network/users/users_api";
+import { useContext } from "react";
+import LoginUserSection from "../components/section/auth/LogInUserSection";
+import SideImageSection from "../components/section/auth/SideImageSection";
 import { simpleSx } from "../styles/PageSX";
 import { minPageHeight } from "../styles/constants";
 import * as Context from "../utils/contexts";
 
 /** UI for the log in page. */
 const LogInPage = () => {
-  // Variable to navigate to other pages
-  const navigate = useNavigate();
   // Get the current color scheme and the function to change it
   const { colorScheme } = useColorScheme();
-
   // Retrieve the set logged in user function from the context
-  const { setUser: setLoggedInUser } =
-    useContext<Context.UserContextProps | null>(Context.UserContext) || {};
+  const { setUser } = useContext(Context.UserContext) || {};
   // Retrieve the set cart function from the context
-  const { setCarts } = useContext<Context.CartsContextProps | null>(Context.CartsContext) || {};
+  const { setCarts } = useContext(Context.CartsContext) || {};
   // Retrieve the snackbar from the context
   const { setSnackbar } = useContext(Context.SnackbarContext) || {};
-  // State to track the email input.
-  const [email, setEmail] = useState<string>("");
-  // State to track the password input.
-  const [password, setPassword] = useState<string>("");
 
-  /** Function to handle log in submission. */
-  async function handleLogIn(identifierType: number, token: string): Promise<void> {
-    try {
-      let requestDetails: any;
-      let user: User;
-      switch (identifierType) {
-        // Log in done using the log in form.
-        case 0:
-          requestDetails = {
-            isSignUp: false,
-            email: email,
-            password: password,
-          };
-          user = await authenticateForm(requestDetails);
-          break;
-        // Log in done using google.
-        case 1:
-          console.log(`In google section: ${token}`);
-          requestDetails = {
-            isSignUp: false,
-            token: token,
-          };
-          user = await authenticateGoogle(requestDetails);
-          break;
-        // Log in done using GitHub.
-        case 2:
-          requestDetails = {
-            isSignUp: false,
-            token: token,
-          };
-          user = await authenticateGitHub(requestDetails);
-          break;
-        // Invalid identifier type.
-        default:
-          throw new Error("Invalid identifier type.");
-      }
-      setLoggedInUser!(user);
-
-      // Retrieve the user's cart from the backend.
-      const carts = await getCarts();
-      setCarts!(carts);
-
-      // Display a success message.
-      setSnackbar!({
-        text: "Successfully logged in.",
-        color: "success",
-        visible: true,
-      });
-
-      // Redirect to home page.
-      navigate("/");
-    } catch (error) {
-      // Show snackbar to indicate failure.
-      if (error instanceof Error) {
-        setSnackbar!({
-          text: error.message,
-          color: "danger",
-          visible: true,
-        });
-      } else {
-        displayError(error);
-      }
-    }
+  /**
+   * Function to set the snackbar format and its visibility.
+   * @param text The text to display in the snackbar.
+   * @param color The color of the snackbar.
+   * @param visible Whether the snackbar is visible or not.
+   */
+  function updateSnackbar(text: string, color: Context.snackBarColor, visible: boolean): void {
+    setSnackbar!({ text, color, visible });
   }
 
-  /** UI layout for the third party login options. */
-  const ThirdPartyLogIn = (
-    <Stack direction="row" gap={4} alignSelf="center" minWidth="43%">
-      {/* Google log in button. */}
-      <GoogleButton
-        isLogIn={true}
-        onSuccess={(jwtToken: string) => handleLogIn(1, jwtToken)}
-        onError={() => {
-          setSnackbar!({
-            text: "An error occurred while logging in with Google. Please try again.",
-            color: "danger",
-            visible: true,
-          });
-        }}
-      />
-
-      {/* GitHub sign up button. */}
-      <Button
-        variant="soft"
-        color="primary"
-        startDecorator={<GitHubIcon />}
-        onClick={() => {
-          window.location.href =
-            "https://github.com/login/oauth/authorize?client_id=" +
-            process.env.REACT_APP_GITHUB_CLIENT_ID;
-        }}
-      >
-        Sign up with GitHub
-      </Button>
-    </Stack>
+  /** UI layout for the sign up section. */
+  const UserSection = (
+    <LoginUserSection setUser={setUser!} setCarts={setCarts!} updateSnackbar={updateSnackbar} />
   );
 
-  /** UI layout for the card content. */
-  const LogInForm = (
-    <form
-      onSubmit={(event) => {
-        event.preventDefault();
-        handleLogIn(0, "");
-      }}
-    >
-      <Stack gap={4} direction="column" alignItems="center">
-        {/* Email input. */}
-        <FormControl>
-          <FormLabel>Email</FormLabel>
-          <CustomInput
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(event) => {
-              setEmail(event.target.value);
-            }}
-            startDecorator={<EmailIcon fontSize="small" />}
-            required={true}
-          />
-        </FormControl>
-
-        {/* Password input. */}
-        <FormControl>
-          <FormLabel>Password</FormLabel>
-          <CustomInput
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(event) => {
-              setPassword(event.target.value);
-            }}
-            startDecorator={<Key fontSize="small" />}
-            required={true}
-          />
-        </FormControl>
-
-        {/* Log in button. */}
-        <Button type="submit" variant="solid" color="primary" sx={{ minWidth: "100%" }}>
-          Log In
-        </Button>
-      </Stack>
-    </form>
-  );
-
-  /** UI layout for the login section. */
-  const LogInSection = (
-    <Stack
-      direction="column"
-      alignItems="center"
-      gap={6}
-      sx={{
-        minWidth: "50vw",
-        outline: "0.5px solid #E0E0E0",
-        borderRadius: "6px",
-        padding: "1% 0%",
-        minHeight: "88vh",
-      }}
-    >
-      {/* Welcome message. */}
-      <Typography level="title-lg">Welcome back!</Typography>
-
-      {/* Third party login options. */}
-      {ThirdPartyLogIn}
-
-      {/* Or separator. */}
-      <Divider orientation="horizontal" sx={{ padding: "0% 10%" }}>
-        or
-      </Divider>
-
-      {/* Log in form. */}
-      {LogInForm}
-    </Stack>
-  );
-
-  /** UI layout for the side image. */
-  const SideImage = (
-    <Container
-      sx={(theme) => ({
-        [theme.getColorSchemeSelector("light")]: {
-          backgroundImage:
-            "url(https://images.unsplash.com/photo-1527181152855-fc03fc7949c8?auto=format&w=1000&dpr=2)",
-        },
-
-        [theme.getColorSchemeSelector("dark")]: {
-          backgroundImage:
-            "url(https://images.unsplash.com/photo-1572072393749-3ca9c8ea0831?auto=format&w=1000&dpr=2)",
-        },
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
-        borderRadius: "6px",
-      })}
-    />
-  );
+  /** UI layout for the side image section. */
+  const ImageSection = <SideImageSection />;
 
   /** Sx for the log in page. */
   const customSx: SxProps = {
@@ -252,11 +55,11 @@ const LogInPage = () => {
       {/* Log in section and side image. */}
       {colorScheme === "light" ? (
         <>
-          {LogInSection} {SideImage}
+          {UserSection} {ImageSection}
         </>
       ) : (
         <>
-          {SideImage} {LogInSection}
+          {ImageSection} {UserSection}
         </>
       )}
     </Stack>

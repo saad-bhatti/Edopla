@@ -9,20 +9,20 @@ import SentimentVeryDissatisfiedIcon from "@mui/icons-material/SentimentVeryDiss
 import { Button, Container, LinearProgress, Stack, Typography } from "@mui/joy";
 import { SxProps, Theme } from "@mui/joy/styles/types";
 import { useContext, useEffect, useState } from "react";
-import VendorInformationCard from "../../components/card/VendorInformationCard";
-import CustomDropdown from "../../components/custom/CustomDropdown";
-import CustomFilter from "../../components/custom/CustomFilter";
-import CustomSearch from "../../components/custom/CustomSearch";
-import { displayError } from "../../errors/displayError";
-import { Vendor } from "../../models/users/vendor";
-import { getSavedVendors, toggleSavedVendor } from "../../network/users/buyers_api";
-import { getAllVendors } from "../../network/users/vendors_api";
-import { onlyBackgroundSx } from "../../styles/PageSX";
-import { SectionTitleText } from "../../styles/Text";
-import { minPageHeight, minPageWidth } from "../../styles/constants";
-import * as Contexts from "../../utils/contexts";
-import * as BuyerPageHelper from "./BuyerPageHelper";
-import * as VendorListManipulation from "./VendorListManipulation";
+import VendorInformationCard from "../components/card/VendorInformationCard";
+import CustomDropdown from "../components/custom/CustomDropdown";
+import CustomFilter from "../components/custom/CustomFilter";
+import CustomSearch from "../components/custom/CustomSearch";
+import { displayError } from "../errors/displayError";
+import { Vendor } from "../models/users/vendor";
+import { getSavedVendors, toggleSavedVendor } from "../network/users/buyers_api";
+import { getAllVendors } from "../network/users/vendors_api";
+import { onlyBackgroundSx } from "../styles/PageSX";
+import { SectionTitleText } from "../styles/Text";
+import { minPageHeight, minPageWidth } from "../styles/constants";
+import * as Contexts from "../utils/contexts";
+import * as BuyerPageHelper from "./helpers/BuyerPageHelper";
+import * as VendorListManipulation from "./manipulation/VendorListManipulation";
 
 /** UI for the buy page. */
 const BuyPage = () => {

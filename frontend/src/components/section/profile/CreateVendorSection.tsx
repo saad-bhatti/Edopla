@@ -12,13 +12,13 @@ import { Button, FormControl, FormHelperText, FormLabel, Stack, Textarea } from 
 import { StandaloneSearchBox } from "@react-google-maps/api";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import CustomDropdown from "../../components/custom/CustomDropdown";
-import CustomInput from "../../components/custom/CustomInput";
-import { displayError } from "../../errors/displayError";
-import { User } from "../../models/users/user";
-import { Vendor } from "../../models/users/vendor";
-import { createVendor } from "../../network/users/vendors_api";
-import { snackBarColor } from "../../utils/contexts";
+import CustomDropdown from "../../custom/CustomDropdown";
+import CustomInput from "../../custom/CustomInput";
+import { displayError } from "../../../errors/displayError";
+import { User } from "../../../models/users/user";
+import { Vendor } from "../../../models/users/vendor";
+import { createVendor } from "../../../network/users/vendors_api";
+import { snackBarColor } from "../../../utils/contexts";
 
 /** Props of the vendor profile section. */
 interface CreateVendorSectionProps {
@@ -291,7 +291,7 @@ const CreateVendorSection = ({ setUser, updateSnackbar }: CreateVendorSectionPro
         minWidth: "50vw",
         outline: "0.5px solid #E0E0E0",
         borderRadius: "6px",
-        minHeight: "85vh",
+        minHeight: "60vh",
       }}
     >
       {vendorCreationForm}

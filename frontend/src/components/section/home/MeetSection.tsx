@@ -3,8 +3,8 @@
  **************************************************************************************************/
 
 import { AspectRatio, Container, Stack } from "@mui/joy";
-import developerImg from "../../images/developer.jpg";
-import { LargeBodyText, SectionTitleText } from "../../styles/Text";
+import developerImg from "../../../images/developer.jpg";
+import { LargeBodyText, SectionTitleText } from "../../../styles/Text";
 
 /** UI for the HomePage's meet section. */
 const Meet = () => {

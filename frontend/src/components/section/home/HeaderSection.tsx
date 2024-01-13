@@ -3,8 +3,8 @@
  **************************************************************************************************/
 
 import { Container, Stack } from "@mui/joy";
-import { LargeBodyText, SectionTitleText } from "../../styles/Text";
-import { minPageWidth } from "../../styles/constants";
+import { LargeBodyText, SectionTitleText } from "../../../styles/Text";
+import { minPageWidth } from "../../../styles/constants";
 
 /** UI for the HomePage's header section. */
 const Header = () => {

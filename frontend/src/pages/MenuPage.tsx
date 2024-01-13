@@ -9,20 +9,20 @@ import { Container, LinearProgress, Stack } from "@mui/joy";
 import { SxProps } from "@mui/joy/styles/types";
 import { useContext, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import MenuItemCard from "../../components/card/MenuItemCard";
-import CustomDropdown from "../../components/custom/CustomDropdown";
-import CustomFilter from "../../components/custom/CustomFilter";
-import CustomSearch from "../../components/custom/CustomSearch";
-import { displayError } from "../../errors/displayError";
-import { CartItem } from "../../models/items/cartItem";
-import { MenuItem } from "../../models/items/menuItem";
-import { createCart, emptyCart, updateItem } from "../../network/items/carts_api";
-import { getMenu } from "../../network/items/menus_api";
-import { SectionTitleText } from "../../styles/Text";
-import { minPageHeight, minPageWidth } from "../../styles/constants";
-import { CartsContext, SnackbarContext, snackBarColor } from "../../utils/contexts";
-import * as MenuManipulation from "./MenuManipulation";
-import * as MenuPageHelper from "./MenuPageHelper";
+import MenuItemCard from "../components/card/MenuItemCard";
+import CustomDropdown from "../components/custom/CustomDropdown";
+import CustomFilter from "../components/custom/CustomFilter";
+import CustomSearch from "../components/custom/CustomSearch";
+import { displayError } from "../errors/displayError";
+import { CartItem } from "../models/items/cartItem";
+import { MenuItem } from "../models/items/menuItem";
+import { createCart, emptyCart, updateItem } from "../network/items/carts_api";
+import { getMenu } from "../network/items/menus_api";
+import { SectionTitleText } from "../styles/Text";
+import { minPageHeight, minPageWidth } from "../styles/constants";
+import { CartsContext, SnackbarContext, snackBarColor } from "../utils/contexts";
+import * as MenuManipulation from "./manipulation/MenuManipulation";
+import * as MenuPageHelper from "./helpers/MenuPageHelper";
 
 /** UI for the menu page. */
 const MenuPage = () => {

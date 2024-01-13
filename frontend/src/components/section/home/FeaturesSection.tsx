@@ -7,7 +7,7 @@ import ShoppingBagIcon from "@mui/icons-material/ShoppingBag";
 import StorefrontIcon from "@mui/icons-material/Storefront";
 import { Container, Stack } from "@mui/joy";
 import { ReactElement, cloneElement } from "react";
-import { LargeBodyText, SectionTitleText, SubSectionTitleText } from "../../styles/Text";
+import { LargeBodyText, SectionTitleText, SubSectionTitleText } from "../../../styles/Text";
 
 /** UI for the HomePage's features section. */
 const Features = () => {

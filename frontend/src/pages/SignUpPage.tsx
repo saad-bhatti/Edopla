@@ -4,13 +4,12 @@
  * party account.                                                                                 *
  **************************************************************************************************/
 
-import { Container, Stack } from "@mui/joy";
+import { Stack } from "@mui/joy";
 import { useColorScheme } from "@mui/joy/styles";
 import { SxProps } from "@mui/joy/styles/types";
-import { useContext, useState } from "react";
-import CreateBuyerSection from "../components/section/CreateBuyerSection";
-import CreateUserSection from "../components/section/CreateUserSection";
-import CreateVendorSection from "../components/section/CreateVendorSection";
+import { useContext } from "react";
+import SideImageSection from "../components/section/auth/SideImageSection";
+import SignUpUserSection from "../components/section/auth/SignUpUserSection";
 import { simpleSx } from "../styles/PageSX";
 import { minPageHeight } from "../styles/constants";
 import * as Context from "../utils/contexts";
@@ -25,10 +24,6 @@ const SignUpPage = () => {
   const { setCarts } = useContext(Context.CartsContext) || {};
   // Retrieve the snackbar from the context
   const { setSnackbar } = useContext(Context.SnackbarContext) || {};
-  // State to control the current step of the sign up process.
-  const [currentStep, setCurrentStep] = useState<number>(0);
-  // State to track whether the client is a buyer or a vendor.
-  const [isBuyer, setIsBuyer] = useState<boolean>(true);
 
   /**
    * Function to set the snackbar format and its visibility.
@@ -41,60 +36,12 @@ const SignUpPage = () => {
   }
 
   /** UI layout for the sign up section. */
-  const CreateUser = (
-    <CreateUserSection
-      setUser={setUser!}
-      setIsBuyer={setIsBuyer}
-      setCarts={setCarts!}
-      setStep={setCurrentStep}
-      updateSnackbar={updateSnackbar}
-    />
+  const UserSection = (
+    <SignUpUserSection setUser={setUser!} setCarts={setCarts!} updateSnackbar={updateSnackbar} />
   );
-
-  /** UI layout for the buyer profile section. */
-  const CreateBuyer = (
-    <CreateBuyerSection setUser={setUser!} updateSnackbar={updateSnackbar} />
-  );
-
-  /** UI layout for the vendor profile section. */
-  const CreateVendor = (
-    <CreateVendorSection setUser={setUser!} updateSnackbar={updateSnackbar} />
-  );
-
-  /** UI layout for the all sections container. */
-  const SectionContainer = (
-    <Stack id="SignUpPageSection" direction="column" spacing={1}>
-      {/* Sign up section. */}
-      {currentStep === 0 && CreateUser}
-
-      {/* Buyer profile section. */}
-      {currentStep === 1 && isBuyer && CreateBuyer}
-
-      {/* Vendor profile section. */}
-      {currentStep === 1 && !isBuyer && CreateVendor}
-    </Stack>
-  );
-
-  /** UI layout for the side image. */
-  const SideImage = (
-    <Container
-      sx={(theme) => ({
-        [theme.getColorSchemeSelector("light")]: {
-          backgroundImage:
-            "url(https://images.unsplash.com/photo-1527181152855-fc03fc7949c8?auto=format&w=1000&dpr=2)",
-        },
-
-        [theme.getColorSchemeSelector("dark")]: {
-          backgroundImage:
-            "url(https://images.unsplash.com/photo-1572072393749-3ca9c8ea0831?auto=format&w=1000&dpr=2)",
-        },
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
-        borderRadius: "6px",
-      })}
-    />
-  );
+  
+  /** UI layout for the side image section. */
+  const ImageSection = <SideImageSection />;
 
   /** Sx for the log in page. */
   const customSx: SxProps = {
@@ -108,11 +55,11 @@ const SignUpPage = () => {
       {/* Sections and side image. */}
       {colorScheme === "light" ? (
         <>
-          {SideImage} {SectionContainer}
+          {ImageSection} {UserSection}
         </>
       ) : (
         <>
-          {SectionContainer} {SideImage}
+          {UserSection} {ImageSection}
         </>
       )}
     </Stack>

@@ -6,8 +6,8 @@ import EmailIcon from "@mui/icons-material/Email";
 import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import PhoneIcon from "@mui/icons-material/Phone";
 import { Container, Stack } from "@mui/joy";
-import { LargeBodyText, SectionTitleText } from "../../styles/Text";
-import { minPageWidth } from "../../styles/constants";
+import { LargeBodyText, SectionTitleText } from "../../../styles/Text";
+import { minPageWidth } from "../../../styles/constants";
 
 /** UI for the HomePage's contact section. */
 const Contact = () => {

@@ -20,7 +20,7 @@ export interface SnackbarContextProps {
   setSnackbar: React.Dispatch<
     React.SetStateAction<{
       text: string;
-      color: "primary" | "neutral" | "danger" | "success" | "warning";
+      color: snackBarColor;
       visible: boolean;
     }>
   >;

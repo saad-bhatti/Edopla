@@ -16,26 +16,24 @@ import {
   Stack,
   Typography,
 } from "@mui/joy";
-import { useEffect, useState } from "react";
-import { displayError } from "../../errors/displayError";
-import { CartItem } from "../../models/items/cartItem";
-import { User } from "../../models/users/user";
-import { authenticateForm, authenticateGitHub, authenticateGoogle } from "../../network/users/users_api";
-import { snackBarColor } from "../../utils/contexts";
+import { useState } from "react";
+import { useNavigate } from "react-router";
+import { displayError } from "../../../errors/displayError";
+import { CartItem } from "../../../models/items/cartItem";
+import { User } from "../../../models/users/user";
+import { authenticateForm, authenticateGoogle } from "../../../network/users/users_api";
+import { snackBarColor } from "../../../utils/contexts";
 import {
   calculateDescriptivePasswordStrength,
   calculateNumericalPasswordStrength,
-} from "../../utils/passwordStrength";
-import GoogleButton from "../GoogleButton";
-import CustomDropdown from "../custom/CustomDropdown";
-import CustomInput from "../custom/CustomInput";
+} from "../../../utils/passwordStrength";
+import GoogleButton from "../../GoogleButton";
+import CustomInput from "../../custom/CustomInput";
 
 /** Props of the sign up section. */
 interface SignUpSectionProps {
   setUser: React.Dispatch<React.SetStateAction<User | null>>;
   setCarts: React.Dispatch<React.SetStateAction<CartItem[]>>;
-  setIsBuyer: React.Dispatch<React.SetStateAction<boolean>>;
-  setStep: React.Dispatch<React.SetStateAction<number>>;
   updateSnackbar: (text: string, color: snackBarColor, visible: boolean) => void;
 }
 
@@ -43,10 +41,10 @@ interface SignUpSectionProps {
 const SignUpSection = ({
   setUser,
   setCarts,
-  setIsBuyer,
-  setStep,
   updateSnackbar,
 }: SignUpSectionProps) => {
+  // Get the navigate function.
+  const navigate = useNavigate();
   // State to track the email input.
   const [email, setEmail] = useState<string>("");
   // State to track the password input.
@@ -58,41 +56,6 @@ const SignUpSection = ({
     isError: 0,
     error: "",
   });
-
-  /** After GitHub oauth redirect, retrieve the code from the url. */
-  useEffect(() => {
-    async function signUpWithGitHub(code: string) {
-      try {
-        // Send a request to sign up with GitHub.
-        const requestDetails = {
-          code: code,
-        };
-        const user: User = await authenticateGitHub(requestDetails);
-
-        // Set the necessary contexts.
-        setUser(user);
-        setCarts([]);
-
-        // Set the snackbar to display a success message.
-        updateSnackbar("Successfully created your account!", "success", true);
-
-        // Increment the step.
-        setStep((prevStep) => prevStep + 1);
-      } catch (error) {
-        error instanceof Error
-          ? updateSnackbar(error.message, "danger", true)
-          : displayError(error);
-      }
-    }
-    // Retrieve the code from the url.
-    const queryString = window.location.search;
-    const urlParams = new URLSearchParams(queryString);
-    const codeParam = urlParams.get("code");
-
-    // If the code is present, send a request to sign up with GitHub.
-    if (codeParam) signUpWithGitHub(codeParam);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   /** Function to validate the sign up form. */
   function validateFormSignUp(): boolean {
@@ -151,14 +114,6 @@ const SignUpSection = ({
           };
           newUser = await authenticateGoogle(requestDetails);
           break;
-        // Log in done using GitHub.
-        case 2:
-          requestDetails = {
-            isSignUp: true,
-            token: token,
-          };
-          newUser = await authenticateGitHub(requestDetails);
-          break;
         // Invalid identifier type.
         default:
           throw new Error("Invalid identifier type.");
@@ -172,8 +127,8 @@ const SignUpSection = ({
       // Set the snackbar to display a success message.
       updateSnackbar("Successfully created your account!", "success", true);
 
-      // Increment the step.
-      setStep((prevStep) => prevStep + 1);
+      // Navigate to the create profile page.
+      navigate("/profile/create");
     } catch (error) {
       error instanceof Error ? updateSnackbar(error.message, "danger", true) : displayError(error);
     }
@@ -326,16 +281,6 @@ const SignUpSection = ({
           <InfoOutlined fontSize="small" />
           Password requirements: Minimum of 8 characters, a number, and a special character.
         </FormHelperText>
-
-        {/* Role selection. */}
-        <CustomDropdown
-          label="I am a"
-          options={["Buyer", "Vendor"]}
-          onOptionClick={[() => setIsBuyer(true), null]}
-          variant="soft"
-          color="primary"
-          sx={{ minWidth: "47%" }}
-        />
 
         {/* Sign up button. */}
         <Button type="submit" variant="solid" color="primary" sx={{ minWidth: "47%" }}>

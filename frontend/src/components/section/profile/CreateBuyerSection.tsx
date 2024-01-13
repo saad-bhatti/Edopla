@@ -10,12 +10,12 @@ import { Button, FormControl, FormHelperText, FormLabel, Stack } from "@mui/joy"
 import { StandaloneSearchBox } from "@react-google-maps/api";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import CustomInput from "../../components/custom/CustomInput";
-import { displayError } from "../../errors/displayError";
-import { Buyer } from "../../models/users/buyer";
-import { User } from "../../models/users/user";
-import { createBuyer } from "../../network/users/buyers_api";
-import { snackBarColor } from "../../utils/contexts";
+import CustomInput from "../../custom/CustomInput";
+import { displayError } from "../../../errors/displayError";
+import { Buyer } from "../../../models/users/buyer";
+import { User } from "../../../models/users/user";
+import { createBuyer } from "../../../network/users/buyers_api";
+import { snackBarColor } from "../../../utils/contexts";
 
 /** Props of the buyer profile section. */
 interface CreateBuyerSectionProps {
@@ -171,7 +171,7 @@ const CreateBuyerSection = ({ setUser, updateSnackbar }: CreateBuyerSectionProps
         outline: "0.5px solid #E0E0E0",
         borderRadius: "6px",
         padding: "1% 0%",
-        minHeight: "85vh",
+        minHeight: "60vh",
       }}
     >
       {BuyerCreationForm}

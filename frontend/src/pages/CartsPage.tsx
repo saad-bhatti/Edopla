@@ -8,14 +8,14 @@ import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import { Button, Container, LinearProgress, Stack, Typography } from "@mui/joy";
 import { SxProps } from "@mui/joy/styles/types";
 import { useContext, useEffect, useState } from "react";
-import CartItemCard from "../../components/card/CartItemCard";
-import CustomDropdown from "../../components/custom/CustomDropdown";
-import CustomSearch from "../../components/custom/CustomSearch";
-import { CartItem } from "../../models/items/cartItem";
-import * as CartsAPI from "../../network/items/carts_api";
-import { minPageHeight, minPageWidth } from "../../styles/constants";
-import { CartsContext, SnackbarContext } from "../../utils/contexts";
-import * as CartsManipulation from "./CartsManipulation";
+import CartItemCard from "../components/card/CartItemCard";
+import CustomDropdown from "../components/custom/CustomDropdown";
+import CustomSearch from "../components/custom/CustomSearch";
+import { CartItem } from "../models/items/cartItem";
+import * as CartsAPI from "../network/items/carts_api";
+import { minPageHeight, minPageWidth } from "../styles/constants";
+import { CartsContext, SnackbarContext } from "../utils/contexts";
+import * as CartsManipulation from "./manipulation/CartsManipulation";
 
 /** UI for the cart page. */
 const CartPage = () => {

@@ -59,6 +59,7 @@ function App() {
   const customSx: SxProps = (theme: Theme) => ({
     ...onlyBackgroundSx(theme),
     minWidth: "100%",
+    minHeight: "100vh",
   });
 
   /** UI layout for the snackbar. */
