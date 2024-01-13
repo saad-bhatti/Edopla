@@ -12,10 +12,7 @@ import { displayError } from "../../../errors/displayError";
 import { CartItem } from "../../../models/items/cartItem";
 import { User } from "../../../models/users/user";
 import { getCarts } from "../../../network/items/carts_api";
-import {
-  authenticateForm,
-  authenticateGoogle
-} from "../../../network/users/users_api";
+import { authenticateForm, authenticateGoogle } from "../../../network/users/users_api";
 import { snackBarColor } from "../../../utils/contexts";
 import GoogleButton from "../../GoogleButton";
 import CustomInput from "../../custom/CustomInput";
@@ -54,7 +51,6 @@ const LogInSection = ({ setUser, setCarts, updateSnackbar }: LogInSectionProps) 
           break;
         // Log in done using google.
         case 1:
-          console.log(`In google section: ${token}`);
           requestDetails = {
             isSignUp: false,
             token: token,
@@ -87,7 +83,7 @@ const LogInSection = ({ setUser, setCarts, updateSnackbar }: LogInSectionProps) 
     <Stack direction="row" gap={4} alignSelf="center" minWidth="43%">
       {/* Google log in button. */}
       <GoogleButton
-        isLogIn={true}
+        mode={"signin_with"}
         onSuccess={(jwtToken: string) => handleLogIn(1, jwtToken)}
         onError={() => {
           updateSnackbar(

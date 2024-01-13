@@ -27,6 +27,14 @@ export interface GitHubCredentials {
   code: string;
 }
 
+/** Interface for the input to link an account. */
+export interface LinkAuthenticationBody {
+  identifier: string;
+  email?: string;
+  password?: string;
+  token?: string;
+}
+
 /**
  * Function to retrieve the currently logged in user.
  * @param None
@@ -78,6 +86,22 @@ export async function authenticateGoogle(credentials: GoogleCredentials): Promis
  */
 export async function authenticateGitHub(credentials: GitHubCredentials): Promise<User> {
   const response = await fetchData(`${endpoint}/authenticate/github`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(credentials),
+  });
+  return response.json();
+}
+
+/**
+ * Function to link an account.
+ * @param credentials identifier: "form" | "google" | "gitHub", email?: string, password?: string, token?: string
+ * @returns A promise that resolves to the user object.
+ */
+export async function linkAuthentication(credentials: LinkAuthenticationBody): Promise<User> {
+  const response = await fetchData(`${endpoint}/link`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

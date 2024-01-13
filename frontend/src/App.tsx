@@ -6,6 +6,7 @@
 
 import { Library } from "@googlemaps/js-api-loader";
 import InfoOutlined from "@mui/icons-material/InfoOutlined";
+import { LinearProgress } from "@mui/joy";
 import Container from "@mui/joy/Container";
 import CssBaseline from "@mui/joy/CssBaseline";
 import { CssVarsProvider } from "@mui/joy/styles";
@@ -42,15 +43,23 @@ function App() {
     color: "primary",
     visible: false,
   });
+  // State to track whether the page data is being loaded.
+  const [isLoading, setIsLoading] = useState(true);
 
   // Retrieve the logged in user and their cart only once before rendering the page
   useEffect(() => {
     async function fetchLoggedInUser() {
       try {
+        setIsLoading(true);
+
         const user = await UsersAPI.getLoggedInUser();
         setUser(user);
         setCarts(await getCarts());
-      } catch (error) {}
+
+        setIsLoading(false);
+      } catch (error) {
+        setIsLoading(false); // Stop loading as this error is expected when not authenticated
+      }
     }
     fetchLoggedInUser();
   }, []);
@@ -75,7 +84,9 @@ function App() {
     />
   );
 
-  return (
+  return isLoading ? (
+    <LinearProgress size="lg" value={28} variant="soft" />
+  ) : (
     <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID as string}>
       {/* Application contexts. */}
       <Context.UserContext.Provider value={{ user, setUser }}>

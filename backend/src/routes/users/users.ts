@@ -12,6 +12,7 @@ router.get("/", requiresAuth, UsersController.getAuthenticatedUser);
 router.post("/authenticate/form", UsersController.authenticationForm);
 router.post("/authenticate/google", UsersController.authenticationGoogle);
 router.post("/authenticate/github", UsersController.authenticateGitHub);
+router.post("/link", requiresAuth, UsersController.linkAuthentication);
 router.post("/logout", requiresAuth, UsersController.logOut);
 
 export default router;

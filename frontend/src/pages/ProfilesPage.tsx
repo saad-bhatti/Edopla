@@ -20,11 +20,12 @@ import { onlyBackgroundSx } from "../styles/PageSX";
 import { SectionTitleText } from "../styles/Text";
 import { minPageHeight, minPageWidth } from "../styles/constants";
 import { SnackbarContext, UserContext, snackBarColor } from "../utils/contexts";
+import { User } from "../models/users/user";
 
 /** UI for the profiles page, depending on user's login status. */
 const ProfilesPage = () => {
   // Retrieve the logged in user from the context
-  const { user } = useContext(UserContext) || {};
+  const { user, setUser } = useContext(UserContext) || {};
   // Retrieve the snackbar from the context
   const { setSnackbar } = useContext(SnackbarContext) || {};
   // State to track whether the page data is being loaded.
@@ -63,6 +64,11 @@ const ProfilesPage = () => {
     }
     loadProfiles();
   }, [user]);
+
+  /** Function to update the user. */
+  function updateUser(user: User) {
+    setUser!(user);
+  }
 
   /** Function to update the snackbar. */
   function updateSnackbar(text: string, color: snackBarColor, visible: boolean) {
@@ -112,11 +118,17 @@ const ProfilesPage = () => {
               // Display the user profile card.
               {
                 tab: "User",
-                panel: user && <UserProfileCard user={user} updateSnackbar={updateSnackbar} />,
+                panel: user && (
+                  <UserProfileCard
+                    user={user}
+                    updateUser={updateUser}
+                    updateSnackbar={updateSnackbar}
+                  />
+                ),
               },
               // Display the buyer profile card.
               {
-                tab: "Buyer",
+                tab: "Role: Buyer",
                 panel: buyer && (
                   <BuyerProfileCard
                     buyer={buyer}
@@ -127,7 +139,7 @@ const ProfilesPage = () => {
               },
               // Display the vendor profile card.
               {
-                tab: "Vendor",
+                tab: "Role: Vendor",
                 panel: vendor && (
                   <VendorProfileCard
                     vendor={vendor}

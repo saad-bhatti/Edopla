@@ -128,7 +128,7 @@ const SignUpSection = ({
       updateSnackbar("Successfully created your account!", "success", true);
 
       // Navigate to the create profile page.
-      navigate("/profile/create");
+      navigate("/");
     } catch (error) {
       error instanceof Error ? updateSnackbar(error.message, "danger", true) : displayError(error);
     }
@@ -139,7 +139,7 @@ const SignUpSection = ({
     <Stack direction="row" gap={4} alignSelf="center" minWidth="43%">
       {/* Google log in button. */}
       <GoogleButton
-        isLogIn={false}
+        mode={"signup_with"}
         onSuccess={(jwtToken: string) => handleSignUp(1, jwtToken)}
         onError={() => {
           updateSnackbar(

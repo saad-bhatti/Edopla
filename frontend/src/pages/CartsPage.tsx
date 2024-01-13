@@ -39,19 +39,10 @@ const CartPage = () => {
     function seperateCarts() {
       setIsSeperating(true);
 
-      // Load the carts from local storage if the carts context is empty.
-      if (!activeCarts?.length && !isSearching) {
-        const cartsFromLocalStorage = localStorage.getItem("carts");
-        if (cartsFromLocalStorage) setActiveCarts!(JSON.parse(cartsFromLocalStorage));
-      }
-
       // Seperate the carts by "savedForLater" if the carts are not empty.
       const [nowCarts, laterCarts] = CartsManipulation.seperateCarts(activeCarts);
       setNowCarts(nowCarts);
       setLaterCarts(laterCarts);
-
-      // Store the carts in local storage.
-      localStorage.setItem("carts", JSON.stringify(carts));
 
       setIsSeperating(false);
     }
@@ -82,9 +73,7 @@ const CartPage = () => {
   async function emptyAllCarts(): Promise<void> {
     try {
       await CartsAPI.emptyCarts();
-
-      // Store an empty carts in local storage.
-      localStorage.setItem("carts", JSON.stringify([]));
+      // Remove all carts from the carts context.
       setCarts!([]);
       setActiveCarts([]);
 

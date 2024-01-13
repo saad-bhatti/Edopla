@@ -15,7 +15,7 @@ import Meet from "../components/section/home/MeetSection";
 import { displayError } from "../errors/displayError";
 import { User } from "../models/users/user";
 import { getCarts } from "../network/items/carts_api";
-import { authenticateGitHub } from "../network/users/users_api";
+import { authenticateGitHub, linkAuthentication } from "../network/users/users_api";
 import * as Context from "../utils/contexts";
 
 /** UI for the home page. */
@@ -41,23 +41,58 @@ const HomePage = () => {
 
   /** After GitHub oauth redirect, retrieve the code from the url. */
   useEffect(() => {
-    async function authenticateWithGitHub(code: string) {
+    /** Function to handle GitHub account linking. */
+    async function linkGitHub(code: string): Promise<void> {
       try {
-        // Send a request to sign up with GitHub.
+        // Send a request to link the GitHub account.
         const requestDetails = {
-          code: code,
+          identifier: "gitHub",
+          token: code,
         };
-        const authenticatedUser: User = await authenticateGitHub(requestDetails);
+        const authenticatedUser: User = await linkAuthentication(requestDetails);
         setUser!(authenticatedUser);
 
         // Set the carts for the user.
         authenticatedUser._buyer !== null ? setCarts!(await getCarts()) : setCarts!([]);
 
-        // If the client signed up, redirect to the create profile page.
-        if (!authenticatedUser._buyer && !authenticatedUser._vendor) navigator("/profiles/create");
+        // Set the snackbar to display a success message.
+        updateSnackbar("Successfully linked GitHub account!", "success", true);
+
+        // Navigate to the profiles page.
+        navigator("/profiles");
+      } catch (error) {
+        Promise.reject(error);
+      }
+    }
+    /** Function to handle GitHub authentication. */
+    async function authenticateWithGitHub(code: string): Promise<void> {
+      try {
+        // Send a request to authenticate with GitHub.
+        const requestDetails = {
+          code: code,
+        };
+        const authenticatedUser = await authenticateGitHub(requestDetails);
+        setUser!(authenticatedUser);
+
+        // Set the carts for the user.
+        authenticatedUser._buyer !== null ? setCarts!(await getCarts()) : setCarts!([]);
 
         // Set the snackbar to display a success message.
         updateSnackbar("Successfully authenticated with GitHub!", "success", true);
+
+        // If the client signed up, redirect to the create profile page.
+        if (!authenticatedUser._buyer && !authenticatedUser._vendor) navigator("/profiles/create");
+      } catch (error) {
+        Promise.reject(error);
+      }
+    }
+    /** Function to handle the GitHub code. */
+    async function handleGitHubCode(code: string): Promise<void> {
+      try {
+        // If the user is logged in, link their GitHub account.
+        if (user && !user.identification.gitHubId) await linkGitHub(code);
+        // If the user is not logged in, authenticate with GitHub.
+        else await authenticateWithGitHub(code);
       } catch (error) {
         error instanceof Error
           ? updateSnackbar(error.message, "danger", true)
@@ -70,7 +105,7 @@ const HomePage = () => {
     const codeParam = urlParams.get("code");
 
     // If the code is present, send a request to sign up with GitHub.
-    if (codeParam) authenticateWithGitHub(codeParam);
+    if (codeParam) handleGitHubCode(codeParam);
 
     // If the user is logged in & does not have a profile, redirect them to the create profile page.
     if (user && !user._buyer && !user._vendor) navigator("/profiles/create");
