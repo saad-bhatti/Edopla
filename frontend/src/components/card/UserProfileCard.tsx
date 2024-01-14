@@ -82,11 +82,7 @@ const UserProfileCard = ({ user, updateUser, updateSnackbar, sx }: UserProfileCa
       const updatedUser = await linkAuthentication(requestDetails);
 
       // Upon success, display the password snackbar
-      updateSnackbar(
-        "Email successfully linked!.",
-        "success",
-        true
-      );
+      updateSnackbar("Email successfully linked!.", "success", true);
 
       // Update the user
       updateUser(updatedUser);
@@ -211,30 +207,24 @@ const UserProfileCard = ({ user, updateUser, updateSnackbar, sx }: UserProfileCa
     >
       <Stack spacing={2} direction="column">
         {/* Link OAuth accounts section title. */}
-        <FormLabel sx={{ fontSize: "large" }}>Add an Email & Password</FormLabel>
+        <FormLabel sx={{ fontSize: "large" }}>Link an Email</FormLabel>
+        {/* Email section. */}
+        {AddEmailSection}
 
-        <Stack spacing={2} direction="column" alignItems="flex-start">
-          {/* Email section. */}
-          {AddEmailSection}
-
-          {/* Password section. */}
-          {AddPasswordSection}
-        </Stack>
+        {/* Password section. */}
+        {AddPasswordSection}
 
         {/* Submit button. */}
         <FormControl>
           {email && password && confirmPassword && (
-            <Stack justifyContent="flex-end">
-              <Button
-                type="submit"
-                variant="solid"
-                size="sm"
-                startDecorator={<SaveIcon fontSize="small" />}
-                sx={{ width: "fit-content", margin: "auto" }}
-              >
-                Link Email
-              </Button>
-            </Stack>
+            <Button
+              type="submit"
+              variant="solid"
+              size="sm"
+              startDecorator={<SaveIcon fontSize="small" />}
+            >
+              Link Email
+            </Button>
           )}
         </FormControl>
       </Stack>

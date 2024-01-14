@@ -62,10 +62,9 @@ const LogInSection = ({ setUser, setCarts, updateSnackbar }: LogInSectionProps) 
           throw new Error("Invalid identifier type.");
       }
       setUser!(user);
-
+      
       // Retrieve the user's cart from the backend.
-      const carts = await getCarts();
-      setCarts!(carts);
+      user._buyer ? setCarts!(await getCarts()) : setCarts!([]);
 
       // Display a success message.
       updateSnackbar("Successfully logged in.", "success", true);

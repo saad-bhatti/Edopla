@@ -98,10 +98,10 @@ export const authenticationForm: RequestHandler<unknown, unknown, FormBody, unkn
       if (!searchedUser) throw new Http_Errors.InvalidField("credentials");
       const isValidPassword = await bcrypt.compare(passwordRaw, searchedUser.password!);
       if (!isValidPassword) throw new Http_Errors.InvalidField("credentials");
-
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { password, ...userWithoutPassword } = searchedUser;
-      returnUser = userWithoutPassword;
+      
+      // Remove the password field from the user object
+      searchedUser.password = undefined;
+      returnUser = searchedUser;
     }
 
     // Part 5: Set up a session and return the user
