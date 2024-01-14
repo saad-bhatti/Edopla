@@ -5,6 +5,7 @@
   "main": "dist/server.js",
   "scripts": {
     "start": "nodemon src/server.ts --node_env=$ENV --debug=$DEBUG",
+    "production": "nodemon src/server.ts --node_env=prod --debug=false",
     "lint": "eslint . --ext .ts",
     "test": "jest --watchAll --verbose --silent --runInBand --bail --detectOpenHandles"
   },
