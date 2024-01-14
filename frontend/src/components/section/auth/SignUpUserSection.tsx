@@ -17,7 +17,7 @@ import {
   Typography,
 } from "@mui/joy";
 import { useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 import { displayError } from "../../../errors/displayError";
 import { CartItem } from "../../../models/items/cartItem";
 import { User } from "../../../models/users/user";

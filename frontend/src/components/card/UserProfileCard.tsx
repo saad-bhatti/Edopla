@@ -83,7 +83,7 @@ const UserProfileCard = ({ user, updateUser, updateSnackbar, sx }: UserProfileCa
 
       // Upon success, display the password snackbar
       updateSnackbar(
-        "Email and password authentication method added successfully!.",
+        "Email successfully linked!.",
         "success",
         true
       );
@@ -232,7 +232,7 @@ const UserProfileCard = ({ user, updateUser, updateSnackbar, sx }: UserProfileCa
                 startDecorator={<SaveIcon fontSize="small" />}
                 sx={{ width: "fit-content", margin: "auto" }}
               >
-                Link Email & Password Authentication
+                Link Email
               </Button>
             </Stack>
           )}

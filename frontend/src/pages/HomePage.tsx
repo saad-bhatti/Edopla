@@ -5,7 +5,7 @@
 
 import Stack from "@mui/joy/Stack";
 import { useContext, useEffect } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 import CustomAnimation from "../components/custom/CustomAnimation";
 import About from "../components/section/home/AboutSection";
 import Contact from "../components/section/home/ContactSection";
