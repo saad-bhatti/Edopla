@@ -265,6 +265,15 @@ const CartPage = () => {
     }
   }
 
+  /** Function to handle checking out. */
+  function onCheckout() {
+    setSnackbar!({
+      text: "This feature is coming soon! Thank you for your patience.",
+      color: "primary",
+      visible: true,
+    });
+  }
+
   /** Variable containing the display for all "now" cart items. */
   const nowCartsStack =
     nowCarts.length > 0 ? (
@@ -277,6 +286,7 @@ const CartPage = () => {
             onUpdateCart={updateCart}
             onDeleteItem={deleteItem}
             onSaveForLater={saveForLater}
+            onCheckout={onCheckout}
           />
         ))}
       </Stack>
@@ -298,6 +308,7 @@ const CartPage = () => {
             onUpdateCart={updateCart}
             onDeleteItem={deleteItem}
             onSaveForLater={saveForLater}
+            onCheckout={onCheckout}
           />
         ))}
       </Stack>

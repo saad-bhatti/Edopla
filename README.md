@@ -28,10 +28,15 @@ Order, pick up, and savor the taste of community with Edopla!
 
 ## Usage
 
-### Prerequisites
+- This application can be accessed at: [Edopla](https://edopla.onrender.com/)
+- Suggested browser: Chrome or Firefox
+- Suggested theme: Dark theme
+
+### Prerequisites for Locally Running Edopla
 
 - [Docker](https://docs.docker.com/get-docker/)
 - [Docker Compose](https://docs.docker.com/compose/install/)
+- .env files (provided on request)
 
 ### Running the application (To Be Updated)
 
@@ -39,7 +44,7 @@ Order, pick up, and savor the taste of community with Edopla!
 2. Navigate to the root directory of the repository 
 3. Run `./edopla-script.sh` to execute the script
 4. Enter `start` to run the application
-5.  Enter the ENV and DEBUG arguments
+5. Enter the ENV and DEBUG arguments
 6. Open a browser and navigate to `localhost:3000`
 
 *The frontend will be running on `localhost:3000`*
