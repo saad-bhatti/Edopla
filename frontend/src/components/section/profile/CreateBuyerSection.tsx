@@ -4,36 +4,27 @@
 
 import BadgeIcon from "@mui/icons-material/Badge";
 import InfoOutlined from "@mui/icons-material/InfoOutlined";
-import LocationOnIcon from '@mui/icons-material/LocationOn';
+import LocationOnIcon from "@mui/icons-material/LocationOn";
 import PhoneIcon from "@mui/icons-material/Phone";
 import { Button, FormControl, FormHelperText, FormLabel, Stack } from "@mui/joy";
 import { StandaloneSearchBox } from "@react-google-maps/api";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import CustomInput from "../../components/custom/CustomInput";
-import { displayError } from "../../errors/displayError";
-import { Buyer } from "../../models/users/buyer";
-import { User } from "../../models/users/user";
-import { createBuyer } from "../../network/users/buyers_api";
+import CustomInput from "../../custom/CustomInput";
+import { displayError } from "../../../errors/displayError";
+import { Buyer } from "../../../models/users/buyer";
+import { User } from "../../../models/users/user";
+import { createBuyer } from "../../../network/users/buyers_api";
+import { snackBarColor } from "../../../utils/contexts";
 
 /** Props of the buyer profile section. */
 interface CreateBuyerSectionProps {
-  setLoggedInUser: React.Dispatch<React.SetStateAction<User | null>>;
-  setSnackbarFormat: React.Dispatch<
-    React.SetStateAction<{
-      text: string;
-      color: "primary" | "neutral" | "danger" | "success" | "warning";
-    }>
-  >;
-  setSnackbarVisible: React.Dispatch<React.SetStateAction<boolean>>;
+  setUser: React.Dispatch<React.SetStateAction<User | null>>;
+  updateSnackbar: (text: string, color: snackBarColor, visible: boolean) => void;
 }
 
 /** UI for the create buyer section. */
-const CreateBuyerSection = ({
-  setLoggedInUser,
-  setSnackbarFormat,
-  setSnackbarVisible,
-}: CreateBuyerSectionProps) => {
+const CreateBuyerSection = ({ setUser, updateSnackbar }: CreateBuyerSectionProps) => {
   // Variable to navigate to other pages
   const navigate = useNavigate();
   // State to track the new buyer name input value.
@@ -66,34 +57,23 @@ const CreateBuyerSection = ({
         phoneNumber: phoneNumber,
       };
       const newBuyer: Buyer = await createBuyer(requestDetails);
-      setLoggedInUser((user: User | null) => {
+      setUser((user: User | null) => {
         user!._buyer = newBuyer._id;
         return user;
       });
 
       // Show success snackbar.
-      setSnackbarFormat({
-        text: "Successfully created a buyer profile!",
-        color: "success",
-      });
-      setSnackbarVisible(true);
+      updateSnackbar("Successfully created a buyer profile!", "success", true);
 
-      // Wait for 3 seconds and then navigate to the home page.
-      await new Promise((resolve) => setTimeout(resolve, 3000));
+      // Navigate to the home page.
       navigate("/");
     } catch (error) {
-      if (error instanceof Error) {
-        setSnackbarFormat({
-          text: error.message,
-          color: "danger",
-        });
-        setSnackbarVisible(true);
-      } else displayError(error);
+      error instanceof Error ? updateSnackbar(error.message, "danger", true) : displayError(error);
     }
   }
 
   /** UI layout for the buyer creation form. */
-  const buyerCreationForm = (
+  const BuyerCreationForm = (
     <form
       style={{ minWidth: "100%", margin: "auto", padding: "0% 5%" }}
       onSubmit={(event) => {
@@ -191,10 +171,10 @@ const CreateBuyerSection = ({
         outline: "0.5px solid #E0E0E0",
         borderRadius: "6px",
         padding: "1% 0%",
-        minHeight: "75vh",
+        minHeight: "60vh",
       }}
     >
-      {buyerCreationForm}
+      {BuyerCreationForm}
     </Stack>
   );
 };

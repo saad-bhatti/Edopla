@@ -6,7 +6,7 @@
 import CustomAutoComplete from "../../components/custom/CustomAutoComplete";
 import CustomSlider from "../../components/custom/CustomSlider";
 import { Vendor } from "../../models/users/vendor";
-import * as VendorListManipulation from "./VendorListManipulation";
+import * as VendorListManipulation from "../manipulation/VendorListManipulation";
 
 //////////////////////////////////////////// FILTERING /////////////////////////////////////////////
 /**

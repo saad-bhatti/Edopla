@@ -1,10 +1,14 @@
 /**************************************************************************************************
  * This file contains the UI for the user profile card.                                           *
- * The user profile card allows the user to change their email and password.                      *
+ * The user profile card allows the user to change their email and password. Along with linking   *
+ * their OAuth accounts.                                                                          *
  * The user profile card is displayed in the profiles page.                                       *
  **************************************************************************************************/
 
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import CheckIcon from "@mui/icons-material/Check";
+import GitHubIcon from "@mui/icons-material/GitHub";
+import GoogleIcon from "@mui/icons-material/Google";
 import InfoOutlined from "@mui/icons-material/InfoOutlined";
 import Key from "@mui/icons-material/Key";
 import SaveIcon from "@mui/icons-material/Save";
@@ -21,339 +25,326 @@ import {
 } from "@mui/joy";
 import { SxProps } from "@mui/joy/styles/types";
 import { useState } from "react";
+import { displayError } from "../../errors/displayError";
 import { User } from "../../models/users/user";
+import { linkAuthentication } from "../../network/users/users_api";
+import { snackBarColor } from "../../utils/contexts";
 import {
   calculateDescriptivePasswordStrength,
   calculateNumericalPasswordStrength,
 } from "../../utils/passwordStrength";
+import GoogleButton from "../GoogleButton";
 import CustomCard from "../custom/CustomCard";
 import CustomInput from "../custom/CustomInput";
-import CustomSnackbar from "../custom/CustomSnackbar";
 
 /** Props of the user profile card component. */
 interface UserProfileCardProps {
   user: User;
+  updateUser: (user: User) => void;
+  updateSnackbar: (text: string, color: snackBarColor, visible: boolean) => void;
   sx?: SxProps;
 }
 
 /** UI component for a user profile card. */
-const UserProfileCard = ({ user, sx }: UserProfileCardProps) => {
-  // Retrieve the email from the User object
-  const { email } = user;
+const UserProfileCard = ({ user, updateUser, updateSnackbar, sx }: UserProfileCardProps) => {
+  // Retrieve the identification from the User object
+  const { identification } = user;
+  const initialEmail = identification.email || "";
   // State to track the new email input value.
-  const [newEmail, setNewEmail] = useState<string>(email);
-  // State to control the display of the snackbar.
-  const [emailSnackbarVisible, setEmailSnackbarVisible] = useState<boolean>(false);
-  // State to control errors on the email form.
-  const [emailError] = useState<{ isError: boolean; error: string }>({
-    isError: false,
-    error: "",
-  });
-
-  // State to track the current password input value.
-  const [currentPassword, setCurrentPassword] = useState<string>("");
+  const [email, setEmail] = useState<string>(initialEmail);
   // State to track the new password input value.
-  const [newPassword, setNewPassword] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
   // State to track the confirm password input value.
   const [confirmPassword, setConfirmPassword] = useState<string>("");
-  // State to control the display of the snackbar.
-  const [passwordSnackbarVisible, setPasswordSnackbarVisible] = useState<boolean>(false);
-  // State to control errors on the password form.
-  const [passwordError, setPasswordError] = useState<{ isError: number; error: string }>({
-    isError: 0,
-    error: "",
-  });
 
-  /** Function to handle an email change request. */
-  function handleEmailChange(): void {
-    // TODO: Send request to change email to backend
-
-    // Upon success, display the email snackbar
-    setEmailSnackbarVisible(true);
-
-    // Reset the email field
-    setNewEmail(email);
-  }
-
-  /** UI layout for the change email form. */
-  const changeEmailForm = (
-    <form
-      onSubmit={(event) => {
-        event.preventDefault();
-        handleEmailChange();
-      }}
-    >
-      <Stack spacing={1} direction="column" marginBottom={1}>
-        {/* Email error text. */}
-        {emailError.isError && (
-          <FormControl error>
-            <FormHelperText>
-              <InfoOutlined fontSize="small" />
-              {emailError.error}
-            </FormHelperText>
-          </FormControl>
-        )}
-
-        {/* Email section title. */}
-        <FormLabel>Email</FormLabel>
-
-        {/* Email input. */}
-        <FormControl error={emailError.isError}>
-          <CustomInput
-            type="email"
-            placeholder="Email"
-            value={newEmail}
-            onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-              setNewEmail(event.target.value);
-            }}
-            startDecorator={<AccountCircleIcon />}
-            required={true}
-          />
-        </FormControl>
-
-        {/* Email helper text. */}
-        <FormHelperText>Your email is not visible to any vendor or buyer.</FormHelperText>
-
-        {/* Submit button. */}
-        {newEmail !== email && (
-          <Button
-            type="submit"
-            variant="solid"
-            size="sm"
-            sx={{ alignSelf: "flex-end" }}
-            startDecorator={<SaveIcon fontSize="small" />}
-          >
-            Update Email
-          </Button>
-        )}
-      </Stack>
-    </form>
-  );
-
-  /** UI layout for the email snackbar. */
-  const emailSnackbar = (
-    <CustomSnackbar
-      content="This feature is coming soon! Thank you for your patience."
-      color="primary"
-      open={emailSnackbarVisible}
-      onClose={() => {
-        setEmailSnackbarVisible(false);
-      }}
-      startDecorator={<InfoOutlined fontSize="small" />}
-    />
-  );
-
-  /** Function to handle a password change request. */
-  function handlePasswordChange(): void {
-    // Validate the password
-    if (calculateNumericalPasswordStrength(newPassword) < 3) {
-      setPasswordError({
-        isError: 2,
-        error: "The new password does not meet the requirements",
-      });
+  /** Function to handle linking form authentication. */
+  async function handleFormLinking(): Promise<void> {
+    // Part 1: Validate the password
+    if (calculateNumericalPasswordStrength(password) < 3) {
+      updateSnackbar("The password does not meet the requirements", "danger", true);
       return;
     }
 
-    // Match the new password and confirm password
-    if (newPassword !== confirmPassword) {
-      setPasswordError({ isError: 3, error: "Passwords do not match" });
+    // Part 2: Match the password and confirm password
+    if (password !== confirmPassword) {
+      updateSnackbar("Passwords do not match", "danger", true);
       return;
     }
 
-    // TODO: Conditions met, send request to backend
+    // Part 3: Link the form authentication
+    try {
+      // Send the request to the backend
+      const requestDetails = {
+        identifier: "form",
+        email: email,
+        password: password,
+      };
+      const updatedUser = await linkAuthentication(requestDetails);
 
-    // Upon success, display the password snackbar
-    setPasswordSnackbarVisible(true);
+      // Upon success, display the password snackbar
+      updateSnackbar(
+        "Email successfully linked!.",
+        "success",
+        true
+      );
 
-    // Reset the password fields and error state
-    setCurrentPassword("");
-    setNewPassword("");
-    setConfirmPassword("");
-    setPasswordError({ isError: 0, error: "" });
+      // Update the user
+      updateUser(updatedUser);
+    } catch (error) {
+      error instanceof Error ? updateSnackbar(error.message, "danger", true) : displayError(error);
+      return;
+    }
   }
 
-  /** UI layout for the change password form. */
-  const changePasswordForm = (
-    <form
-      onSubmit={(event) => {
-        event.preventDefault();
-        handlePasswordChange();
-      }}
-    >
-      <Stack spacing={2} direction="column" marginBottom={2}>
-        {/* Password error text. */}
-        {passwordError.isError !== 0 && (
-          <FormControl error>
-            <FormHelperText>
-              <InfoOutlined fontSize="small" />
-              {passwordError.error}
-            </FormHelperText>
-          </FormControl>
-        )}
+  /** UI layout for the email section of the form. */
+  const AddEmailSection = (
+    <Stack id="AddEmailSection" spacing={1} direction="column">
+      {/* Email section title. */}
+      <FormLabel>Email</FormLabel>
 
-        {/* Current password input. */}
-        <FormControl>
-          <FormLabel>Current Password</FormLabel>
+      {/* Email input. */}
+      <FormControl>
+        <CustomInput
+          type="email"
+          placeholder={"Enter your email"}
+          value={email}
+          onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+            setEmail(event.target.value);
+          }}
+          startDecorator={<AccountCircleIcon />}
+          required={true}
+        />
+      </FormControl>
+    </Stack>
+  );
+
+  /** UI layout for the password section of the form. */
+  const AddPasswordSection = (
+    <Stack id="AddPasswordSection" spacing={2} direction="column">
+      {/* Password section. */}
+      <FormControl>
+        <FormLabel>Password</FormLabel>
+        <Stack
+          spacing={0.5}
+          direction="column"
+          sx={{
+            "--hue": Math.min(calculateNumericalPasswordStrength(password) * 40, 120),
+          }}
+        >
+          {/* New password input. */}
           <CustomInput
             type="password"
-            placeholder="Enter your current password"
-            value={currentPassword}
+            placeholder="Enter your password"
+            value={password}
             onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-              setCurrentPassword(event.target.value);
+              setPassword(event.target.value);
             }}
             startDecorator={<Key fontSize="small" sx={{ alignSelf: "center" }} />}
-            error={passwordError.isError === 1}
           />
-        </FormControl>
-
-        {/* New password section. */}
-        <FormControl>
-          <FormLabel>New Password</FormLabel>
-          <Stack
-            spacing={0.5}
-            direction="column"
+          {/* Password strength indicator. */}
+          <LinearProgress
+            determinate
+            size="sm"
+            value={Math.min((calculateNumericalPasswordStrength(password) * 100) / 3, 100)}
             sx={{
-              "--hue": Math.min(calculateNumericalPasswordStrength(newPassword) * 40, 120),
+              bgcolor: "background.level3",
+              color: "hsl(var(--hue) 80% 40%)",
             }}
+          />
+          {/* Password strength text. */}
+          <Typography
+            level="body-xs"
+            sx={{ alignSelf: "flex-end", color: "hsl(var(--hue) 80% 30%)" }}
           >
-            {/* New password input. */}
-            <CustomInput
-              type="password"
-              placeholder="Enter your new password"
-              value={newPassword}
-              onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                setNewPassword(event.target.value);
-              }}
-              startDecorator={<Key fontSize="small" sx={{ alignSelf: "center" }} />}
-              error={passwordError.isError === 2}
-            />
-            {/* Password strength indicator. */}
-            <LinearProgress
-              determinate
-              size="sm"
-              value={Math.min((calculateNumericalPasswordStrength(newPassword) * 100) / 3, 100)}
-              sx={{
-                bgcolor: "background.level3",
-                color: "hsl(var(--hue) 80% 40%)",
-              }}
-            />
-            {/* Password strength text. */}
+            {calculateDescriptivePasswordStrength(password)}
+          </Typography>
+        </Stack>
+      </FormControl>
+
+      {/* Confirm password section. */}
+      <FormControl>
+        <Stack
+          spacing={0.5}
+          direction="column"
+          sx={{ "--hue": Math.min(password === confirmPassword ? 120 : 0, 120) }}
+        >
+          {/* Confirm password input. */}
+          <CustomInput
+            type="password"
+            placeholder="Re-enter your password"
+            value={confirmPassword}
+            onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+              setConfirmPassword(event.target.value);
+            }}
+            startDecorator={<Key fontSize="small" sx={{ alignSelf: "center" }} />}
+          />
+
+          {/* Password match text. */}
+          {confirmPassword.length > 0 && (
             <Typography
               level="body-xs"
               sx={{ alignSelf: "flex-end", color: "hsl(var(--hue) 80% 30%)" }}
             >
-              {calculateDescriptivePasswordStrength(newPassword)}
+              {password !== confirmPassword ? "Passwords do not match" : "Passwords match"}
             </Typography>
-          </Stack>
-        </FormControl>
+          )}
+        </Stack>
+      </FormControl>
 
-        {/* Confirm new password section. */}
+      {/* Password requirements. */}
+      <FormHelperText sx={{ fontSize: "small" }}>
+        <InfoOutlined fontSize="small" />
+        Password requirements: Minimum of 8 characters, a number, and a special character.
+      </FormHelperText>
+    </Stack>
+  );
+
+  /** UI layout for the link form section. */
+  const LinkFormSection = (
+    <form
+      id="LinkFormSection"
+      onSubmit={(event) => {
+        event.preventDefault();
+        handleFormLinking();
+      }}
+      style={{ minWidth: "51%" }}
+    >
+      <Stack spacing={2} direction="column">
+        {/* Link OAuth accounts section title. */}
+        <FormLabel sx={{ fontSize: "large" }}>Add an Email & Password</FormLabel>
+
+        <Stack spacing={2} direction="column" alignItems="flex-start">
+          {/* Email section. */}
+          {AddEmailSection}
+
+          {/* Password section. */}
+          {AddPasswordSection}
+        </Stack>
+
+        {/* Submit button. */}
         <FormControl>
-          <Stack
-            spacing={0.5}
-            direction="column"
-            sx={{ "--hue": Math.min(newPassword === confirmPassword ? 120 : 0, 120) }}
-          >
-            {/* Confirm password input. */}
-            <CustomInput
-              type="password"
-              placeholder="Re-enter your new password"
-              value={confirmPassword}
-              onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                setConfirmPassword(event.target.value);
-              }}
-              startDecorator={<Key fontSize="small" sx={{ alignSelf: "center" }} />}
-              error={passwordError.isError === 3}
-            />
-
-            {/* Password match text. */}
-            {confirmPassword.length > 0 && (
-              <Typography
-                level="body-xs"
-                sx={{ alignSelf: "flex-end", color: "hsl(var(--hue) 80% 30%)" }}
+          {email && password && confirmPassword && (
+            <Stack justifyContent="flex-end">
+              <Button
+                type="submit"
+                variant="solid"
+                size="sm"
+                startDecorator={<SaveIcon fontSize="small" />}
+                sx={{ width: "fit-content", margin: "auto" }}
               >
-                {newPassword !== confirmPassword ? "Passwords do not match" : "Passwords match"}
-              </Typography>
-            )}
-          </Stack>
-        </FormControl>
-
-        {/* Password requirements. */}
-        <FormControl>
-          <FormHelperText>
-            <InfoOutlined fontSize="small" />
-            Password must be at least 8 characters long, contain at least one number, and one
-            special character.
-          </FormHelperText>
+                Link Email
+              </Button>
+            </Stack>
+          )}
         </FormControl>
       </Stack>
-
-      {/* Submit button. */}
-      <FormControl>
-        {newPassword && (
-          <Button
-            type="submit"
-            variant="solid"
-            size="sm"
-            sx={{ alignSelf: "flex-end" }}
-            startDecorator={<SaveIcon fontSize="small" />}
-          >
-            Update Password
-          </Button>
-        )}
-      </FormControl>
     </form>
   );
 
-  /** UI layout for the password snackbar. */
-  const passwordSnackbar = (
-    <CustomSnackbar
-      content="This feature is coming soon! Thank you for your patience."
-      color="primary"
-      open={passwordSnackbarVisible}
-      onClose={() => {
-        setPasswordSnackbarVisible(false);
-      }}
-      startDecorator={<InfoOutlined fontSize="small" />}
-    />
+  const ExistingLinkFormSection = (
+    <Stack spacing={2} direction="column">
+      {/* Existing form section title. */}
+      <FormLabel sx={{ fontSize: "large" }}>Email</FormLabel>
+
+      {/* Section to show existing email. */}
+      <CustomInput
+        type="email"
+        placeholder={""}
+        value={email}
+        onChange={() => {}}
+        startDecorator={<AccountCircleIcon />}
+        required={true}
+      />
+    </Stack>
+  );
+
+  /** Function to handle linking google authentication. */
+  async function handleGoogleLinking(jwtToken: string) {
+    // Part 1: Link the google authentication
+    try {
+      // Send the request to the backend
+      const requestDetails = {
+        identifier: "google",
+        token: jwtToken,
+      };
+      const updatedUser = await linkAuthentication(requestDetails);
+
+      // Upon success, display the password snackbar
+      updateSnackbar("Google account successfully linked!.", "success", true);
+
+      // Update the user
+      updateUser(updatedUser);
+    } catch (error) {
+      error instanceof Error ? updateSnackbar(error.message, "danger", true) : displayError(error);
+      return;
+    }
+  }
+
+  /** UI layout for the linking oauth accounts section. */
+  const LinkOAuthSection = (
+    <Stack id="LinkOauthSection" spacing={2} direction="column" minWidth="51%">
+      {/* Link OAuth accounts section title. */}
+      <FormLabel sx={{ fontSize: "large" }}>Link Accounts</FormLabel>
+
+      <Stack spacing={4} direction="row">
+        {/* Link github oauth. */}
+        <Button
+          variant="soft"
+          color="primary"
+          startDecorator={<GitHubIcon />}
+          endDecorator={identification.gitHubId && <CheckIcon />}
+          onClick={() => {
+            if (!identification.gitHubId)
+              window.location.href =
+                "https://github.com/login/oauth/authorize?client_id=" +
+                process.env.REACT_APP_GITHUB_CLIENT_ID;
+          }}
+        >
+          {identification.gitHubId ? "GitHub Linked" : "Link GitHub"}
+        </Button>
+
+        {/* Link google oauth. */}
+        {!identification.googleId ? (
+          <GoogleButton mode={"continue_with"} onSuccess={handleGoogleLinking} onError={() => {}} />
+        ) : (
+          <Button
+            variant="soft"
+            color="primary"
+            startDecorator={<GoogleIcon />}
+            endDecorator={<CheckIcon />}
+          >
+            Google Linked
+          </Button>
+        )}
+      </Stack>
+
+      {/* Link OAuth accounts helper text. */}
+      {/* Password requirements. */}
+      <FormHelperText sx={{ fontSize: "small" }}>
+        <InfoOutlined fontSize="small" />
+        Linking these accounts will allow you to sign in with them.
+      </FormHelperText>
+    </Stack>
   );
 
   /** UI layout for the user profile card. */
-  const cardContent = (
+  const UserCardContent = (
     <CardContent>
-      <Stack
-        spacing={2}
-        direction="column"
-        justifyContent="space-between"
-        alignItems="flex-start"
-        sx={{ maxWidth: "51%" }}
-      >
-        {/* Change email form. */}
-        {changeEmailForm}
+      <Stack spacing={2} direction="column" justifyContent="space-between" alignItems="flex-start">
+        {/* Link form authentication section. */}
+        {!identification.email ? LinkFormSection : ExistingLinkFormSection}
 
         {/* Divider. */}
-        <Divider sx={{ border: "1px solid #000" }} />
+        <Divider sx={{ border: "1px solid" }} />
 
-        {/* Change password section title. */}
-        <Typography level="title-lg">Change Password</Typography>
-
-        {/* Change password form. */}
-        {changePasswordForm}
+        {/* Link OAuth accounts section. */}
+        {LinkOAuthSection}
       </Stack>
     </CardContent>
   );
 
   /** UI layout for the card. */
-  return (
-    <>
-      {/* Display the email snackbar. */}
-      {emailSnackbar}
-      {/* Display the password snackbar. */}
-      {passwordSnackbar}
-      {/* Display the user profile card. */}
-      <CustomCard cardContent={cardContent} sx={sx} />
-    </>
-  );
+  return <CustomCard cardContent={UserCardContent} sx={sx} />;
 };
 
 export default UserProfileCard;

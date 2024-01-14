@@ -46,7 +46,7 @@ export async function fetchData(
         throw new InvalidFieldError(errorMessage);
       default:
         throw new Error(
-          "Request failed with status: " + response.status + " and message: " + errorMessage
+          errorMessage
         );
     }
   }

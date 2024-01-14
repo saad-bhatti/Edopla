@@ -3,8 +3,8 @@
  **************************************************************************************************/
 
 import { AspectRatio, Container, Stack } from "@mui/joy";
-import logo from "../../images/logo.png";
-import { LargeBodyText, SectionTitleText } from "../../styles/Text";
+import logo from "../../../images/logo.png";
+import { LargeBodyText, SectionTitleText } from "../../../styles/Text";
 
 /** UI for the HomePage's about section. */
 const About = () => {

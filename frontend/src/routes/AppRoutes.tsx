@@ -4,23 +4,24 @@
 
 import { useContext } from "react";
 import { Route, Routes } from "react-router-dom";
-import BuyerPage from "../pages/Buyer/BuyerPage";
-import CartsPage from "../pages/Carts/CartsPage";
+import BuyerPage from "../pages/BuyerPage";
+import CartsPage from "../pages/CartsPage";
+import CreateProfilePage from "../pages/CreateProfilePage";
 import ForbiddenPage from "../pages/ForbiddenPage";
-import HomePage from "../pages/Home/HomePage";
+import HomePage from "../pages/HomePage";
 import LogInPage from "../pages/LogInPage";
-import MenuPage from "../pages/Menu/MenuPage";
+import MenuPage from "../pages/MenuPage";
 import NotFoundPage from "../pages/NotFoundPage";
 import ProfilesPage from "../pages/ProfilesPage";
-import SignUpPage from "../pages/SignUp/SignUpPage";
-import { LoggedInUserContext, LoggedInUserContextProps } from "../utils/contexts";
+import SignUpPage from "../pages/SignUpPage";
+import { UserContext, UserContextProps } from "../utils/contexts";
 import BuyerProtectedRoute from "./BuyerProtectedRoute";
 import UserProtectedRoute from "./UserProtectedRoute";
 
 /** UI component for the routes of the application. */
 const AppRoutes = () => {
   // Retrieve the logged in user.
-  const { loggedInUser } = useContext<LoggedInUserContextProps | null>(LoggedInUserContext) || {};
+  const { user } = useContext<UserContextProps | null>(UserContext) || {};
 
   return (
     <Routes>
@@ -31,9 +32,17 @@ const AppRoutes = () => {
 
       {/* Routes accessible to logged in users. */}
       <Route
+        path="/profiles/create"
+        element={
+          <UserProtectedRoute user={user}>
+            <CreateProfilePage />
+          </UserProtectedRoute>
+        }
+      />
+      <Route
         path="/profiles"
         element={
-          <UserProtectedRoute user={loggedInUser}>
+          <UserProtectedRoute user={user}>
             <ProfilesPage />
           </UserProtectedRoute>
         }
@@ -41,7 +50,7 @@ const AppRoutes = () => {
       <Route
         path="/menu/:vendorId"
         element={
-          <UserProtectedRoute user={loggedInUser}>
+          <UserProtectedRoute user={user}>
             <MenuPage />
           </UserProtectedRoute>
         }
@@ -51,7 +60,7 @@ const AppRoutes = () => {
       <Route
         path="/buy"
         element={
-          <BuyerProtectedRoute user={loggedInUser}>
+          <BuyerProtectedRoute user={user}>
             <BuyerPage />
           </BuyerProtectedRoute>
         }
@@ -59,7 +68,7 @@ const AppRoutes = () => {
       <Route
         path="/carts"
         element={
-          <BuyerProtectedRoute user={loggedInUser}>
+          <BuyerProtectedRoute user={user}>
             <CartsPage />
           </BuyerProtectedRoute>
         }

@@ -1,5 +1,5 @@
 # Upcoming Changes
-*Last Updated: January 8th, 2024*
+*Last Updated: January 13th, 2024*
 
 * * *
 
@@ -8,8 +8,9 @@
 ### General changes
 
 - Change the terminology from *Vendor* to *Seller*
-- Make the snackbar global, rather than individual elements creating it
+- ~~Make the snackbar global, rather than individual elements creating it~~
 - Change the custom components to allow additional sx styling
+- Fix the Google OAuth Button resizing issues
 
 ### Home Page
 
@@ -19,21 +20,20 @@
 
 ### Sign up Page
 
-- Third-party sign-up (Google & Facebook) functionality
-- Allow the user to choose either a buyer or seller role
-- Allow the user to create a seller profile
+- ~~Third-party sign-up (Google & GitHub) functionality~~
+- ~~Allow the user to choose either a buyer or seller role~~
+- ~~Allow the user to create a seller profile~~
 - Require email verification upon account creation
 
 ### Log in Page
 
-- Third-party log-in (Google & Facebook) functionality
+- ~~Third-party log-in (Google & GitHub) functionality~~
 - Allow the user to recover their password
 
 ### Profile Page
 
 - Allow the user to update their email and password
 - Create the functionality to add multiple addresses
-- Change the tabs section to allow the user to see either buyer or seller profile
 
 ### Buy Page
 
@@ -80,7 +80,7 @@
 - The address and phone number fields will be moved to user model
 - Multiple addresses for a user will be allowed
 - Functionality to update a user's credentials
-- A third party API for address suggestion/validation will be incorporated
+- ~~A third party API for address suggestion/validation will be incorporated~~
 
 ### Buyer
 
@@ -96,7 +96,7 @@
 
 ### Third Party API Integration
 
-- Signup & Login with: Google, Facebook
+- ~~Signup & Login with: Google, GitHub~~
 - Payments with: Credit card, PayPal, Apple pay, Google pay
 
 ### Etc

@@ -4,7 +4,6 @@
 
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import DensityMediumIcon from "@mui/icons-material/DensityMedium";
-import InfoOutlined from "@mui/icons-material/InfoOutlined";
 import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import {
@@ -21,52 +20,27 @@ import Badge from "@mui/joy/Badge";
 import Button from "@mui/joy/Button";
 import { useContext, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import CustomSnackbar from "../components/custom/CustomSnackbar";
 import { logout } from "../network/users/users_api";
 import * as Context from "../utils/contexts";
+import { googleLogout } from "@react-oauth/google";
 
 /** UI component for the logged in view of the navigation bar head. */
 export const NavBarLoggedInHead = () => {
-  // State to control the display of the snackbar.
-  const [snackbarVisible, setSnackbarVisible] = useState<boolean>(false);
-  // State to track the text and color of the snackbar.
-  type possibleColors = "primary" | "neutral" | "danger" | "success" | "warning";
-  const [snackbarFormat, setSnackbarFormat] = useState<{
-    text: string;
-    color: possibleColors;
-  }>({
-    text: "",
-    color: "primary",
-  });
-
-  /** UI layout for the snackbar. */
-  const snackbar = (
-    <CustomSnackbar
-      content={snackbarFormat.text}
-      color={snackbarFormat.color}
-      open={snackbarVisible}
-      onClose={() => {
-        setSnackbarVisible(false);
-      }}
-      startDecorator={<InfoOutlined fontSize="small" />}
-    />
-  );
+  // Retrieve the snackbar from the context
+  const { setSnackbar } = useContext(Context.SnackbarContext) || {};
 
   /** Function to display a snackbar for pages that are coming soon. */
   function pageComingSoon(): void {
-    setSnackbarFormat({
+    setSnackbar!({
       text: "This page is coming soon! Thank you for your patience",
       color: "primary",
+      visible: true,
     });
-    setSnackbarVisible(true);
   }
 
   /** UI layout for the navigation bar head when logged in. */
   return (
     <div id="NavBarHead">
-      {/* Snackbar. */}
-      {snackbar}
-
       {/* Buy button. */}
       <Link to="/buy">
         <Button
@@ -109,55 +83,44 @@ export const NavBarLoggedInTail = () => {
   // Variable to navigate to other pages
   const navigate = useNavigate();
   // Retrieve the logged in user from the context
-  const { loggedInUser, setLoggedInUser } =
-    useContext<Context.LoggedInUserContextProps | null>(Context.LoggedInUserContext) || {};
+  const { user, setUser } = useContext<Context.UserContextProps | null>(Context.UserContext) || {};
+  // Retrieve the identification from the user context
+  const identification =
+    user?.identification.email || user?.identification.googleId || user?.identification.gitHubId;
   // Retrieve the set cart function from the context
   const { carts, setCarts } =
     useContext<Context.CartsContextProps | null>(Context.CartsContext) || {};
+  // Retrieve the snackbar from the context
+  const { setSnackbar } = useContext(Context.SnackbarContext) || {};
   // State to track whether the dropdown menu is visible.
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
-
-  // State to control the display of the snackbar.
-  const [snackbarVisible, setSnackbarVisible] = useState<boolean>(false);
-  // State to track the text and color of the snackbar.
-  type possibleColors = "primary" | "neutral" | "danger" | "success" | "warning";
-  const [snackbarFormat, setSnackbarFormat] = useState<{
-    text: string;
-    color: possibleColors;
-  }>({
-    text: "",
-    color: "primary",
-  });
-
-  /** UI layout for the snackbar. */
-  const snackbar = (
-    <CustomSnackbar
-      content={snackbarFormat.text}
-      color={snackbarFormat.color}
-      open={snackbarVisible}
-      onClose={() => {
-        setSnackbarVisible(false);
-      }}
-      startDecorator={<InfoOutlined fontSize="small" />}
-    />
-  );
 
   /** Function to handle logging out request. */
   async function logOut(): Promise<void> {
     try {
+      // Log out from Google
+      if (user?.identification.googleId) googleLogout();
+
       // Execute the logout request
       await logout();
-      setLoggedInUser!(null);
+      setUser!(null);
       setCarts!([]);
+
+      // Display a success message
+      setSnackbar!({
+        text: "Successfully logged out.",
+        color: "success",
+        visible: true,
+      });
 
       // Navigate to the home page
       navigate("/");
     } catch (error) {
-      setSnackbarFormat({
+      setSnackbar!({
         text: "Failed to log out. Please try again later.",
         color: "danger",
+        visible: true,
       });
-      setSnackbarVisible(true);
     }
   }
 
@@ -184,7 +147,7 @@ export const NavBarLoggedInTail = () => {
     >
       {/* User email. */}
       <MenuItem>
-        <Typography level="body-xs">{loggedInUser?.email}</Typography>
+        <Typography level="body-xs">{identification}</Typography>
       </MenuItem>
 
       <ListDivider />
@@ -210,9 +173,6 @@ export const NavBarLoggedInTail = () => {
   /** UI layout for the navigation bar tail when logged in. */
   return (
     <div id="NavBarTail">
-      {/* Snackbar. */}
-      {snackbar}
-
       <Stack
         direction="row"
         alignItems="center"
