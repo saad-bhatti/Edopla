@@ -12,7 +12,7 @@ import CreateBuyerSection from "../components/section/profile/CreateBuyerSection
 import CreateVendorSection from "../components/section/profile/CreateVendorSection";
 import { simpleSx } from "../styles/PageSX";
 import { SubSectionTitleText } from "../styles/Text";
-import { minPageHeight } from "../styles/constants";
+import { minPageHeight } from "../styles/StylingConstants";
 import * as Context from "../utils/contexts";
 
 /** UI for the create profile page. */

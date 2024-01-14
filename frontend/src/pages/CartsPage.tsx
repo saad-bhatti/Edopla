@@ -13,7 +13,7 @@ import CustomDropdown from "../components/custom/CustomDropdown";
 import CustomSearch from "../components/custom/CustomSearch";
 import { CartItem } from "../models/items/cartItem";
 import * as CartsAPI from "../network/items/carts_api";
-import { minPageHeight, minPageWidth } from "../styles/constants";
+import { minPageHeight, minPageWidth } from "../styles/StylingConstants";
 import { CartsContext, SnackbarContext } from "../utils/contexts";
 import * as CartsManipulation from "./manipulation/CartsManipulation";
 

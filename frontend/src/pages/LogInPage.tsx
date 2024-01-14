@@ -11,7 +11,7 @@ import { useContext } from "react";
 import LoginUserSection from "../components/section/auth/LogInUserSection";
 import SideImageSection from "../components/section/auth/SideImageSection";
 import { simpleSx } from "../styles/PageSX";
-import { minPageHeight } from "../styles/constants";
+import { minPageHeight } from "../styles/StylingConstants";
 import * as Context from "../utils/contexts";
 
 /** UI for the log in page. */

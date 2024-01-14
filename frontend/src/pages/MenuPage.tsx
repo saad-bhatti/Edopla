@@ -19,7 +19,7 @@ import { MenuItem } from "../models/items/menuItem";
 import { createCart, emptyCart, updateItem } from "../network/items/carts_api";
 import { getMenu } from "../network/items/menus_api";
 import { SectionTitleText } from "../styles/Text";
-import { minPageHeight, minPageWidth } from "../styles/constants";
+import { minPageHeight, minPageWidth } from "../styles/StylingConstants";
 import { CartsContext, SnackbarContext, snackBarColor } from "../utils/contexts";
 import * as MenuManipulation from "./manipulation/MenuManipulation";
 import * as MenuPageHelper from "./helpers/MenuPageHelper";

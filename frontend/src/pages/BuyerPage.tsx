@@ -19,7 +19,7 @@ import { getSavedVendors, toggleSavedVendor } from "../network/users/buyers_api"
 import { getAllVendors } from "../network/users/vendors_api";
 import { onlyBackgroundSx } from "../styles/PageSX";
 import { SectionTitleText } from "../styles/Text";
-import { minPageHeight, minPageWidth } from "../styles/constants";
+import { minPageHeight, minPageWidth } from "../styles/StylingConstants";
 import * as Contexts from "../utils/contexts";
 import * as BuyerPageHelper from "./helpers/BuyerPageHelper";
 import * as VendorListManipulation from "./manipulation/VendorListManipulation";

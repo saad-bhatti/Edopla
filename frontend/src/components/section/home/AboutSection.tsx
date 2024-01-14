@@ -4,6 +4,7 @@
 
 import { AspectRatio, Container, Stack } from "@mui/joy";
 import logo from "../../../images/logo.png";
+import { mobileScreenInnerWidth } from "../../../styles/StylingConstants";
 import { LargeBodyText, SectionTitleText } from "../../../styles/Text";
 
 /** UI for the HomePage's about section. */
@@ -13,7 +14,7 @@ const About = () => {
     <Container
       id="About"
       sx={(theme) => ({
-        borderRadius: "2%",
+        borderRadius: window.innerWidth <= mobileScreenInnerWidth ? 0 : "10%",
         [theme.getColorSchemeSelector("dark")]: {
           background: "linear-gradient(to right, #1e1e30, #172836)",
         },
@@ -22,13 +23,18 @@ const About = () => {
       {/* Section title. */}
       <SectionTitleText
         children="About Us"
-        width="35%"
-        paddingTop={verticalPadding}
-        sx={{ borderBottom: "2vh solid" }}
+        marginBottom={window.innerWidth <= mobileScreenInnerWidth ? verticalPadding : 0}
+        paddingTop={window.innerWidth <= mobileScreenInnerWidth ? 0 : verticalPadding}
+        sx={{ width: "fit-content", mx: "auto", borderBottom: "1vh solid" }}
       />
 
       {/* Section content. */}
-      <Stack direction="row" justifyContent="center" gap="5vw" padding={`${verticalPadding} 0%`}>
+      <Stack
+        direction={window.innerWidth <= mobileScreenInnerWidth ? "column" : "row"}
+        justifyContent="center"
+        gap={5}
+        padding={`${verticalPadding} 0%`}
+      >
         {/* Section text. */}
         <LargeBodyText>
           Welcome to Edopla, where your cravings become our mission! At Edopla, we take pride in
@@ -58,7 +64,7 @@ const About = () => {
           variant="outlined"
           objectFit="fill"
           sx={{
-            minWidth: "25vw",
+            minWidth: "25%",
             borderRadius: "md",
             marginY: "auto",
           }}

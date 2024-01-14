@@ -7,3 +7,5 @@ export const navBarMaxWidth = "7vh";
 export const minPageWidth = "99%";
 
 export const minPageHeight = "93vh";
+
+export const mobileScreenInnerWidth = 500;
