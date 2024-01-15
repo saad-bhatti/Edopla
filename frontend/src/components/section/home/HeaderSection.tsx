@@ -3,8 +3,8 @@
  **************************************************************************************************/
 
 import { Container, Stack } from "@mui/joy";
-import { LargeBodyText, SectionTitleText } from "../../../styles/Text";
-import { minPageWidth } from "../../../styles/constants";
+import { mobileScreenInnerWidth } from "../../../styles/StylingConstants";
+import { LargeBodyText, SectionTitleText, centerText } from "../../../styles/TextSX";
 
 /** UI for the HomePage's header section. */
 const Header = () => {
@@ -12,9 +12,9 @@ const Header = () => {
     <Container
       id="Header"
       sx={(theme) => ({
-        minWidth: minPageWidth,
-        maxHeight: "80vh",
-        borderRadius: "0 0 40% 40%",
+        minWidth: "100%",
+        minHeight: "80%",
+        borderRadius: window.innerWidth <= mobileScreenInnerWidth ? 0 : "0 0 40% 40%",
         [theme.getColorSchemeSelector("dark")]: {
           background: "linear-gradient(to right, #280afe, #996bce)",
         },
@@ -22,12 +22,13 @@ const Header = () => {
     >
       <Stack direction="column" alignItems="center" gap={5} paddingY="10%">
         {/* Section title. */}
-        <SectionTitleText children="Welcome to Edopla!" />
+        <SectionTitleText children="Welcome to Edopla!" sx={centerText} />
 
         {/* Section content. */}
         <LargeBodyText
           children="Your cravings, our mission - order, pick up, enjoy!"
-          fontSize="3vh"
+          fontSize="130%"
+          sx={centerText}
         />
       </Stack>
     </Container>

@@ -115,7 +115,7 @@ const HomePage = () => {
 
   /** UI layout for the home page. */
   return (
-    <Stack id="HomePage" direction="column" gap={10}>
+    <Stack id="HomePage" direction="column" gap={10} m={0} p={0}>
       <CustomAnimation child={<Header />} transformAnimation="translateY(-5%)" />
       <CustomAnimation child={<Features />} transformAnimation="translateX(-5%)" />
       <CustomAnimation child={<About />} transformAnimation="translateX(-5%)" />

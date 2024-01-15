@@ -6,8 +6,8 @@
 import SentimentVeryDissatisfiedIcon from "@mui/icons-material/SentimentVeryDissatisfied";
 import Stack from "@mui/joy/Stack";
 import { SxProps } from "@mui/joy/styles/types";
-import { SectionTitleText } from "../styles/Text";
-import { minPageHeight } from "../styles/constants";
+import { SectionTitleText } from "../styles/TextSX";
+import { minPageHeight } from "../styles/StylingConstants";
 
 /** UI for the forbidden page. */
 const NotFoundPage = () => {

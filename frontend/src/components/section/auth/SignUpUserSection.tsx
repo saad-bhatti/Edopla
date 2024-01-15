@@ -22,6 +22,8 @@ import { displayError } from "../../../errors/displayError";
 import { CartItem } from "../../../models/items/cartItem";
 import { User } from "../../../models/users/user";
 import { authenticateForm, authenticateGoogle } from "../../../network/users/users_api";
+import { mobileScreenInnerWidth } from "../../../styles/StylingConstants";
+import { centerText } from "../../../styles/TextSX";
 import { snackBarColor } from "../../../utils/contexts";
 import {
   calculateDescriptivePasswordStrength,
@@ -38,11 +40,7 @@ interface SignUpSectionProps {
 }
 
 /** UI for the sign up section. */
-const SignUpSection = ({
-  setUser,
-  setCarts,
-  updateSnackbar,
-}: SignUpSectionProps) => {
+const SignUpSection = ({ setUser, setCarts, updateSnackbar }: SignUpSectionProps) => {
   // Get the navigate function.
   const navigate = useNavigate();
   // State to track the email input.
@@ -52,30 +50,26 @@ const SignUpSection = ({
   // State to track the confirm password input.
   const [confirmPassword, setConfirmPassword] = useState<string>("");
   // State to control errors on the sign up information form.
-  const [formError, setFormError] = useState<{ isError: number; error: string }>({
-    isError: 0,
-    error: "",
-  });
+  const [formError, setFormError] = useState<number>(0);
 
   /** Function to validate the sign up form. */
   function validateFormSignUp(): boolean {
     // Validate the password
     if (calculateNumericalPasswordStrength(password) < 3) {
-      setFormError({
-        isError: 2,
-        error: "The password does not meet the specified requirements",
-      });
+      setFormError(2);
+      updateSnackbar("The password does not meet the specified requirements", "danger", true);
       return false;
     }
 
     // Match the password and confirm password
     if (password !== confirmPassword) {
-      setFormError({ isError: 3, error: "Passwords do not match" });
+      setFormError(2);
+      updateSnackbar("Passwords do not match", "danger", true);
       return false;
     }
 
     // Reset the form error state.
-    setFormError({ isError: 0, error: "" });
+    setFormError(0);
     return true;
   }
 
@@ -136,7 +130,11 @@ const SignUpSection = ({
 
   /** UI layout for the third party signup options. */
   const ThirdPartySignUp = (
-    <Stack direction="row" gap={4} alignSelf="center" minWidth="43%">
+    <Stack
+      direction={window.innerWidth <= mobileScreenInnerWidth ? "column" : "row"}
+      gap={4}
+      alignSelf="center"
+    >
       {/* Google log in button. */}
       <GoogleButton
         mode={"signup_with"}
@@ -175,16 +173,6 @@ const SignUpSection = ({
       }}
     >
       <Stack gap={3} direction="column" alignItems="center">
-        {/* Form error text. */}
-        {formError.isError !== 0 && (
-          <FormControl error>
-            <FormHelperText>
-              <InfoOutlined fontSize="small" />
-              {formError.error}
-            </FormHelperText>
-          </FormControl>
-        )}
-
         {/* Email section. */}
         <FormControl>
           <FormLabel>Email</FormLabel>
@@ -198,7 +186,7 @@ const SignUpSection = ({
             }}
             startDecorator={<EmailIcon fontSize="small" />}
             required={true}
-            error={formError.isError === 1}
+            error={formError === 1}
           />
         </FormControl>
 
@@ -222,7 +210,7 @@ const SignUpSection = ({
               }}
               startDecorator={<Key fontSize="small" sx={{ alignSelf: "center" }} />}
               required={true}
-              error={formError.isError === 2}
+              error={formError === 2}
             />
             {/* Password strength indicator. */}
             <LinearProgress
@@ -261,24 +249,22 @@ const SignUpSection = ({
               }}
               startDecorator={<Key fontSize="small" sx={{ alignSelf: "center" }} />}
               required={true}
-              error={formError.isError === 3}
+              error={formError === 3}
             />
 
             {/* Password match text. */}
-            {confirmPassword.length > 0 && (
-              <Typography
-                level="body-xs"
-                sx={{ alignSelf: "flex-end", color: "hsl(var(--hue) 80% 30%)" }}
-              >
-                {password !== confirmPassword ? "Passwords do not match" : "Passwords match"}
-              </Typography>
-            )}
+            <Typography
+              level="body-xs"
+              sx={{ alignSelf: "flex-end", color: "hsl(var(--hue) 80% 30%)" }}
+            >
+              {password !== confirmPassword ? "Passwords do not match" : "Passwords match"}
+            </Typography>
           </Stack>
         </FormControl>
 
         {/* Password requirements. */}
-        <FormHelperText sx={{ fontSize: "small" }}>
-          <InfoOutlined fontSize="small" />
+        <FormHelperText sx={{ ...centerText, fontSize: "small" }}>
+          {window.innerWidth >= mobileScreenInnerWidth && <InfoOutlined fontSize="small" />}
           Password requirements: Minimum of 8 characters, a number, and a special character.
         </FormHelperText>
 
@@ -296,13 +282,14 @@ const SignUpSection = ({
       id="SignUpSection"
       direction="column"
       alignItems="center"
-      gap={2}
+      gap={4}
       sx={{
-        minWidth: "50vw",
+        minWidth: window.innerWidth <= mobileScreenInnerWidth ? "100%" : "50%",
+        minHeight: window.innerWidth <= mobileScreenInnerWidth ? "82vh" : "90vh",
+        px: 0,
+        py: window.innerWidth <= mobileScreenInnerWidth ? "5%" : "2%",
         outline: "0.5px solid #E0E0E0",
         borderRadius: "6px",
-        padding: "1% 0%",
-        minHeight: "85vh",
       }}
     >
       {/* Welcome message. */}

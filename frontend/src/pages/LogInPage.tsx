@@ -10,8 +10,7 @@ import { SxProps } from "@mui/joy/styles/types";
 import { useContext } from "react";
 import LoginUserSection from "../components/section/auth/LogInUserSection";
 import SideImageSection from "../components/section/auth/SideImageSection";
-import { simpleSx } from "../styles/PageSX";
-import { minPageHeight } from "../styles/constants";
+import { mobileScreenInnerWidth } from "../styles/StylingConstants";
 import * as Context from "../utils/contexts";
 
 /** UI for the log in page. */
@@ -45,8 +44,10 @@ const LogInPage = () => {
 
   /** Sx for the log in page. */
   const customSx: SxProps = {
-    ...simpleSx,
-    maxHeight: minPageHeight,
+    p: 0,
+    minWidth: "90%",
+    mx: "5%",
+    my: window.innerWidth <= mobileScreenInnerWidth ? "5%" : "1%",
   };
 
   /** UI layout for the login page. */

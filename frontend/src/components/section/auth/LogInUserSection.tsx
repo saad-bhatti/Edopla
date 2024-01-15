@@ -16,6 +16,7 @@ import { authenticateForm, authenticateGoogle } from "../../../network/users/use
 import { snackBarColor } from "../../../utils/contexts";
 import GoogleButton from "../../GoogleButton";
 import CustomInput from "../../custom/CustomInput";
+import { mobileScreenInnerWidth } from "../../../styles/StylingConstants";
 
 /** Props of the log in section. */
 interface LogInSectionProps {
@@ -62,7 +63,7 @@ const LogInSection = ({ setUser, setCarts, updateSnackbar }: LogInSectionProps) 
           throw new Error("Invalid identifier type.");
       }
       setUser!(user);
-      
+
       // Retrieve the user's cart from the backend.
       user._buyer ? setCarts!(await getCarts()) : setCarts!([]);
 
@@ -79,7 +80,11 @@ const LogInSection = ({ setUser, setCarts, updateSnackbar }: LogInSectionProps) 
 
   /** UI layout for the third party login options. */
   const ThirdPartyLogIn = (
-    <Stack direction="row" gap={4} alignSelf="center" minWidth="43%">
+    <Stack
+      direction={window.innerWidth <= mobileScreenInnerWidth ? "column" : "row"}
+      gap={4}
+      alignSelf="center"
+    >
       {/* Google log in button. */}
       <GoogleButton
         mode={"signin_with"}
@@ -159,15 +164,18 @@ const LogInSection = ({ setUser, setCarts, updateSnackbar }: LogInSectionProps) 
   /** UI layout for the login section. */
   return (
     <Stack
+      id="LogInSection"
       direction="column"
       alignItems="center"
       gap={6}
+      style={{ marginLeft: 0 }}
       sx={{
-        minWidth: "50vw",
+        minWidth: window.innerWidth <= mobileScreenInnerWidth ? "100%" : "50%",
+        minHeight: window.innerWidth <= mobileScreenInnerWidth ? "82vh" : "90vh",
+        px: 0,
+        py: window.innerWidth <= mobileScreenInnerWidth ? "5%" : "2%",
         outline: "0.5px solid #E0E0E0",
         borderRadius: "6px",
-        padding: "1% 0%",
-        minHeight: "88vh",
       }}
     >
       {/* Welcome message. */}
