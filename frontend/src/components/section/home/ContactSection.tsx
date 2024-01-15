@@ -6,8 +6,12 @@ import EmailIcon from "@mui/icons-material/Email";
 import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import PhoneIcon from "@mui/icons-material/Phone";
 import { Container, Stack } from "@mui/joy";
-import { mobileScreenInnerWidth } from "../../../styles/StylingConstants";
-import { LargeBodyText, SectionTitleText, centerText } from "../../../styles/TextSX";
+import {
+  LargeBodyText,
+  SectionTitleText,
+  centerText,
+  mobileScreenInnerWidth,
+} from "../../../styles/TextSX";
 
 /** UI for the HomePage's contact section. */
 const Contact = () => {

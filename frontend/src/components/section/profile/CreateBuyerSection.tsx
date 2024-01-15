@@ -3,19 +3,19 @@
  **************************************************************************************************/
 
 import BadgeIcon from "@mui/icons-material/Badge";
-import InfoOutlined from "@mui/icons-material/InfoOutlined";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import PhoneIcon from "@mui/icons-material/Phone";
-import { Button, FormControl, FormHelperText, FormLabel, Stack } from "@mui/joy";
+import { Button, FormControl, FormLabel, Stack } from "@mui/joy";
 import { StandaloneSearchBox } from "@react-google-maps/api";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import CustomInput from "../../custom/CustomInput";
 import { displayError } from "../../../errors/displayError";
 import { Buyer } from "../../../models/users/buyer";
 import { User } from "../../../models/users/user";
 import { createBuyer } from "../../../network/users/buyers_api";
+import { mobileScreenInnerWidth } from "../../../styles/TextSX";
 import { snackBarColor } from "../../../utils/contexts";
+import CustomInput from "../../custom/CustomInput";
 
 /** Props of the buyer profile section. */
 interface CreateBuyerSectionProps {
@@ -34,20 +34,18 @@ const CreateBuyerSection = ({ setUser, updateSnackbar }: CreateBuyerSectionProps
   // State to track the new phone number input value.
   const [phoneNumber, setPhoneNumber] = useState<string>("");
   // State to control errors on the sign up information form.
-  const [formError, setFormError] = useState<{ isError: number; error: string }>({
-    isError: 0,
-    error: "",
-  });
+  const [formError, setFormError] = useState<number>(0);
 
   /** Function to handle buyer creation submission. */
   async function handleBuyerCreation() {
     // Check that the phone number is valid, checking that it only contains numbers.
     if (phoneNumber.length && !phoneNumber.match(/^[0-9]+$/)) {
-      setFormError({ isError: 3, error: "Please enter a valid phone number." });
+      setFormError(3);
+      updateSnackbar("Please enter a valid phone number.", "danger", true);
       return;
     }
     // Reset the form error state.
-    setFormError({ isError: 0, error: "" });
+    setFormError(0);
 
     try {
       // Send request to backend to create the new buyer profile.
@@ -73,27 +71,17 @@ const CreateBuyerSection = ({ setUser, updateSnackbar }: CreateBuyerSectionProps
   }
 
   /** UI layout for the buyer creation form. */
+  const inputMinWidth = { minWidth: window.innerWidth <= mobileScreenInnerWidth ? "90%" : "70%" };
   const BuyerCreationForm = (
     <form
-      style={{ minWidth: "100%", margin: "auto", padding: "0% 5%" }}
       onSubmit={(event) => {
         event.preventDefault();
         handleBuyerCreation();
       }}
     >
       <Stack gap={5} direction="column" alignItems="center">
-        {/* Form error text. */}
-        {formError.isError !== 0 && (
-          <FormControl error>
-            <FormHelperText>
-              <InfoOutlined fontSize="small" />
-              {formError.error}
-            </FormHelperText>
-          </FormControl>
-        )}
-
         {/* Buyer name section. */}
-        <FormControl>
+        <FormControl sx={inputMinWidth}>
           <FormLabel>Name *</FormLabel>
           <CustomInput
             type="text"
@@ -104,13 +92,12 @@ const CreateBuyerSection = ({ setUser, updateSnackbar }: CreateBuyerSectionProps
             }}
             startDecorator={<BadgeIcon fontSize="small" />}
             required={true}
-            error={formError.isError === 1}
-            sx={{ minWidth: "30vw" }}
+            error={formError === 1}
           />
         </FormControl>
 
         {/* Address section. */}
-        <FormControl>
+        <FormControl sx={inputMinWidth}>
           <FormLabel>Address *</FormLabel>
           <StandaloneSearchBox
             onLoad={(ref) => {
@@ -132,13 +119,13 @@ const CreateBuyerSection = ({ setUser, updateSnackbar }: CreateBuyerSectionProps
               }}
               startDecorator={<LocationOnIcon fontSize="small" />}
               required={true}
-              sx={{ minWidth: "30vw" }}
+              error={formError === 2}
             />
           </StandaloneSearchBox>
         </FormControl>
 
         {/* Phone number section. */}
-        <FormControl>
+        <FormControl sx={inputMinWidth}>
           <FormLabel>Phone Number</FormLabel>
           <CustomInput
             type="tel"
@@ -148,12 +135,17 @@ const CreateBuyerSection = ({ setUser, updateSnackbar }: CreateBuyerSectionProps
               setPhoneNumber(event.target.value);
             }}
             startDecorator={<PhoneIcon fontSize="small" />}
-            sx={{ minWidth: "30vw" }}
+            error={formError === 3}
           />
         </FormControl>
 
         {/* Create profile button. */}
-        <Button type="submit" variant="solid" color="primary" sx={{ minWidth: "20vw" }}>
+        <Button
+          type="submit"
+          variant="solid"
+          color="primary"
+          sx={{ alignSelf: "center", minWidth: "50%" }}
+        >
           Create Profile
         </Button>
       </Stack>
@@ -167,11 +159,12 @@ const CreateBuyerSection = ({ setUser, updateSnackbar }: CreateBuyerSectionProps
       alignItems="center"
       gap={3}
       sx={{
-        minWidth: "50vw",
+        minWidth: window.innerWidth <= mobileScreenInnerWidth ? "90%" : "50%",
+        minHeight: window.innerWidth <= mobileScreenInnerWidth ? "60vh" : "65vh",
+        px: window.innerWidth <= mobileScreenInnerWidth ? "5%" : "2%",
+        py: window.innerWidth <= mobileScreenInnerWidth ? "7%" : "3%",
         outline: "0.5px solid #E0E0E0",
         borderRadius: "6px",
-        padding: "1% 0%",
-        minHeight: "60vh",
       }}
     >
       {BuyerCreationForm}

@@ -3,7 +3,7 @@
  **************************************************************************************************/
 
 import { Container } from "@mui/joy";
-import { mobileScreenInnerWidth } from "../../../styles/StylingConstants";
+import { mobileScreenInnerWidth } from "../../../styles/TextSX";
 
 /** UI for the side image section. */
 const SideImageSection = () => {

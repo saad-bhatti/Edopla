@@ -13,10 +13,10 @@ import { CartItem } from "../../../models/items/cartItem";
 import { User } from "../../../models/users/user";
 import { getCarts } from "../../../network/items/carts_api";
 import { authenticateForm, authenticateGoogle } from "../../../network/users/users_api";
+import { mobileScreenInnerWidth } from "../../../styles/TextSX";
 import { snackBarColor } from "../../../utils/contexts";
 import GoogleButton from "../../GoogleButton";
 import CustomInput from "../../custom/CustomInput";
-import { mobileScreenInnerWidth } from "../../../styles/StylingConstants";
 
 /** Props of the log in section. */
 interface LogInSectionProps {
@@ -29,14 +29,16 @@ interface LogInSectionProps {
 const LogInSection = ({ setUser, setCarts, updateSnackbar }: LogInSectionProps) => {
   // Variable to navigate to other pages
   const navigate = useNavigate();
-
   // State to track the email input.
   const [email, setEmail] = useState<string>("");
   // State to track the password input.
   const [password, setPassword] = useState<string>("");
+  // State to control errors on the sign up information form.
+  const [formError, setFormError] = useState<number>(0);
 
   /** Function to handle log in submission. */
   async function handleLogIn(identifierType: number, token: string): Promise<void> {
+    setFormError(0);
     try {
       let requestDetails: any;
       let user: User;
@@ -74,7 +76,11 @@ const LogInSection = ({ setUser, setCarts, updateSnackbar }: LogInSectionProps) 
       navigate("/");
     } catch (error) {
       // Show snackbar to indicate failure.
-      error instanceof Error ? updateSnackbar(error.message, "danger", true) : displayError(error);
+      if (error instanceof Error) {
+        updateSnackbar(error.message, "danger", true);
+        if (error.message.includes("email")) setFormError(1);
+        else if (error.message.includes("password")) setFormError(2);
+      } else displayError(error);
     }
   }
 
@@ -135,6 +141,7 @@ const LogInSection = ({ setUser, setCarts, updateSnackbar }: LogInSectionProps) 
             }}
             startDecorator={<EmailIcon fontSize="small" />}
             required={true}
+            error={formError === 1}
           />
         </FormControl>
 
@@ -150,6 +157,7 @@ const LogInSection = ({ setUser, setCarts, updateSnackbar }: LogInSectionProps) 
             }}
             startDecorator={<Key fontSize="small" />}
             required={true}
+            error={formError === 2}
           />
         </FormControl>
 

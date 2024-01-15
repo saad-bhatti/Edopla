@@ -4,7 +4,6 @@
  * The menu items can be searched, filtered, and sorted.                                           *
  **************************************************************************************************/
 
-import SentimentVeryDissatisfiedIcon from "@mui/icons-material/SentimentVeryDissatisfied";
 import { Container, LinearProgress, Stack } from "@mui/joy";
 import { SxProps } from "@mui/joy/styles/types";
 import { useContext, useEffect, useState } from "react";
@@ -18,11 +17,10 @@ import { CartItem } from "../models/items/cartItem";
 import { MenuItem } from "../models/items/menuItem";
 import { createCart, emptyCart, updateItem } from "../network/items/carts_api";
 import { getMenu } from "../network/items/menus_api";
-import { SectionTitleText } from "../styles/TextSX";
-import { minPageHeight, minPageWidth } from "../styles/StylingConstants";
+import { ErrorPageText, mobileScreenInnerWidth } from "../styles/TextSX";
 import { CartsContext, SnackbarContext, snackBarColor } from "../utils/contexts";
-import * as MenuManipulation from "./manipulation/MenuManipulation";
 import * as MenuPageHelper from "./helpers/MenuPageHelper";
+import * as MenuManipulation from "./manipulation/MenuManipulation";
 
 /** UI for the menu page. */
 const MenuPage = () => {
@@ -180,17 +178,9 @@ const MenuPage = () => {
     </Stack>
   );
 
-  /** Sx for when a loading error occurs. */
-  const errorSx: SxProps = {
-    margin: 0,
-    minHeight: minPageHeight,
-  };
-
   /** Sx for the menu page. */
   const customSx: SxProps = {
     py: 5,
-    minWidth: minPageWidth,
-    minHeight: minPageHeight,
   };
 
   /** UI layout for the profiles page. */
@@ -201,18 +191,12 @@ const MenuPage = () => {
 
       {/* Display for when the menu fails to load. */}
       {showLoadingError && (
-        <Stack id="MenuPage" direction="row" justifyContent="center" gap={5} py={10} sx={errorSx}>
-          <SentimentVeryDissatisfiedIcon sx={{ fontSize: "20vh" }} />
-          <SectionTitleText>Something went wrong. Please try again.</SectionTitleText>
-        </Stack>
+        <ErrorPageText id="MenuPage">Something went wrong. Please try again.</ErrorPageText>
       )}
 
       {/* Display if no vendor id is provided. */}
       {!isLoading && !showLoadingError && !vendorId && (
-        <Stack id="MenuPage" direction="row" justifyContent="center" gap={5} py={10} sx={errorSx}>
-          <SentimentVeryDissatisfiedIcon sx={{ fontSize: "20vh" }} />
-          <SectionTitleText>No vendor id provided.</SectionTitleText>
-        </Stack>
+        <ErrorPageText id="MenuPage">No vendor id provided.</ErrorPageText>
       )}
 
       {/* Display each menu item. */}
@@ -224,17 +208,20 @@ const MenuPage = () => {
             initialValue=""
             activeSearch={true}
             onSearch={handleMenuSearch}
-            sx={{ width: "50%", mx: "auto" }}
+            sx={{
+              maxWidth: window.innerWidth <= mobileScreenInnerWidth ? "100%" : "50%",
+              mx: "auto",
+              mb: window.innerWidth <= mobileScreenInnerWidth ? "3%" : "0%",
+            }}
           />
 
           <Stack
             useFlexGap
             direction="row"
-            spacing={{ xs: 0, sm: 2 }}
-            justifyContent={{ xs: "space-between" }}
+            spacing={2}
+            justifyContent="space-between"
             flexWrap="wrap"
-            sx={{ minWidth: 0 }}
-            margin={{ xs: "0 0 5px 0" }}
+            mb="1%"
           >
             {/* Drawer for the filter options. */}
             <CustomFilter

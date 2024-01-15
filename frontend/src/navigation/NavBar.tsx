@@ -11,7 +11,7 @@ import { SxProps } from "@mui/joy/styles/types";
 import { useContext } from "react";
 import { Link } from "react-router-dom";
 import CustomSearch from "../components/custom/CustomSearch";
-import * as Constants from "../styles/StylingConstants";
+import * as Constants from "../styles/TextSX";
 import { UserContext, UserContextProps } from "../utils/contexts";
 import ColorSchemeToggle from "./ColorSchemeToggle";
 import { NavBarLoggedInHead, NavBarLoggedInTail } from "./NavBarLoggedInView";
@@ -23,7 +23,7 @@ const NavBar = () => {
   const { user } = useContext<UserContextProps | null>(UserContext) || {};
   /** Sx for the navigation bar. */
   const customSx: SxProps = {
-    minWidth: Constants.minPageWidth,
+    minWidth: "99%",
   };
 
   /** UI layout for the custom navigation. */
@@ -65,7 +65,9 @@ const NavBar = () => {
             initialValue=""
             activeSearch={false}
             onSearch={() => {}}
-            sx={{ display: window.innerWidth <= Constants.mobileScreenInnerWidth ? "none" : "flex" }}
+            sx={{
+              display: window.innerWidth <= Constants.mobileScreenInnerWidth ? "none" : "flex",
+            }}
           />
 
           {/* Color scheme toggle. */}

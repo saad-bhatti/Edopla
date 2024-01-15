@@ -4,10 +4,8 @@
  * The vendors can be searched, filtered, and sorted.                                              *
  **************************************************************************************************/
 
-import CloseIcon from "@mui/icons-material/Close";
-import SentimentVeryDissatisfiedIcon from "@mui/icons-material/SentimentVeryDissatisfied";
-import { Button, Container, LinearProgress, Stack, Typography } from "@mui/joy";
-import { SxProps, Theme } from "@mui/joy/styles/types";
+import { Container, LinearProgress, Stack, Typography } from "@mui/joy";
+import { SxProps } from "@mui/joy/styles/types";
 import { useContext, useEffect, useState } from "react";
 import VendorInformationCard from "../components/card/VendorInformationCard";
 import CustomDropdown from "../components/custom/CustomDropdown";
@@ -17,9 +15,7 @@ import { displayError } from "../errors/displayError";
 import { Vendor } from "../models/users/vendor";
 import { getSavedVendors, toggleSavedVendor } from "../network/users/buyers_api";
 import { getAllVendors } from "../network/users/vendors_api";
-import { onlyBackgroundSx } from "../styles/PageSX";
-import { SectionTitleText } from "../styles/TextSX";
-import { minPageHeight, minPageWidth } from "../styles/StylingConstants";
+import { ErrorPageText, mobileScreenInnerWidth } from "../styles/TextSX";
 import * as Contexts from "../utils/contexts";
 import * as BuyerPageHelper from "./helpers/BuyerPageHelper";
 import * as VendorListManipulation from "./manipulation/VendorListManipulation";
@@ -150,35 +146,26 @@ const BuyPage = () => {
   const VendorListViewOptions = (
     <>
       {/* Search bar. */}
-      <Stack direction="row" gap={0.5} justifyContent="center">
-        <CustomSearch
-          placeholder="Search"
-          initialValue={searchValue}
-          activeSearch={true}
-          onSearch={handleVendorSearch}
-          sx={{ width: "50%" }}
-        />
-        {searchValue && (
-          <Button
-            variant="solid"
-            color="danger"
-            onClick={() => handleVendorSearch("")}
-            endDecorator={<CloseIcon />}
-          >
-            Clear Search
-          </Button>
-        )}
-      </Stack>
+      <CustomSearch
+        placeholder="Search"
+        initialValue={searchValue}
+        activeSearch={true}
+        onSearch={handleVendorSearch}
+        sx={{
+          maxWidth: window.innerWidth <= mobileScreenInnerWidth ? "100%" : "50%",
+          mx: "auto",
+          mb: window.innerWidth <= mobileScreenInnerWidth ? "3%" : "0%",
+        }}
+      />
 
       {/* Filter and sort options. */}
       <Stack
         useFlexGap
         direction="row"
-        spacing={{ xs: 0, sm: 2 }}
-        justifyContent={{ xs: "space-between" }}
+        spacing={2}
+        justifyContent="space-between"
         flexWrap="wrap"
-        sx={{ minWidth: 0 }}
-        margin={{ xs: "0 0 5px 0" }}
+        mb="1%"
       >
         {/* Drawer for the filter options. */}
         <CustomFilter
@@ -286,18 +273,9 @@ const BuyPage = () => {
     </Stack>
   ) : null;
 
-  /** Sx for when a loading error occurs. */
-  const errorSx: SxProps = (theme: Theme) => ({
-    ...onlyBackgroundSx(theme),
-    margin: 0,
-    minHeight: minPageHeight,
-  });
-
   /** Sx for the buyer page. */
   const customSx: SxProps = {
     py: 5,
-    minWidth: minPageWidth,
-    minHeight: minPageHeight,
   };
 
   /** UI layout for the profiles page. */
@@ -308,17 +286,7 @@ const BuyPage = () => {
 
       {/* Display for when the menu fails to load. */}
       {showLoadingError && (
-        <Stack
-          id="ProfilesPage"
-          direction="row"
-          justifyContent="center"
-          gap={5}
-          py={10}
-          sx={errorSx}
-        >
-          <SentimentVeryDissatisfiedIcon sx={{ fontSize: "20vh" }} />
-          <SectionTitleText>Something went wrong. Please try again.</SectionTitleText>
-        </Stack>
+        <ErrorPageText id="BuyPage">Something went wrong. Please try again.</ErrorPageText>
       )}
 
       {/* Display each menu item. */}

@@ -6,18 +6,18 @@
 
 import BadgeIcon from "@mui/icons-material/Badge";
 import CloseIcon from "@mui/icons-material/Close";
-import InfoOutlined from "@mui/icons-material/InfoOutlined";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import PhoneIcon from "@mui/icons-material/Phone";
 import SaveIcon from "@mui/icons-material/Save";
-import { Button, CardContent, FormControl, FormHelperText, FormLabel, Textarea } from "@mui/joy";
+import { Button, CardContent, FormControl, FormLabel, Textarea } from "@mui/joy";
 import Stack from "@mui/joy/Stack";
 import { SxProps } from "@mui/joy/styles/types";
 import { StandaloneSearchBox } from "@react-google-maps/api";
 import { useState } from "react";
 import { Vendor } from "../../models/users/vendor";
 import { updateVendor } from "../../network/users/vendors_api";
+import { InfoHelperText, mobileScreenInnerWidth } from "../../styles/TextSX";
 import { snackBarColor } from "../../utils/contexts";
 import CustomCard from "../custom/CustomCard";
 import CustomDropdown from "../custom/CustomDropdown";
@@ -70,7 +70,7 @@ const VendorProfileCard = ({
   /** Function to handle change submissions to the vendor profile. */
   async function handleProfileChange() {
     // Check that the phone number is valid, checking that it only contains numbers.
-    if (!newPhoneNumber.match(/^[0-9]+$/)) {
+    if (newPhoneNumber.length && !newPhoneNumber.match(/^[0-9]+$/)) {
       updateSnackbar("Please enter a valid phone number.", "danger", true);
       return;
     }
@@ -100,7 +100,7 @@ const VendorProfileCard = ({
   const VendorNameSection = (
     <>
       {/* Vendor name section title. */}
-      <FormLabel>Vendor Name</FormLabel>
+      <FormLabel>Name *</FormLabel>
       {/* Vendor name input. */}
       <FormControl>
         <CustomInput
@@ -121,7 +121,7 @@ const VendorProfileCard = ({
   const AddressSection = (
     <>
       {/* Address section title. */}
-      <FormLabel>Address</FormLabel>
+      <FormLabel>Address *</FormLabel>
       {/* Address input. */}
       <FormControl>
         <StandaloneSearchBox
@@ -174,9 +174,9 @@ const VendorProfileCard = ({
   const PriceRangeSection = (
     <>
       {/* Price range section title. */}
-      <FormLabel>Price Range</FormLabel>
+      <FormLabel>Price Range *</FormLabel>
       {/* Price range input. */}
-      <FormControl sx={{ maxWidth: "30%" }}>
+      <FormControl sx={{ maxWidth: "50%" }}>
         <CustomDropdown
           label={`Price range: ${newPriceRange}`}
           options={["$", "$$", "$$$"]}
@@ -196,7 +196,7 @@ const VendorProfileCard = ({
   const DescriptonSection = (
     <>
       {/* Description section title. */}
-      <FormLabel>Description</FormLabel>
+      <FormLabel>Description *</FormLabel>
       {/* Description input. */}
       <FormControl>
         <Textarea
@@ -222,7 +222,7 @@ const VendorProfileCard = ({
       <FormLabel>Cuisine Types</FormLabel>
       <FormControl>
         {/* New cuisine input. */}
-        <Stack direction="row" marginBottom={1}>
+        <Stack direction="row" mb={1}>
           {/* Cuisine input. */}
           <CustomInput
             type="text"
@@ -283,12 +283,9 @@ const VendorProfileCard = ({
       }}
     >
       {/* Dislaimer text. */}
-      <FormHelperText sx={{ marginBottom: 2 }}>
-        <InfoOutlined fontSize="small" />
-        Your profile details are visible to buyers.
-      </FormHelperText>
+      <InfoHelperText children="Your profile details are visible to buyers." sx={{ mb: 2 }} />
 
-      <Stack spacing={1} direction="column" marginBottom={1} sx={{ maxWidth: "40%" }}>
+      <Stack spacing={1} direction="column" mb={1}>
         {/* Vendor name section. */}
         {VendorNameSection}
 
@@ -326,8 +323,15 @@ const VendorProfileCard = ({
   /** UI layout for the vendor profile card. */
   const VendorCardContent = <CardContent>{ChangeVendorInfoForm}</CardContent>;
 
+  /** Custom styling for the card. */
+  const customSx: SxProps = {
+    maxWidth: window.innerWidth <= mobileScreenInnerWidth ? "100%" : "70%",
+    margin: "auto",
+    ...sx,
+  };
+
   /** UI layout for the card. */
-  return <CustomCard cardContent={VendorCardContent} sx={sx} />;
+  return <CustomCard cardContent={VendorCardContent} sx={customSx} />;
 };
 
 export default VendorProfileCard;

@@ -9,7 +9,6 @@ import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import CheckIcon from "@mui/icons-material/Check";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import GoogleIcon from "@mui/icons-material/Google";
-import InfoOutlined from "@mui/icons-material/InfoOutlined";
 import Key from "@mui/icons-material/Key";
 import SaveIcon from "@mui/icons-material/Save";
 import {
@@ -17,7 +16,6 @@ import {
   CardContent,
   Divider,
   FormControl,
-  FormHelperText,
   FormLabel,
   LinearProgress,
   Stack,
@@ -28,6 +26,7 @@ import { useState } from "react";
 import { displayError } from "../../errors/displayError";
 import { User } from "../../models/users/user";
 import { linkAuthentication } from "../../network/users/users_api";
+import { InfoHelperText, mobileScreenInnerWidth } from "../../styles/TextSX";
 import { snackBarColor } from "../../utils/contexts";
 import {
   calculateDescriptivePasswordStrength,
@@ -176,22 +175,19 @@ const UserProfileCard = ({ user, updateUser, updateSnackbar, sx }: UserProfileCa
           />
 
           {/* Password match text. */}
-          {confirmPassword.length > 0 && (
-            <Typography
-              level="body-xs"
-              sx={{ alignSelf: "flex-end", color: "hsl(var(--hue) 80% 30%)" }}
-            >
-              {password !== confirmPassword ? "Passwords do not match" : "Passwords match"}
-            </Typography>
-          )}
+          <Typography
+            level="body-xs"
+            sx={{ alignSelf: "flex-end", color: "hsl(var(--hue) 80% 30%)" }}
+          >
+            {password !== confirmPassword ? "Passwords do not match" : "Passwords match"}
+          </Typography>
         </Stack>
       </FormControl>
 
       {/* Password requirements. */}
-      <FormHelperText sx={{ fontSize: "small" }}>
-        <InfoOutlined fontSize="small" />
+      <InfoHelperText>
         Password requirements: Minimum of 8 characters, a number, and a special character.
-      </FormHelperText>
+      </InfoHelperText>
     </Stack>
   );
 
@@ -203,7 +199,7 @@ const UserProfileCard = ({ user, updateUser, updateSnackbar, sx }: UserProfileCa
         event.preventDefault();
         handleFormLinking();
       }}
-      style={{ minWidth: "51%" }}
+      style={{ minWidth: "50%" }}
     >
       <Stack spacing={2} direction="column">
         {/* Link OAuth accounts section title. */}
@@ -272,11 +268,16 @@ const UserProfileCard = ({ user, updateUser, updateSnackbar, sx }: UserProfileCa
 
   /** UI layout for the linking oauth accounts section. */
   const LinkOAuthSection = (
-    <Stack id="LinkOauthSection" spacing={2} direction="column" minWidth="51%">
+    <Stack id="LinkOauthSection" spacing={2} direction="column">
       {/* Link OAuth accounts section title. */}
       <FormLabel sx={{ fontSize: "large" }}>Link Accounts</FormLabel>
 
-      <Stack spacing={4} direction="row">
+      {/* Link OAuth accounts section. */}
+      <Stack
+        spacing={4}
+        direction={window.innerWidth <= mobileScreenInnerWidth ? "column" : "row"}
+        alignItems={window.innerWidth <= mobileScreenInnerWidth ? "center" : "flex-start"}
+      >
         {/* Link github oauth. */}
         <Button
           variant="soft"
@@ -289,6 +290,7 @@ const UserProfileCard = ({ user, updateUser, updateSnackbar, sx }: UserProfileCa
                 "https://github.com/login/oauth/authorize?client_id=" +
                 process.env.REACT_APP_GITHUB_CLIENT_ID;
           }}
+          sx={{ width: "219.2px", height: "44px" }}
         >
           {identification.gitHubId ? "GitHub Linked" : "Link GitHub"}
         </Button>
@@ -302,6 +304,7 @@ const UserProfileCard = ({ user, updateUser, updateSnackbar, sx }: UserProfileCa
             color="primary"
             startDecorator={<GoogleIcon />}
             endDecorator={<CheckIcon />}
+            sx={{ width: "219.2px", height: "44px" }}
           >
             Google Linked
           </Button>
@@ -309,11 +312,7 @@ const UserProfileCard = ({ user, updateUser, updateSnackbar, sx }: UserProfileCa
       </Stack>
 
       {/* Link OAuth accounts helper text. */}
-      {/* Password requirements. */}
-      <FormHelperText sx={{ fontSize: "small" }}>
-        <InfoOutlined fontSize="small" />
-        Linking these accounts will allow you to sign in with them.
-      </FormHelperText>
+      <InfoHelperText children="Linking these accounts will allow you to sign in with them." />
     </Stack>
   );
 
@@ -333,8 +332,15 @@ const UserProfileCard = ({ user, updateUser, updateSnackbar, sx }: UserProfileCa
     </CardContent>
   );
 
+  /** Custom styling for the card. */
+  const customSx: SxProps = {
+    maxWidth: window.innerWidth <= mobileScreenInnerWidth ? "100%" : "70%",
+    margin: "auto",
+    ...sx,
+  };
+
   /** UI layout for the card. */
-  return <CustomCard cardContent={UserCardContent} sx={sx} />;
+  return <CustomCard cardContent={UserCardContent} sx={customSx} />;
 };
 
 export default UserProfileCard;

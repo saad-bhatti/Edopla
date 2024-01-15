@@ -4,21 +4,21 @@
 
 import BadgeIcon from "@mui/icons-material/Badge";
 import CloseIcon from "@mui/icons-material/Close";
-import InfoOutlined from "@mui/icons-material/InfoOutlined";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import PhoneIcon from "@mui/icons-material/Phone";
-import { Button, FormControl, FormHelperText, FormLabel, Stack, Textarea } from "@mui/joy";
+import { Button, FormControl, FormLabel, Stack, Textarea } from "@mui/joy";
 import { StandaloneSearchBox } from "@react-google-maps/api";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import CustomDropdown from "../../custom/CustomDropdown";
-import CustomInput from "../../custom/CustomInput";
 import { displayError } from "../../../errors/displayError";
 import { User } from "../../../models/users/user";
 import { Vendor } from "../../../models/users/vendor";
 import { createVendor } from "../../../network/users/vendors_api";
+import { mobileScreenInnerWidth } from "../../../styles/TextSX";
 import { snackBarColor } from "../../../utils/contexts";
+import CustomDropdown from "../../custom/CustomDropdown";
+import CustomInput from "../../custom/CustomInput";
 
 /** Props of the vendor profile section. */
 interface CreateVendorSectionProps {
@@ -44,22 +44,19 @@ const CreateVendorSection = ({ setUser, updateSnackbar }: CreateVendorSectionPro
   const [cuisine, setCuisine] = useState<string>("");
   // State to track the cuisine types input value.
   const [cuisineTypes, setCuisineTypes] = useState<string[]>([]);
-
   // State to control errors on the vendor information form.
-  const [formError, setFormError] = useState<{ isError: number; error: string }>({
-    isError: 0,
-    error: "",
-  });
+  const [formError, setFormError] = useState<number>(0);
 
   /** Function to handle vendor creation submission. */
   async function handleVendorCreation() {
     // Check that the phone number is valid, checking that it only contains numbers.
     if (phoneNumber.length && !phoneNumber.match(/^[0-9]+$/)) {
-      setFormError({ isError: 3, error: "Please enter a valid phone number." });
+      setFormError(3);
+      updateSnackbar("Please enter a valid phone number.", "danger", true);
       return;
     }
     // Reset the form error state.
-    setFormError({ isError: 0, error: "" });
+    setFormError(0);
 
     try {
       // Send request to backend to create the new vendor profile.
@@ -88,9 +85,9 @@ const CreateVendorSection = ({ setUser, updateSnackbar }: CreateVendorSectionPro
   }
 
   /** UI layout for the vendor creation form. */
+  const inputMinWidth = { minWidth: window.innerWidth <= mobileScreenInnerWidth ? "90%" : "70%" };
   const vendorCreationForm = (
     <form
-      style={{ width: "100%", margin: "auto", padding: "0% 5%" }}
       onSubmit={(event) => {
         event.preventDefault();
         handleVendorCreation();
@@ -98,175 +95,154 @@ const CreateVendorSection = ({ setUser, updateSnackbar }: CreateVendorSectionPro
     >
       {/* Container for whole form. */}
       <Stack direction="column" gap={4}>
-        {/* Form error text. */}
-        {formError.isError !== 0 && (
-          <FormControl error sx={{ alignSelf: "center" }}>
-            <FormHelperText>
-              <InfoOutlined fontSize="small" />
-              {formError.error}
-            </FormHelperText>
+        {/* Fields containing the vendor's information. */}
+        <Stack gap={3} direction="column" alignItems="flex-start">
+          {/* Vendor name section. */}
+          <FormControl error={formError === 1} sx={inputMinWidth}>
+            <FormLabel>Name *</FormLabel>
+            <CustomInput
+              type="text"
+              placeholder="Name"
+              value={vendorName}
+              onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                setVendorName(event.target.value);
+              }}
+              startDecorator={<BadgeIcon fontSize="small" />}
+              required={true}
+            />
           </FormControl>
-        )}
 
-        {/* Container for both columns of the form. */}
-        <Stack direction="row" justifyContent="space-between">
-          {/* Left column of the form. */}
-          <Stack gap={3} direction="column" alignItems="flex-start" maxWidth="60%">
-            {/* Vendor name section. */}
-            <FormControl error={formError.isError === 1}>
-              <FormLabel>Name *</FormLabel>
+          {/* Address section. */}
+          <FormControl error={formError === 2} sx={inputMinWidth}>
+            <FormLabel>Address *</FormLabel>
+            <StandaloneSearchBox
+              onLoad={(ref) => {
+                ref.addListener("places_changed", () => {
+                  const places = ref.getPlaces();
+                  if (!places || places.length === 0) return;
+                  const place = places[0];
+                  const address = place.formatted_address;
+                  if (address) setAddress(address);
+                });
+              }}
+            >
               <CustomInput
                 type="text"
-                placeholder="Name"
-                value={vendorName}
+                placeholder="Address"
+                value={address}
                 onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                  setVendorName(event.target.value);
+                  setAddress(event.target.value);
                 }}
-                startDecorator={<BadgeIcon fontSize="small" />}
+                startDecorator={<LocationOnIcon fontSize="small" />}
                 required={true}
               />
-            </FormControl>
+            </StandaloneSearchBox>
+          </FormControl>
 
-            {/* Phone number section. */}
-            <FormControl error={formError.isError === 3}>
-              <FormLabel>Phone Number</FormLabel>
+          {/* Phone number section. */}
+          <FormControl error={formError === 3} sx={inputMinWidth}>
+            <FormLabel>Phone Number</FormLabel>
+            <CustomInput
+              type="tel"
+              placeholder="Phone Number"
+              value={phoneNumber}
+              onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                setPhoneNumber(event.target.value);
+              }}
+              startDecorator={<PhoneIcon fontSize="small" />}
+            />
+          </FormControl>
+
+          {/* Price range section. */}
+          <FormControl error={formError === 4} sx={inputMinWidth}>
+            <FormLabel>Price Range *</FormLabel>
+            <CustomDropdown
+              label={`Price range: ${priceRange}`}
+              options={["$", "$$", "$$$"]}
+              onOptionClick={[
+                () => setPriceRange("$"),
+                () => setPriceRange("$$"),
+                () => setPriceRange("$$$"),
+              ]}
+              variant="outlined"
+              color="primary"
+            />
+          </FormControl>
+
+          {/* Description section. */}
+          <FormControl error={formError === 5} sx={inputMinWidth}>
+            <FormLabel>Description *</FormLabel>
+            <Textarea
+              color="neutral"
+              size="sm"
+              variant="outlined"
+              placeholder="Description"
+              value={description}
+              onChange={(event: React.ChangeEvent<HTMLTextAreaElement>) => {
+                setDescription(event.target.value);
+              }}
+              minRows={2}
+              required
+            />
+          </FormControl>
+
+          {/* Cuisine types section. */}
+          <FormControl error={formError === 6} sx={inputMinWidth}>
+            <FormLabel>Cuisine Types</FormLabel>
+            {/* New cuisine input. */}
+            <Stack direction="row" mb={1}>
+              {/* Cuisine input. */}
               <CustomInput
-                type="tel"
-                placeholder="Phone Number"
-                value={phoneNumber}
+                type="text"
+                placeholder="Enter a Cuisine Type"
+                value={cuisine}
                 onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                  setPhoneNumber(event.target.value);
+                  setCuisine(event.target.value);
                 }}
-                startDecorator={<PhoneIcon fontSize="small" />}
+                startDecorator={<MenuBookIcon fontSize="small" />}
               />
-            </FormControl>
-
-            {/* Description section. */}
-            <FormControl error={formError.isError === 5}>
-              <FormLabel>Description *</FormLabel>
-              <Textarea
-                color="neutral"
-                size="sm"
+              {/* Cuisine button. */}
+              <Button
+                type="button"
                 variant="outlined"
-                placeholder="Description"
-                value={description}
-                onChange={(event: React.ChangeEvent<HTMLTextAreaElement>) => {
-                  setDescription(event.target.value);
-                }}
-                minRows={2}
-                required
-              />
-            </FormControl>
-          </Stack>
-
-          {/* Right column of the form. */}
-          <Stack gap={3} direction="column" alignItems="flex-start" maxWidth="40%">
-            {/* Address section. */}
-            <FormControl error={formError.isError === 2}>
-              <FormLabel>Address *</FormLabel>
-              <StandaloneSearchBox
-                onLoad={(ref) => {
-                  ref.addListener("places_changed", () => {
-                    const places = ref.getPlaces();
-                    if (!places || places.length === 0) return;
-                    const place = places[0];
-                    const address = place.formatted_address;
-                    if (address) setAddress(address);
-                  });
+                size="sm"
+                onClick={() => {
+                  // Check if the cuisine type is already in the list.
+                  if (cuisineTypes.includes(cuisine)) {
+                    setFormError(6);
+                    updateSnackbar("Cuisine type already exists.", "danger", true);
+                    return;
+                  }
+                  // Otherwise, add the cuisine type to the list and reset error state.
+                  setCuisineTypes([...cuisineTypes, cuisine]);
+                  setCuisine("");
+                  if (formError === 6) {
+                    setFormError(0);
+                  }
                 }}
               >
-                <CustomInput
-                  type="text"
-                  placeholder="Address"
-                  value={address}
-                  onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                    setAddress(event.target.value);
-                  }}
-                  startDecorator={<LocationOnIcon fontSize="small" />}
-                  required={true}
-                />
-              </StandaloneSearchBox>
-            </FormControl>
-
-            {/* Price range section. */}
-            <FormControl error={formError.isError === 4}>
-              <FormLabel>Price Range *</FormLabel>
-              <CustomDropdown
-                label={`Price range: ${priceRange}`}
-                options={["$", "$$", "$$$"]}
-                onOptionClick={[
-                  () => setPriceRange("$"),
-                  () => setPriceRange("$$"),
-                  () => setPriceRange("$$$"),
-                ]}
-                variant="outlined"
-                color="primary"
-              />
-            </FormControl>
-
-            {/* Cuisine types section. */}
-            <FormControl error={formError.isError === 6}>
-              <FormLabel>Cuisine Types</FormLabel>
-              {/* New cuisine input. */}
-              <Stack direction="row" marginBottom={1}>
-                {/* Cuisine input. */}
-                <CustomInput
-                  type="text"
-                  placeholder="Cuisine Types"
-                  value={cuisine}
-                  onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                    setCuisine(event.target.value);
-                  }}
-                  startDecorator={<MenuBookIcon fontSize="small" />}
-                />
-                {/* Cuisine button. */}
+                Add
+              </Button>
+            </Stack>
+            {/* Existing cuisine types display. */}
+            <Stack direction="row" spacing={0.5} sx={{ flexWrap: "wrap" }}>
+              {cuisineTypes.map((cuisine, index) => (
                 <Button
-                  type="button"
+                  key={index}
                   variant="outlined"
                   size="sm"
                   onClick={() => {
-                    // Check if the cuisine type is already in the list.
-                    if (cuisineTypes.includes(cuisine)) {
-                      setFormError({
-                        isError: 6,
-                        error: "Cuisine type already exists.",
-                      });
-                      return;
-                    }
-                    // Otherwise, add the cuisine type to the list and reset error state.
-                    setCuisineTypes([...cuisineTypes, cuisine]);
-                    setCuisine("");
-                    if (formError.isError === 6) {
-                      setFormError({
-                        isError: 0,
-                        error: "",
-                      });
-                    }
+                    setCuisineTypes(
+                      cuisineTypes.filter((traversalCuisine) => traversalCuisine !== cuisine)
+                    );
                   }}
+                  endDecorator={<CloseIcon fontSize="small" />}
                 >
-                  Add
+                  {cuisine}
                 </Button>
-              </Stack>
-              {/* Existing cuisine types display. */}
-              <Stack direction="row" spacing={0.5} sx={{ flexWrap: "wrap" }}>
-                {cuisineTypes.map((cuisine, index) => (
-                  <Button
-                    key={index}
-                    variant="outlined"
-                    size="sm"
-                    onClick={() => {
-                      setCuisineTypes(
-                        cuisineTypes.filter((traversalCuisine) => traversalCuisine !== cuisine)
-                      );
-                    }}
-                    endDecorator={<CloseIcon fontSize="small" />}
-                  >
-                    {cuisine}
-                  </Button>
-                ))}
-              </Stack>
-            </FormControl>
-          </Stack>
+              ))}
+            </Stack>
+          </FormControl>
         </Stack>
 
         {/* Create profile button. */}
@@ -288,10 +264,12 @@ const CreateVendorSection = ({ setUser, updateSnackbar }: CreateVendorSectionPro
       direction="column"
       gap={3}
       sx={{
-        minWidth: "50vw",
+        minWidth: window.innerWidth <= mobileScreenInnerWidth ? "90%" : "50%",
+        minHeight: window.innerWidth <= mobileScreenInnerWidth ? "60vh" : "65vh",
+        px: window.innerWidth <= mobileScreenInnerWidth ? "5%" : "2%",
+        py: window.innerWidth <= mobileScreenInnerWidth ? "7%" : "3%",
         outline: "0.5px solid #E0E0E0",
         borderRadius: "6px",
-        minHeight: "60vh",
       }}
     >
       {vendorCreationForm}
