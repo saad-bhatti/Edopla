@@ -24,6 +24,7 @@ import * as UsersAPI from "./network/users/users_api";
 import AppRoutes from "./routes/AppRoutes";
 import { onlyBackgroundSx } from "./styles/PageSX";
 import * as Context from "./utils/contexts";
+import { mobileScreenInnerWidth } from "./styles/TextSX";
 
 // Google Maps API libraries to load
 const apiLibaries = ["places" as Library] as Library[];
@@ -43,6 +44,8 @@ function App() {
     color: "primary",
     visible: false,
   });
+  // State to track if the view is considered mobile
+  const [isMobile, setIsMobile] = useState(window.innerWidth < mobileScreenInnerWidth);
   // State to track whether the page data is being loaded.
   const [isLoading, setIsLoading] = useState(true);
 
@@ -62,7 +65,13 @@ function App() {
       }
     }
     fetchLoggedInUser();
-  }, []);
+
+    // Add event listener to track if the view is considered mobile
+    function handleResize() {
+      setIsMobile(window.innerWidth <= mobileScreenInnerWidth);
+    }
+    window.addEventListener('resize', handleResize);
+  }, [isMobile]);
 
   /** Sx for the application. */
   const customSx: SxProps = (theme: Theme) => ({

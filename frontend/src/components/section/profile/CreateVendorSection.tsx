@@ -187,7 +187,10 @@ const CreateVendorSection = ({ setUser, updateSnackbar }: CreateVendorSectionPro
           </FormControl>
 
           {/* Cuisine types section. */}
-          <FormControl error={formError === 6} sx={inputMinWidth}>
+          <FormControl
+            error={formError === 6}
+            sx={{ maxWidth: "100%" }}
+          >
             <FormLabel>Cuisine Types</FormLabel>
             {/* New cuisine input. */}
             <Stack direction="row" mb={1}>
