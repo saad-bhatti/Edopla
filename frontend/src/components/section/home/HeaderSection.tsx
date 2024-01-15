@@ -4,7 +4,7 @@
 
 import { Container, Stack } from "@mui/joy";
 import { mobileScreenInnerWidth } from "../../../styles/StylingConstants";
-import { LargeBodyText, SectionTitleText } from "../../../styles/Text";
+import { LargeBodyText, SectionTitleText, centerText } from "../../../styles/TextSX";
 
 /** UI for the HomePage's header section. */
 const Header = () => {
@@ -22,13 +22,13 @@ const Header = () => {
     >
       <Stack direction="column" alignItems="center" gap={5} paddingY="10%">
         {/* Section title. */}
-        <SectionTitleText children="Welcome to Edopla!" textAlign="center" />
+        <SectionTitleText children="Welcome to Edopla!" sx={centerText} />
 
         {/* Section content. */}
         <LargeBodyText
           children="Your cravings, our mission - order, pick up, enjoy!"
           fontSize="130%"
-          textAlign="center"
+          sx={centerText}
         />
       </Stack>
     </Container>

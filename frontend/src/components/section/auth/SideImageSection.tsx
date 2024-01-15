@@ -3,6 +3,7 @@
  **************************************************************************************************/
 
 import { Container } from "@mui/joy";
+import { mobileScreenInnerWidth } from "../../../styles/StylingConstants";
 
 /** UI for the side image section. */
 const SideImageSection = () => {
@@ -10,6 +11,9 @@ const SideImageSection = () => {
   return (
     <Container
       sx={(theme) => ({
+        p: 0,
+        m: 0,
+        display: window.innerWidth <= mobileScreenInnerWidth ? "none" : "flex",
         [theme.getColorSchemeSelector("light")]: {
           backgroundImage:
             "url(https://images.unsplash.com/photo-1527181152855-fc03fc7949c8?auto=format&w=1000&dpr=2)",

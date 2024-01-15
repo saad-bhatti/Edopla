@@ -17,7 +17,7 @@ import { Vendor } from "../models/users/vendor";
 import { getBuyer } from "../network/users/buyers_api";
 import { getVendor } from "../network/users/vendors_api";
 import { onlyBackgroundSx } from "../styles/PageSX";
-import { SectionTitleText } from "../styles/Text";
+import { SectionTitleText } from "../styles/TextSX";
 import { minPageHeight, minPageWidth } from "../styles/StylingConstants";
 import { SnackbarContext, UserContext, snackBarColor } from "../utils/contexts";
 import { User } from "../models/users/user";

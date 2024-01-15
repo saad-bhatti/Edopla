@@ -14,6 +14,7 @@ import CustomSearch from "../components/custom/CustomSearch";
 import { CartItem } from "../models/items/cartItem";
 import * as CartsAPI from "../network/items/carts_api";
 import { minPageHeight, minPageWidth } from "../styles/StylingConstants";
+import { centerText } from "../styles/TextSX";
 import { CartsContext, SnackbarContext } from "../utils/contexts";
 import * as CartsManipulation from "./manipulation/CartsManipulation";
 
@@ -291,7 +292,7 @@ const CartPage = () => {
         ))}
       </Stack>
     ) : (
-      <Typography level="body-lg" sx={{ textAlign: "center" }}>
+      <Typography level="body-lg" sx={centerText}>
         You have no active carts.
       </Typography>
     );
@@ -313,7 +314,7 @@ const CartPage = () => {
         ))}
       </Stack>
     ) : (
-      <Typography level="body-lg" sx={{ textAlign: "center" }}>
+      <Typography level="body-lg" sx={centerText}>
         You have no carts that are saved for later.
       </Typography>
     );

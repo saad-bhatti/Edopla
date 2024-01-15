@@ -10,8 +10,7 @@ import { SxProps } from "@mui/joy/styles/types";
 import { useContext } from "react";
 import SideImageSection from "../components/section/auth/SideImageSection";
 import SignUpUserSection from "../components/section/auth/SignUpUserSection";
-import { simpleSx } from "../styles/PageSX";
-import { minPageHeight } from "../styles/StylingConstants";
+import { mobileScreenInnerWidth } from "../styles/StylingConstants";
 import * as Context from "../utils/contexts";
 
 /** UI for the sign up page. */
@@ -39,14 +38,16 @@ const SignUpPage = () => {
   const UserSection = (
     <SignUpUserSection setUser={setUser!} setCarts={setCarts!} updateSnackbar={updateSnackbar} />
   );
-  
+
   /** UI layout for the side image section. */
   const ImageSection = <SideImageSection />;
 
   /** Sx for the log in page. */
   const customSx: SxProps = {
-    ...simpleSx,
-    maxHeight: minPageHeight,
+    p: 0,
+    minWidth: "90%",
+    mx: "5%",
+    my: window.innerWidth <= mobileScreenInnerWidth ? "5%" : "1%",
   };
 
   /** UI layout for the sign up page. */

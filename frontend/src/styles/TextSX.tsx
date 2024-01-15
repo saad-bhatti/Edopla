@@ -6,6 +6,8 @@
 import { Typography, TypographyProps } from "@mui/joy";
 import { ReactElement, ReactNode } from "react";
 
+export const centerText = { textAlign: "center" };
+
 interface CustomTypographyProps extends TypographyProps {
   children: ReactNode;
 }

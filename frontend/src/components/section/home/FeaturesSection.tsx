@@ -8,7 +8,7 @@ import StorefrontIcon from "@mui/icons-material/Storefront";
 import { Container, Stack } from "@mui/joy";
 import { ReactElement, cloneElement } from "react";
 import { mobileScreenInnerWidth } from "../../../styles/StylingConstants";
-import { LargeBodyText, SectionTitleText, SubSectionTitleText } from "../../../styles/Text";
+import { LargeBodyText, SectionTitleText, SubSectionTitleText, centerText } from "../../../styles/TextSX";
 
 /** UI for the HomePage's features section. */
 const Features = () => {
@@ -43,7 +43,7 @@ const Features = () => {
           {/* Feature title. */}
           <SubSectionTitleText children={title} fontFamily="cursive" />
           {/* Feature description. */}
-          <LargeBodyText children={description} sx={{ textAlign: "center" }} />
+          <LargeBodyText children={description} sx={centerText} />
         </Stack>
       </Container>
     );

@@ -7,7 +7,7 @@ import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import PhoneIcon from "@mui/icons-material/Phone";
 import { Container, Stack } from "@mui/joy";
 import { mobileScreenInnerWidth } from "../../../styles/StylingConstants";
-import { LargeBodyText, SectionTitleText } from "../../../styles/Text";
+import { LargeBodyText, SectionTitleText, centerText } from "../../../styles/TextSX";
 
 /** UI for the HomePage's contact section. */
 const Contact = () => {
@@ -25,7 +25,7 @@ const Contact = () => {
     >
       <Stack direction="column" alignItems="center" gap={5} paddingY="5%">
         {/* Section title. */}
-        <SectionTitleText children="Contact Us" textAlign="center" />
+        <SectionTitleText children="Contact Us" sx={centerText} />
 
         {/* Description section. */}
 
@@ -33,21 +33,21 @@ const Contact = () => {
         <LargeBodyText
           children="saad.bhatti.cs@gmail.com"
           startDecorator={<EmailIcon />}
-          textAlign="center"
+          sx={centerText}
         />
 
         {/* Number section. */}
         <LargeBodyText
           children="+1 (781) 692-9561"
           startDecorator={<PhoneIcon />}
-          textAlign="center"
+          sx={centerText}
         />
 
         {/* LinkedIn section. */}
         <LargeBodyText
           children="https://www.linkedin.com/in/saad-bhatti/"
           startDecorator={<LinkedInIcon />}
-          textAlign="center"
+          sx={centerText}
         />
       </Stack>
     </Container>

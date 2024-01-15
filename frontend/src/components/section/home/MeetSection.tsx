@@ -5,7 +5,7 @@
 import { AspectRatio, Container, Stack } from "@mui/joy";
 import developerImg from "../../../images/developer.jpg";
 import { mobileScreenInnerWidth } from "../../../styles/StylingConstants";
-import { LargeBodyText, SectionTitleText } from "../../../styles/Text";
+import { LargeBodyText, SectionTitleText } from "../../../styles/TextSX";
 
 /** UI for the HomePage's meet section. */
 const Meet = () => {

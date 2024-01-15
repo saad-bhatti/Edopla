@@ -18,7 +18,7 @@ import { CartItem } from "../models/items/cartItem";
 import { MenuItem } from "../models/items/menuItem";
 import { createCart, emptyCart, updateItem } from "../network/items/carts_api";
 import { getMenu } from "../network/items/menus_api";
-import { SectionTitleText } from "../styles/Text";
+import { SectionTitleText } from "../styles/TextSX";
 import { minPageHeight, minPageWidth } from "../styles/StylingConstants";
 import { CartsContext, SnackbarContext, snackBarColor } from "../utils/contexts";
 import * as MenuManipulation from "./manipulation/MenuManipulation";
