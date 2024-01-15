@@ -3,26 +3,11 @@
  * This page is used to display a message when a route is not found.                              *
  **************************************************************************************************/
 
-import SentimentVeryDissatisfiedIcon from "@mui/icons-material/SentimentVeryDissatisfied";
-import Stack from "@mui/joy/Stack";
-import { SxProps } from "@mui/joy/styles/types";
-import { SectionTitleText } from "../styles/TextSX";
-import { minPageHeight } from "../styles/StylingConstants";
+import { ErrorPageText } from "../styles/TextSX";
 
 /** UI for the not found page. */
 const NotFoundPage = () => {
-  /** Sx for the not found page. */
-  const customSx: SxProps = {
-    margin: 0,
-    minHeight: minPageHeight,
-  };
-
-  return (
-    <Stack id="NotFoundPage" direction="row" justifyContent="center" gap={5} py={10} sx={customSx}>
-      <SentimentVeryDissatisfiedIcon sx={{ fontSize: "20vh" }} />
-      <SectionTitleText>Page not found</SectionTitleText>
-    </Stack>
-  );
+  return <ErrorPageText id="NotFoundPage">Page not found.</ErrorPageText>;
 };
 
 export default NotFoundPage;

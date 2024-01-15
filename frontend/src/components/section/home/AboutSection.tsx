@@ -4,8 +4,7 @@
 
 import { AspectRatio, Container, Stack } from "@mui/joy";
 import logo from "../../../images/logo.png";
-import { mobileScreenInnerWidth } from "../../../styles/StylingConstants";
-import { LargeBodyText, SectionTitleText } from "../../../styles/TextSX";
+import { LargeBodyText, SectionTitleText, mobileScreenInnerWidth } from "../../../styles/TextSX";
 
 /** UI for the HomePage's about section. */
 const About = () => {
@@ -23,7 +22,7 @@ const About = () => {
       {/* Section title. */}
       <SectionTitleText
         children="About Us"
-        marginBottom={window.innerWidth <= mobileScreenInnerWidth ? verticalPadding : 0}
+        mb={window.innerWidth <= mobileScreenInnerWidth ? verticalPadding : 0}
         paddingTop={window.innerWidth <= mobileScreenInnerWidth ? 0 : verticalPadding}
         sx={{ width: "fit-content", mx: "auto", borderBottom: "1vh solid" }}
       />

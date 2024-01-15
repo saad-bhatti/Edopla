@@ -95,9 +95,9 @@ export const authenticationForm: RequestHandler<unknown, unknown, FormBody, unkn
 
     // Part 4: Handle the log in case, by checking the password
     else {
-      if (!searchedUser) throw new Http_Errors.InvalidField("credentials");
+      if (!searchedUser) throw new Http_Errors.InvalidField("email");
       const isValidPassword = await bcrypt.compare(passwordRaw, searchedUser.password!);
-      if (!isValidPassword) throw new Http_Errors.InvalidField("credentials");
+      if (!isValidPassword) throw new Http_Errors.InvalidField("password");
       
       // Remove the password field from the user object
       searchedUser.password = undefined;

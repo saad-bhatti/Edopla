@@ -4,17 +4,15 @@
 
 import EmailIcon from "@mui/icons-material/Email";
 import GitHubIcon from "@mui/icons-material/GitHub";
-import InfoOutlined from "@mui/icons-material/InfoOutlined";
 import Key from "@mui/icons-material/Key";
 import {
   Button,
   Divider,
   FormControl,
-  FormHelperText,
   FormLabel,
   LinearProgress,
   Stack,
-  Typography,
+  Typography
 } from "@mui/joy";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -22,8 +20,7 @@ import { displayError } from "../../../errors/displayError";
 import { CartItem } from "../../../models/items/cartItem";
 import { User } from "../../../models/users/user";
 import { authenticateForm, authenticateGoogle } from "../../../network/users/users_api";
-import { mobileScreenInnerWidth } from "../../../styles/StylingConstants";
-import { centerText } from "../../../styles/TextSX";
+import { InfoHelperText, mobileScreenInnerWidth } from "../../../styles/TextSX";
 import { snackBarColor } from "../../../utils/contexts";
 import {
   calculateDescriptivePasswordStrength,
@@ -63,7 +60,7 @@ const SignUpSection = ({ setUser, setCarts, updateSnackbar }: SignUpSectionProps
 
     // Match the password and confirm password
     if (password !== confirmPassword) {
-      setFormError(2);
+      setFormError(3);
       updateSnackbar("Passwords do not match", "danger", true);
       return false;
     }
@@ -263,10 +260,9 @@ const SignUpSection = ({ setUser, setCarts, updateSnackbar }: SignUpSectionProps
         </FormControl>
 
         {/* Password requirements. */}
-        <FormHelperText sx={{ ...centerText, fontSize: "small" }}>
-          {window.innerWidth >= mobileScreenInnerWidth && <InfoOutlined fontSize="small" />}
+        <InfoHelperText>
           Password requirements: Minimum of 8 characters, a number, and a special character.
-        </FormHelperText>
+        </InfoHelperText>
 
         {/* Sign up button. */}
         <Button type="submit" variant="solid" color="primary" sx={{ minWidth: "47%" }}>

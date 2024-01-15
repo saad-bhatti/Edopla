@@ -10,7 +10,7 @@ import { SxProps } from "@mui/joy/styles/types";
 import { useContext } from "react";
 import LoginUserSection from "../components/section/auth/LogInUserSection";
 import SideImageSection from "../components/section/auth/SideImageSection";
-import { mobileScreenInnerWidth } from "../styles/StylingConstants";
+import { mobileScreenInnerWidth } from "../styles/TextSX";
 import * as Context from "../utils/contexts";
 
 /** UI for the log in page. */

@@ -3,27 +3,26 @@
  * This page is used to display and change the user, buyer, and vendor profile information.       *
  **************************************************************************************************/
 
-import SentimentVeryDissatisfiedIcon from "@mui/icons-material/SentimentVeryDissatisfied";
-import { Container, LinearProgress, Stack } from "@mui/joy";
-import { SxProps, Theme } from "@mui/joy/styles/types";
+import { Button, Container, LinearProgress, Stack } from "@mui/joy";
 import { useContext, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import BuyerProfileCard from "../components/card/BuyerProfileCard";
 import UserProfileCard from "../components/card/UserProfileCard";
 import VendorProfileCard from "../components/card/VendorProfileCard";
 import CustomTabs from "../components/custom/CustomTabs";
 import { displayError } from "../errors/displayError";
 import { Buyer } from "../models/users/buyer";
+import { User } from "../models/users/user";
 import { Vendor } from "../models/users/vendor";
 import { getBuyer } from "../network/users/buyers_api";
 import { getVendor } from "../network/users/vendors_api";
-import { onlyBackgroundSx } from "../styles/PageSX";
-import { SectionTitleText } from "../styles/TextSX";
-import { minPageHeight, minPageWidth } from "../styles/StylingConstants";
+import { ErrorPageText, LargeBodyText, centerText } from "../styles/TextSX";
 import { SnackbarContext, UserContext, snackBarColor } from "../utils/contexts";
-import { User } from "../models/users/user";
 
 /** UI for the profiles page, depending on user's login status. */
 const ProfilesPage = () => {
+  // Create a navigate object to move between pages
+  const navigate = useNavigate();
   // Retrieve the logged in user from the context
   const { user, setUser } = useContext(UserContext) || {};
   // Retrieve the snackbar from the context
@@ -75,19 +74,47 @@ const ProfilesPage = () => {
     setSnackbar!({ text, color, visible });
   }
 
-  /** Sx for when a loading error occurs. */
-  const errorSx: SxProps = (theme: Theme) => ({
-    ...onlyBackgroundSx(theme),
-    margin: 0,
-    minHeight: minPageHeight,
-  });
+  /** UI layout for the content to be displayed in the buyer tab. */
+  const BuyerTab = buyer ? (
+    <BuyerProfileCard buyer={buyer} onBuyerUpdate={setBuyer} updateSnackbar={updateSnackbar} />
+  ) : (
+    <Stack direction="column" alignContent="center" gap={2}>
+      <LargeBodyText sx={centerText}>
+        You currently do not have a buyer profile.
+      </LargeBodyText>
+      <Button
+        color="primary"
+        variant="soft"
+        onClick={() => {
+          navigate("/profiles/create?role=buyer");
+        }}
+        sx={{ maxWidth: "50%", m: "auto" }}
+      >
+        Click here to create one
+      </Button>
+    </Stack>
+  );
 
-  /** Sx for the profiles page. */
-  const customSx: SxProps = {
-    py: 5,
-    minWidth: minPageWidth,
-    minHeight: minPageHeight,
-  };
+  /** UI layout for the content to be displayed in the vendor tab. */
+  const VendorTab = vendor ? (
+    <VendorProfileCard vendor={vendor} onVendorUpdate={setVendor} updateSnackbar={updateSnackbar} />
+  ) : (
+    <Stack direction="column" alignContent="center" gap={2}>
+      <LargeBodyText sx={centerText}>
+        You currently do not have a vendor profile.
+      </LargeBodyText>
+      <Button
+        color="primary"
+        variant="soft"
+        onClick={() => {
+          navigate("/profiles/create?role=vendor");
+        }}
+        sx={{ maxWidth: "50%", m: "auto" }}
+      >
+        Click here to create one
+      </Button>
+    </Stack>
+  );
 
   return (
     <>
@@ -96,22 +123,12 @@ const ProfilesPage = () => {
 
       {/* Display for when the profiles fail to load. */}
       {showLoadingError && (
-        <Stack
-          id="ProfilesPage"
-          direction="row"
-          justifyContent="center"
-          gap={5}
-          py={10}
-          sx={errorSx}
-        >
-          <SentimentVeryDissatisfiedIcon sx={{ fontSize: "20vh" }} />
-          <SectionTitleText>Something went wrong. Please try again.</SectionTitleText>
-        </Stack>
+        <ErrorPageText id="ProfilesPage">Something went wrong. Please try again.</ErrorPageText>
       )}
 
       {/* Display each profile's information. */}
       {!isLoading && !showLoadingError && user && (
-        <Container id="ProfilesPage" sx={customSx}>
+        <Container id="ProfilesPage" sx={{ py: 5 }}>
           {/* Tabs for the profile page. */}
           <CustomTabs
             tabs={[
@@ -129,27 +146,15 @@ const ProfilesPage = () => {
               // Display the buyer profile card.
               {
                 tab: "Role: Buyer",
-                panel: buyer && (
-                  <BuyerProfileCard
-                    buyer={buyer}
-                    onBuyerUpdate={setBuyer}
-                    updateSnackbar={updateSnackbar}
-                  />
-                ),
+                panel: BuyerTab,
               },
               // Display the vendor profile card.
               {
                 tab: "Role: Vendor",
-                panel: vendor && (
-                  <VendorProfileCard
-                    vendor={vendor}
-                    onVendorUpdate={setVendor}
-                    updateSnackbar={updateSnackbar}
-                  />
-                ),
+                panel: VendorTab,
               },
             ]}
-            sx={{ marginBottom: "10px" }}
+            sx={{ mb: "10px" }}
           />
         </Container>
       )}

@@ -3,8 +3,12 @@
  **************************************************************************************************/
 
 import { Container, Stack } from "@mui/joy";
-import { mobileScreenInnerWidth } from "../../../styles/StylingConstants";
-import { LargeBodyText, SectionTitleText, centerText } from "../../../styles/TextSX";
+import {
+  LargeBodyText,
+  SectionTitleText,
+  centerText,
+  mobileScreenInnerWidth,
+} from "../../../styles/TextSX";
 
 /** UI for the HomePage's header section. */
 const Header = () => {

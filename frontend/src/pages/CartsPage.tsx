@@ -13,8 +13,7 @@ import CustomDropdown from "../components/custom/CustomDropdown";
 import CustomSearch from "../components/custom/CustomSearch";
 import { CartItem } from "../models/items/cartItem";
 import * as CartsAPI from "../network/items/carts_api";
-import { minPageHeight, minPageWidth } from "../styles/StylingConstants";
-import { centerText } from "../styles/TextSX";
+import { centerText, mobileScreenInnerWidth } from "../styles/TextSX";
 import { CartsContext, SnackbarContext } from "../utils/contexts";
 import * as CartsManipulation from "./manipulation/CartsManipulation";
 
@@ -322,21 +321,25 @@ const CartPage = () => {
   /** Sx for the carts page. */
   const customSx: SxProps = {
     py: 5,
-    minWidth: minPageWidth,
-    minHeight: minPageHeight,
   };
 
   return (
     <Container id="CartsPage" sx={customSx}>
-      <Stack
-        useFlexGap
-        direction="row"
-        spacing={{ xs: 0, sm: 2 }}
-        justifyContent={{ xs: "space-between" }}
-        flexWrap="wrap"
-        sx={{ minWidth: 0 }}
-        margin={{ xs: "0 0 5px 0" }}
-      >
+      {/* Search bar. */}
+      <CustomSearch
+        placeholder="Search by vendor or item"
+        initialValue=""
+        activeSearch={true}
+        onSearch={handleCartsSearch}
+        sx={{
+          maxWidth: window.innerWidth <= mobileScreenInnerWidth ? "100%" : "50%",
+          mx: "auto",
+          mb: window.innerWidth <= mobileScreenInnerWidth ? "3%" : "0%",
+        }}
+      />
+
+      {/* Sort options and empty all carts button. */}
+      <Stack useFlexGap direction="row" spacing={2} justifyContent="space-between" flexWrap="wrap">
         {/* Dropdown for the sort options. */}
         <CustomDropdown
           label="Sort by"
@@ -344,15 +347,6 @@ const CartPage = () => {
           onOptionClick={sortFunctions}
           variant="plain"
           color="primary"
-        />
-
-        {/* Search bar. */}
-        <CustomSearch
-          placeholder="Search by vendor or item"
-          initialValue=""
-          activeSearch={true}
-          onSearch={handleCartsSearch}
-          sx={{ width: "30%" }}
         />
 
         {/* Button to empty all carts. */}
@@ -377,13 +371,13 @@ const CartPage = () => {
       {!isSeperating && (
         <>
           {/* Display for the "now" carts. */}
-          <Typography level="h3" sx={{ mt: 3, mb: 2 }}>
+          <Typography level="h3" sx={{ mt: 1, mb: 2 }}>
             Active Carts
           </Typography>
           {nowCartsStack}
 
           {/* Display for the "later" carts. */}
-          <Typography level="h3" sx={{ mt: 3, mb: 2 }}>
+          <Typography level="h3" sx={{ mt: 1, mb: 2 }}>
             Saved for later
           </Typography>
           {laterCartsStack}

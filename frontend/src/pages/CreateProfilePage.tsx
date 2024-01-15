@@ -5,14 +5,13 @@
 
 import { Stack } from "@mui/joy";
 import { SxProps } from "@mui/joy/styles/types";
-import { useContext } from "react";
+import { useContext, useEffect, useState } from "react";
 import CustomTabs from "../components/custom/CustomTabs";
 import SideImageSection from "../components/section/auth/SideImageSection";
 import CreateBuyerSection from "../components/section/profile/CreateBuyerSection";
 import CreateVendorSection from "../components/section/profile/CreateVendorSection";
 import { simpleSx } from "../styles/PageSX";
 import { SubSectionTitleText } from "../styles/TextSX";
-import { minPageHeight } from "../styles/StylingConstants";
 import * as Context from "../utils/contexts";
 
 /** UI for the create profile page. */
@@ -21,6 +20,8 @@ const CreateProfilePage = () => {
   const { user, setUser } = useContext(Context.UserContext) || {};
   // Retrieve the snackbar from the context
   const { setSnackbar } = useContext(Context.SnackbarContext) || {};
+  // State to track the tabs to display.
+  const [tabs, setTabs] = useState<{ tab: string; panel: JSX.Element | null }[]>([]);
 
   /**
    * Function to set the snackbar format and its visibility.
@@ -38,7 +39,6 @@ const CreateProfilePage = () => {
   /** Sx for the log in page. */
   const customSx: SxProps = {
     ...simpleSx,
-    maxHeight: minPageHeight,
   };
 
   /** UI layout for the create buyer profile. */
@@ -61,24 +61,24 @@ const CreateProfilePage = () => {
     </Stack>
   );
 
+  /** Set the tabs to display based on the user's missing profiles. */
+  useEffect(() => {
+    // Add the buyer tab if the user is not a buyer.
+    if (!user!._buyer)
+      setTabs((existingTabs) => [...existingTabs, { tab: "Role: Buyer", panel: BuyerSection }]);
+
+    // Add the vendor tab if the user is not a vendor.
+    if (!user!._vendor)
+      setTabs((existingTabs) => [...existingTabs, { tab: "Role: Vendor", panel: VendorSection }]);
+    
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
+
+  /** UI layout for the create profile page. */
   return (
     <Stack id="CreateProfilePage" direction="column" spacing={1} sx={customSx}>
       <SubSectionTitleText children="Create a Profile for your Preferred Role" />
-      <CustomTabs
-        tabs={[
-          // Display the create buyer section.
-          {
-            tab: "Role: Buyer",
-            panel: !user!._buyer ? BuyerSection : null,
-          },
-          // Display the vendor profile card.
-          {
-            tab: "Role: Vendor",
-            panel: !user!._vendor ? VendorSection : null,
-          },
-        ]}
-        sx={{ marginBottom: "10px" }}
-      />
+      <CustomTabs tabs={tabs} sx={{ mb: "10px" }} />
     </Stack>
   );
 };

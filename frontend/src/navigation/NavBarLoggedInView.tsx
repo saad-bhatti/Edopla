@@ -83,13 +83,12 @@ export const NavBarLoggedInTail = () => {
   // Variable to navigate to other pages
   const navigate = useNavigate();
   // Retrieve the logged in user from the context
-  const { user, setUser } = useContext<Context.UserContextProps | null>(Context.UserContext) || {};
+  const { user, setUser } = useContext(Context.UserContext) || {};
   // Retrieve the identification from the user context
   const identification =
     user?.identification.email || user?.identification.googleId || user?.identification.gitHubId;
   // Retrieve the set cart function from the context
-  const { carts, setCarts } =
-    useContext<Context.CartsContextProps | null>(Context.CartsContext) || {};
+  const { carts, setCarts } = useContext(Context.CartsContext) || {};
   // Retrieve the snackbar from the context
   const { setSnackbar } = useContext(Context.SnackbarContext) || {};
   // State to track whether the dropdown menu is visible.
@@ -177,7 +176,6 @@ export const NavBarLoggedInTail = () => {
         direction="row"
         alignItems="center"
         spacing={1}
-        sx={{ display: { xs: "none", sm: "flex" } }}
       >
         {/* Cart button. */}
         {CartButton}
