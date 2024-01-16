@@ -38,7 +38,7 @@ Order, pick up, and savor the taste of community with Edopla!
 - [Docker Compose](https://docs.docker.com/compose/install/)
 - .env files (provided on request)
 
-### Running the application (To Be Updated)
+### Running the application
 
 1. Clone the repository
 2. Navigate to the root directory of the repository 
@@ -53,15 +53,16 @@ Order, pick up, and savor the taste of community with Edopla!
 
 ### Stopping the application
 
+Given the application is running:
 1. Navigate to the root directory of the repository
 2. Run `./edopla-script.sh` to execute the script
 3. Enter `stop` to stop the application
 
 ### Testing the backend
 
-1. Run the application
-1. Navigate to the backend directory of the repository
-2. Run `npm test` to run the tests or `npm run {test filename}` to run the tests in watch mode
+1. Run the application (as described above)
+2. Enter the backend container by running `docker exec -it edopla-backend bash`
+2. Run `npm test` to run all tests or `npm run {test filename}` to run the tests in a specific file
 
 * * *
 
@@ -220,8 +221,12 @@ Order, pick up, and savor the taste of community with Edopla!
 
 * * *
 
-## Learn About the Developer
+## Contact the Developer
 
-[Devloper's website](https://saad-bhatti.github.io/)
+- <b>Gmail</b>: saad.bhatti.cs@gmail.com
+- <b>Phone</b>: +1 (781) 692-9561
+- [LinkedIn](https://www.linkedin.com/in/saad-bhatti/)
+- [GitHub](https://github.com/saad-bhatti)
+- [Devloper's website](https://saad-bhatti.github.io/)
 
 * * *
