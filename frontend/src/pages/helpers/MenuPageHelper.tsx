@@ -6,7 +6,7 @@
 import CustomAutoComplete from "../../components/custom/CustomAutoComplete";
 import CustomSlider from "../../components/custom/CustomSlider";
 import { MenuItem } from "../../models/items/menuItem";
-import * as MenuManipulation from "./MenuManipulation";
+import * as MenuManipulation from "../manipulation/MenuManipulation";
 
 //////////////////////////////////////////// SEARCHING /////////////////////////////////////////////
 /**

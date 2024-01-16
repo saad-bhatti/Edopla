@@ -7,7 +7,13 @@ import ShoppingBagIcon from "@mui/icons-material/ShoppingBag";
 import StorefrontIcon from "@mui/icons-material/Storefront";
 import { Container, Stack } from "@mui/joy";
 import { ReactElement, cloneElement } from "react";
-import { LargeBodyText, SectionTitleText, SubSectionTitleText } from "../../styles/Text";
+import {
+  LargeBodyText,
+  SectionTitleText,
+  SubSectionTitleText,
+  centerText,
+  mobileScreenInnerWidth,
+} from "../../../styles/TextSX";
 
 /** UI for the HomePage's features section. */
 const Features = () => {
@@ -21,8 +27,8 @@ const Features = () => {
     return (
       <Container
         sx={(theme) => ({
-          borderRadius: "10%",
           padding: "5%",
+          borderRadius: "10%",
           [theme.getColorSchemeSelector("dark")]: {
             background: "#202328",
           },
@@ -42,7 +48,7 @@ const Features = () => {
           {/* Feature title. */}
           <SubSectionTitleText children={title} fontFamily="cursive" />
           {/* Feature description. */}
-          <LargeBodyText children={description} sx={{ textAlign: "center" }} />
+          <LargeBodyText children={description} sx={centerText} />
         </Stack>
       </Container>
     );
@@ -73,18 +79,22 @@ const Features = () => {
     <Container
       id="Features"
       sx={(theme) => ({
-        borderRadius: "10%",
+        borderRadius: window.innerWidth <= mobileScreenInnerWidth ? 0 : "10%",
         [theme.getColorSchemeSelector("dark")]: {
           background: "#161b22",
         },
       })}
     >
-      <Stack direction="column" alignItems="center" gap="8vh" p="5%">
+      <Stack direction="column" alignItems="center" gap={8} p="5%">
         {/* Section title. */}
-        <SectionTitleText children="Features" sx={{ borderBottom: "2vh solid" }} />
+        <SectionTitleText children="Features" sx={{ borderBottom: "1vh solid" }} />
 
         {/* Section content. */}
-        <Stack direction="row" alignItems="center" gap="5vw">
+        <Stack
+          direction={window.innerWidth <= mobileScreenInnerWidth ? "column" : "row"}
+          alignItems="center"
+          gap={5}
+        >
           {/* Feature 1. */}
           {buyFeature}
           {/* Feature 2. */}

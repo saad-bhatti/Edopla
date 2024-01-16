@@ -3,36 +3,28 @@
  **************************************************************************************************/
 
 import BadgeIcon from "@mui/icons-material/Badge";
-import InfoOutlined from "@mui/icons-material/InfoOutlined";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import PhoneIcon from "@mui/icons-material/Phone";
-import { Button, FormControl, FormHelperText, FormLabel, Stack } from "@mui/joy";
+import { Button, FormControl, FormLabel, Stack } from "@mui/joy";
+import { StandaloneSearchBox } from "@react-google-maps/api";
 import { useState } from "react";
-import CustomInput from "../../components/custom/CustomInput";
-import { displayError } from "../../errors/displayError";
-import { Buyer } from "../../models/users/buyer";
-import { User } from "../../models/users/user";
-import { createBuyer } from "../../network/users/buyers_api";
 import { useNavigate } from "react-router-dom";
+import { displayError } from "../../../errors/displayError";
+import { Buyer } from "../../../models/users/buyer";
+import { User } from "../../../models/users/user";
+import { createBuyer } from "../../../network/users/buyers_api";
+import { mobileScreenInnerWidth } from "../../../styles/TextSX";
+import { snackBarColor } from "../../../utils/contexts";
+import CustomInput from "../../custom/CustomInput";
 
 /** Props of the buyer profile section. */
 interface CreateBuyerSectionProps {
-  setLoggedInUser: React.Dispatch<React.SetStateAction<User | null>>;
-  setSnackbarFormat: React.Dispatch<
-    React.SetStateAction<{
-      text: string;
-      color: "primary" | "neutral" | "danger" | "success" | "warning";
-    }>
-  >;
-  setSnackbarVisible: React.Dispatch<React.SetStateAction<boolean>>;
+  setUser: React.Dispatch<React.SetStateAction<User | null>>;
+  updateSnackbar: (text: string, color: snackBarColor, visible: boolean) => void;
 }
 
 /** UI for the create buyer section. */
-const CreateBuyerSection = ({
-  setLoggedInUser,
-  setSnackbarFormat,
-  setSnackbarVisible,
-}: CreateBuyerSectionProps) => {
+const CreateBuyerSection = ({ setUser, updateSnackbar }: CreateBuyerSectionProps) => {
   // Variable to navigate to other pages
   const navigate = useNavigate();
   // State to track the new buyer name input value.
@@ -42,20 +34,18 @@ const CreateBuyerSection = ({
   // State to track the new phone number input value.
   const [phoneNumber, setPhoneNumber] = useState<string>("");
   // State to control errors on the sign up information form.
-  const [formError, setFormError] = useState<{ isError: number; error: string }>({
-    isError: 0,
-    error: "",
-  });
+  const [formError, setFormError] = useState<number>(0);
 
   /** Function to handle buyer creation submission. */
   async function handleBuyerCreation() {
     // Check that the phone number is valid, checking that it only contains numbers.
     if (phoneNumber.length && !phoneNumber.match(/^[0-9]+$/)) {
-      setFormError({ isError: 3, error: "Please enter a valid phone number." });
+      setFormError(3);
+      updateSnackbar("Please enter a valid phone number.", "danger", true);
       return;
     }
     // Reset the form error state.
-    setFormError({ isError: 0, error: "" });
+    setFormError(0);
 
     try {
       // Send request to backend to create the new buyer profile.
@@ -65,54 +55,33 @@ const CreateBuyerSection = ({
         phoneNumber: phoneNumber,
       };
       const newBuyer: Buyer = await createBuyer(requestDetails);
-      setLoggedInUser((user: User | null) => {
+      setUser((user: User | null) => {
         user!._buyer = newBuyer._id;
         return user;
       });
 
       // Show success snackbar.
-      setSnackbarFormat({
-        text: "Successfully created a buyer profile!",
-        color: "success",
-      });
-      setSnackbarVisible(true);
+      updateSnackbar("Successfully created a buyer profile!", "success", true);
 
-      // Wait for 3 seconds and then navigate to the home page.
-      await new Promise((resolve) => setTimeout(resolve, 3000));
+      // Navigate to the home page.
       navigate("/");
     } catch (error) {
-      if (error instanceof Error) {
-        setSnackbarFormat({
-          text: error.message,
-          color: "danger",
-        });
-        setSnackbarVisible(true);
-      } else displayError(error);
+      error instanceof Error ? updateSnackbar(error.message, "danger", true) : displayError(error);
     }
   }
 
   /** UI layout for the buyer creation form. */
-  const buyerCreationForm = (
+  const inputMinWidth = { minWidth: window.innerWidth <= mobileScreenInnerWidth ? "90%" : "70%" };
+  const BuyerCreationForm = (
     <form
-      style={{ width: "100%", margin: "auto", padding: "0% 5%" }}
       onSubmit={(event) => {
         event.preventDefault();
         handleBuyerCreation();
       }}
     >
-      <Stack gap={3} direction="column" alignItems="center">
-        {/* Form error text. */}
-        {formError.isError !== 0 && (
-          <FormControl error>
-            <FormHelperText>
-              <InfoOutlined fontSize="small" />
-              {formError.error}
-            </FormHelperText>
-          </FormControl>
-        )}
-
+      <Stack gap={5} direction="column" alignItems="center">
         {/* Buyer name section. */}
-        <FormControl>
+        <FormControl sx={inputMinWidth}>
           <FormLabel>Name *</FormLabel>
           <CustomInput
             type="text"
@@ -123,28 +92,40 @@ const CreateBuyerSection = ({
             }}
             startDecorator={<BadgeIcon fontSize="small" />}
             required={true}
-            error={formError.isError === 1}
+            error={formError === 1}
           />
         </FormControl>
 
         {/* Address section. */}
-        <FormControl>
+        <FormControl sx={inputMinWidth}>
           <FormLabel>Address *</FormLabel>
-          <CustomInput
-            type="address"
-            placeholder="Address"
-            value={address}
-            onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-              setAddress(event.target.value);
+          <StandaloneSearchBox
+            onLoad={(ref) => {
+              ref.addListener("places_changed", () => {
+                const places = ref.getPlaces();
+                if (!places || places.length === 0) return;
+                const place = places[0];
+                const address = place.formatted_address;
+                if (address) setAddress(address);
+              });
             }}
-            startDecorator={<LocationOnIcon fontSize="small" />}
-            required={true}
-            error={formError.isError === 2}
-          />
+          >
+            <CustomInput
+              type="text"
+              placeholder="Address"
+              value={address}
+              onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                setAddress(event.target.value);
+              }}
+              startDecorator={<LocationOnIcon fontSize="small" />}
+              required={true}
+              error={formError === 2}
+            />
+          </StandaloneSearchBox>
         </FormControl>
 
         {/* Phone number section. */}
-        <FormControl>
+        <FormControl sx={inputMinWidth}>
           <FormLabel>Phone Number</FormLabel>
           <CustomInput
             type="tel"
@@ -154,11 +135,17 @@ const CreateBuyerSection = ({
               setPhoneNumber(event.target.value);
             }}
             startDecorator={<PhoneIcon fontSize="small" />}
+            error={formError === 3}
           />
         </FormControl>
 
         {/* Create profile button. */}
-        <Button type="submit" variant="solid" color="primary" sx={{ minWidth: "35%" }}>
+        <Button
+          type="submit"
+          variant="solid"
+          color="primary"
+          sx={{ alignSelf: "center", minWidth: "50%" }}
+        >
           Create Profile
         </Button>
       </Stack>
@@ -172,14 +159,15 @@ const CreateBuyerSection = ({
       alignItems="center"
       gap={3}
       sx={{
-        minWidth: "50vw",
+        minWidth: window.innerWidth <= mobileScreenInnerWidth ? "90%" : "50%",
+        minHeight: window.innerWidth <= mobileScreenInnerWidth ? "60vh" : "65vh",
+        px: window.innerWidth <= mobileScreenInnerWidth ? "5%" : "2%",
+        py: window.innerWidth <= mobileScreenInnerWidth ? "7%" : "3%",
         outline: "0.5px solid #E0E0E0",
         borderRadius: "6px",
-        padding: "1% 0%",
-        minHeight: "75vh",
       }}
     >
-      {buyerCreationForm}
+      {BuyerCreationForm}
     </Stack>
   );
 };

@@ -7,11 +7,12 @@
 import CloseIcon from "@mui/icons-material/Close";
 import Snackbar from "@mui/joy/Snackbar";
 import { keyframes } from "@mui/system";
+import { snackBarColor } from "../../utils/contexts";
 
 /** Props of the custom snackbar component. */
 interface CustomSnackbarProps {
   content: string;
-  color: "primary" | "neutral" | "danger" | "success" | "warning";
+  color: snackBarColor;
   open: boolean;
   onClose: () => void;
   startDecorator?: React.ReactNode;

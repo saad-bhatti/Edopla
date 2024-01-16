@@ -12,9 +12,11 @@ import ordersRoutes from "./routes/items/orders";
 import buyersRoutes from "./routes/users/buyers";
 import usersRoutes from "./routes/users/users";
 import vendorsRoutes from "./routes/users/vendors";
+import databaseRequests from "./tests/helper/databaseRequests";
 import env from "./util/validateEnv";
 
 // Get necessary flag from the command line
+const isTest = process.argv[2].split("=")[1] === "test";
 const isDebug = process.argv[3].split("=")[1] === "true";
 
 // Initialize the app
@@ -27,14 +29,16 @@ app.use(morgan("dev"));
 app.use(express.json());
 
 // Add middleware to enable CORS
-app.use(
-  cors({
-    origin: env.FRONTEND_URL,
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
-);
+!isTest
+  ? app.use(
+      cors({
+        origin: [env.FRONTEND_URL, "https://maps.googleapis.com/maps/api/*"],
+        credentials: true,
+        methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+        allowedHeaders: ["Content-Type", "Authorization"],
+      })
+    )
+  : app.use(cors());
 
 // Add middleware to set-up & handle sessions
 app.use(
@@ -47,7 +51,7 @@ app.use(
     },
     rolling: true,
     store: MongoStore.create({
-      mongoUrl: env.DATABASE_URL,
+      mongoUrl: !isTest ? env.DATABASE_URL : env.TEST_DATABASE_URL,
       collectionName: "sessions",
     }),
   })
@@ -60,6 +64,9 @@ app.use("/api/menus", menusRoutes);
 app.use("/api/buyers", buyersRoutes);
 app.use("/api/carts", requiresBuyer, cartsRoutes);
 app.use("/api/orders", ordersRoutes);
+
+// Route to handle database requests for testing
+isTest && app.use("/api/database", databaseRequests);
 
 // Catch invalid routes
 app.use((req, res, next) => {

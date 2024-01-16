@@ -11,8 +11,8 @@ import { SxProps } from "@mui/joy/styles/types";
 import { useContext } from "react";
 import { Link } from "react-router-dom";
 import CustomSearch from "../components/custom/CustomSearch";
-import * as Constants from "../styles/constants";
-import { LoggedInUserContext, LoggedInUserContextProps } from "../utils/contexts";
+import * as Constants from "../styles/TextSX";
+import { UserContext, UserContextProps } from "../utils/contexts";
 import ColorSchemeToggle from "./ColorSchemeToggle";
 import { NavBarLoggedInHead, NavBarLoggedInTail } from "./NavBarLoggedInView";
 import { NavBarLoggedOutHead, NavBarLoggedOutTail } from "./NavBarLoggedOutView";
@@ -20,11 +20,10 @@ import { NavBarLoggedOutHead, NavBarLoggedOutTail } from "./NavBarLoggedOutView"
 /** UI component for a custom navigation. */
 const NavBar = () => {
   // Retrieve the logged in user from the context
-  const { loggedInUser } = useContext<LoggedInUserContextProps | null>(LoggedInUserContext) || {};
+  const { user } = useContext<UserContextProps | null>(UserContext) || {};
   /** Sx for the navigation bar. */
   const customSx: SxProps = {
-    minWidth: Constants.minPageWidth,
-    maxHeight: Constants.navBarMaxWidth,
+    minWidth: "99%",
   };
 
   /** UI layout for the custom navigation. */
@@ -41,13 +40,7 @@ const NavBar = () => {
           padding: "5px 0px",
         }}
       >
-        <Stack
-          direction="row"
-          justifyContent="center"
-          alignItems="center"
-          spacing={1}
-          sx={{ display: { xs: "none", sm: "flex" } }}
-        >
+        <Stack direction="row" justifyContent="center" alignItems="center" spacing={1}>
           {/* Home button. */}
           <Link to="/">
             <Button
@@ -61,29 +54,27 @@ const NavBar = () => {
           </Link>
 
           {/* Rest of head depending in authentication status. */}
-          {loggedInUser ? <NavBarLoggedInHead /> : <NavBarLoggedOutHead />}
+          {user ? <NavBarLoggedInHead /> : <NavBarLoggedOutHead />}
         </Stack>
 
         {/* Navigation bar tail. */}
-        <Stack
-          direction="row"
-          alignItems="center"
-          spacing={1}
-          sx={{ display: { xs: "none", sm: "flex" } }}
-        >
+        <Stack direction="row" alignItems="center" spacing={1}>
           {/* Search bar. */}
           <CustomSearch
             placeholder="Type to search"
             initialValue=""
             activeSearch={false}
             onSearch={() => {}}
+            sx={{
+              display: window.innerWidth <= Constants.mobileScreenInnerWidth ? "none" : "flex",
+            }}
           />
 
           {/* Color scheme toggle. */}
           <ColorSchemeToggle />
 
           {/* Rest of tail depending in authentication status. */}
-          {loggedInUser ? <NavBarLoggedInTail /> : <NavBarLoggedOutTail />}
+          {user ? <NavBarLoggedInTail /> : <NavBarLoggedOutTail />}
         </Stack>
       </Box>
     </Container>

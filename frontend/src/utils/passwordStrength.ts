@@ -17,7 +17,7 @@ export function calculateDescriptivePasswordStrength(newPassword: string): strin
   const containsSpecialCharacter: number = /[!@#$%^&*(),.?":{}|<>]/.test(newPassword) ? 1 : 0;
 
   const strength: number = lengthRequirement + containsNumber + containsSpecialCharacter;
-  if (newPassword.length === 0) return "";
+  if (newPassword.length === 0) return "No input";
   else if (strength === 0) return "Very Weak";
   else if (strength === 1) return "Weak";
   else if (strength === 2) return "Strong";

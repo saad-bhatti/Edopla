@@ -4,35 +4,32 @@
  * The menu items can be searched, filtered, and sorted.                                           *
  **************************************************************************************************/
 
-import InfoOutlined from "@mui/icons-material/InfoOutlined";
-import SentimentVeryDissatisfiedIcon from "@mui/icons-material/SentimentVeryDissatisfied";
 import { Container, LinearProgress, Stack } from "@mui/joy";
 import { SxProps } from "@mui/joy/styles/types";
 import { useContext, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import MenuItemCard from "../../components/card/MenuItemCard";
-import CustomDropdown from "../../components/custom/CustomDropdown";
-import CustomFilter from "../../components/custom/CustomFilter";
-import CustomSearch from "../../components/custom/CustomSearch";
-import CustomSnackbar from "../../components/custom/CustomSnackbar";
-import { displayError } from "../../errors/displayError";
-import { CartItem } from "../../models/items/cartItem";
-import { MenuItem } from "../../models/items/menuItem";
-import { createCart, emptyCart, updateItem } from "../../network/items/carts_api";
-import { getMenu } from "../../network/items/menus_api";
-import { SectionTitleText } from "../../styles/Text";
-import { minPageHeight, minPageWidth } from "../../styles/constants";
-import * as Contexts from "../../utils/contexts";
-import * as MenuManipulation from "./MenuManipulation";
-import * as MenuPageHelper from "./MenuPageHelper";
+import MenuItemCard from "../components/card/MenuItemCard";
+import CustomDropdown from "../components/custom/CustomDropdown";
+import CustomFilter from "../components/custom/CustomFilter";
+import CustomSearch from "../components/custom/CustomSearch";
+import { displayError } from "../errors/displayError";
+import { CartItem } from "../models/items/cartItem";
+import { MenuItem } from "../models/items/menuItem";
+import { createCart, emptyCart, updateItem } from "../network/items/carts_api";
+import { getMenu } from "../network/items/menus_api";
+import { ErrorPageText, mobileScreenInnerWidth } from "../styles/TextSX";
+import { CartsContext, SnackbarContext, snackBarColor } from "../utils/contexts";
+import * as MenuPageHelper from "./helpers/MenuPageHelper";
+import * as MenuManipulation from "./manipulation/MenuManipulation";
 
 /** UI for the menu page. */
 const MenuPage = () => {
   // Retrieve the vendor id from the URL path.
   const { vendorId } = useParams();
   // Retrieve the logged in user's cart.
-  const { carts, setCarts } =
-    useContext<Contexts.CartsContextProps | null>(Contexts.CartsContext) || {};
+  const { carts, setCarts } = useContext(CartsContext) || {};
+  // Retrieve the snackbar from the context.
+  const { setSnackbar } = useContext(SnackbarContext) || {};
   // State to track whether the page data is being loaded.
   const [isLoading, setIsLoading] = useState(true);
   // State to show an error message if the vendors fail to load.
@@ -43,18 +40,6 @@ const MenuPage = () => {
   const [activeMenu, setActiveMenu] = useState<MenuItem[]>([]);
   // State to track the user's cart for this vendor.
   const [cart, setCart] = useState<CartItem | null>(null);
-
-  // State to control the display of the snackbar.
-  const [snackbarVisible, setSnackbarVisible] = useState<boolean>(false);
-  // State to track the text and color of the snackbar.
-  type possibleColors = "primary" | "neutral" | "danger" | "success" | "warning";
-  const [snackbarFormat, setSnackbarFormat] = useState<{
-    text: string;
-    color: possibleColors;
-  }>({
-    text: "",
-    color: "primary",
-  });
 
   /** Retrieve the menu only once before rendering the page. */
   useEffect(() => {
@@ -82,6 +67,16 @@ const MenuPage = () => {
     }
     loadMenu();
   }, [carts, vendorId]);
+
+  /**
+   * Function to set the snackbar format and its visibility.
+   * @param text The text to display in the snackbar.
+   * @param color The color of the snackbar.
+   * @param visible Whether the snackbar is visible or not.
+   */
+  function updateSnackbar(text: string, color: snackBarColor, visible: boolean): void {
+    setSnackbar!({ text, color, visible });
+  }
 
   /** Function to search the menu by its name or category. */
   const handleMenuSearch = (searchValue: string): void => {
@@ -133,12 +128,13 @@ const MenuPage = () => {
           );
 
         // Show snackbar to indicate success.
-        setSnackbarFormat({
-          text: quantity
+        updateSnackbar(
+          quantity
             ? "Item successfully modified in the cart!"
             : "Item successfully removed from the cart!",
-          color: "success",
-        });
+          "success",
+          true
+        );
       }
       // If the user's cart for this vendor does not exist
       else {
@@ -152,24 +148,16 @@ const MenuPage = () => {
         setCarts!([...carts!, newCart]);
 
         // Show snackbar to indicate success.
-        setSnackbarFormat({
-          text: "Item successfully added to the cart!",
-          color: "success",
-        });
+        updateSnackbar("Item successfully added to the cart!", "success", true);
       }
     } catch (error) {
       // Show snackbar to indicate failure.
-      setSnackbarFormat({
-        text: "Failed to add or update the item to the cart.",
-        color: "danger",
-      });
-    } finally {
-      setSnackbarVisible(true);
+      updateSnackbar("Failed to add or update the item to the cart.", "danger", true);
     }
   }
 
   /** Variable containing the display for all menu items. */
-  const menuItemsStack = (
+  const MenuItemsStack = (
     <Stack spacing={2} sx={{ overflow: "auto" }}>
       {activeMenu.map((menuItem: MenuItem) =>
         cart && cart.items.find((itemInCart) => itemInCart.item._id === menuItem._id) ? (
@@ -190,30 +178,9 @@ const MenuPage = () => {
     </Stack>
   );
 
-  /** UI layout for the snackbar. */
-  const snackbar = (
-    <CustomSnackbar
-      content={snackbarFormat.text}
-      color={snackbarFormat.color}
-      open={snackbarVisible}
-      onClose={() => {
-        setSnackbarVisible(false);
-      }}
-      startDecorator={<InfoOutlined fontSize="small" />}
-    />
-  );
-
-  /** Sx for when a loading error occurs. */
-  const errorSx: SxProps = {
-    margin: 0,
-    minHeight: minPageHeight,
-  };
-
   /** Sx for the menu page. */
   const customSx: SxProps = {
     py: 5,
-    minWidth: minPageWidth,
-    minHeight: minPageHeight,
   };
 
   /** UI layout for the profiles page. */
@@ -224,43 +191,37 @@ const MenuPage = () => {
 
       {/* Display for when the menu fails to load. */}
       {showLoadingError && (
-        <Stack id="MenuPage" direction="row" justifyContent="center" gap={5} py={10} sx={errorSx}>
-          <SentimentVeryDissatisfiedIcon sx={{ fontSize: "20vh" }} />
-          <SectionTitleText>Something went wrong. Please try again.</SectionTitleText>
-        </Stack>
+        <ErrorPageText id="MenuPage">Something went wrong. Please try again.</ErrorPageText>
       )}
 
       {/* Display if no vendor id is provided. */}
       {!isLoading && !showLoadingError && !vendorId && (
-        <Stack id="MenuPage" direction="row" justifyContent="center" gap={5} py={10} sx={errorSx}>
-          <SentimentVeryDissatisfiedIcon sx={{ fontSize: "20vh" }} />
-          <SectionTitleText>No vendor id provided.</SectionTitleText>
-        </Stack>
+        <ErrorPageText id="MenuPage">No vendor id provided.</ErrorPageText>
       )}
 
       {/* Display each menu item. */}
       {!isLoading && !showLoadingError && vendorId && (
         <Container id="MenuPage" sx={customSx}>
-          {/* Display for the snackbar. */}
-          {snackbar}
-
           {/* Search bar. */}
           <CustomSearch
             placeholder="Search by name or category"
             initialValue=""
             activeSearch={true}
             onSearch={handleMenuSearch}
-            sx={{ width: "50%", mx: "auto" }}
+            sx={{
+              maxWidth: window.innerWidth <= mobileScreenInnerWidth ? "100%" : "50%",
+              mx: "auto",
+              mb: window.innerWidth <= mobileScreenInnerWidth ? "3%" : "0%",
+            }}
           />
 
           <Stack
             useFlexGap
             direction="row"
-            spacing={{ xs: 0, sm: 2 }}
-            justifyContent={{ xs: "space-between" }}
+            spacing={2}
+            justifyContent="space-between"
             flexWrap="wrap"
-            sx={{ minWidth: 0 }}
-            margin={{ xs: "0 0 5px 0" }}
+            mb="1%"
           >
             {/* Drawer for the filter options. */}
             <CustomFilter
@@ -284,7 +245,7 @@ const MenuPage = () => {
           </Stack>
 
           {/* Display for the menu items. */}
-          {menuItemsStack}
+          {MenuItemsStack}
         </Container>
       )}
     </>

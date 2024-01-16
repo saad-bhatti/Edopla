@@ -27,6 +27,7 @@ interface CartItemCardProps {
   onUpdateCart: (cart: CartItem, items: { item: string; quantity: number }[]) => void;
   onDeleteItem: (cart: CartItem, itemId: string) => void;
   onSaveForLater: (cart: CartItem) => void;
+  onCheckout: () => void;
 }
 
 /** UI component for a cart item card. */
@@ -36,6 +37,7 @@ const CartItemCard = ({
   onUpdateCart,
   onDeleteItem,
   onSaveForLater,
+  onCheckout,
 }: CartItemCardProps) => {
   // Retrieve the cart item's vendor ID, items, and saved for later status.
   const { vendorId, items, savedForLater } = cartItem;
@@ -254,6 +256,7 @@ const CartItemCard = ({
         <Button
           variant="outlined"
           size="sm"
+          onClick={onCheckout}
           startDecorator={<LockIcon sx={{ fontSize: "medium" }} />}
         >
           Checkout

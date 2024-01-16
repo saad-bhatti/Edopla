@@ -3,8 +3,8 @@
  **************************************************************************************************/
 
 import { AspectRatio, Container, Stack } from "@mui/joy";
-import developerImg from "../../images/developer.jpg";
-import { LargeBodyText, SectionTitleText } from "../../styles/Text";
+import developerImg from "../../../images/developer.jpg";
+import { LargeBodyText, SectionTitleText, mobileScreenInnerWidth } from "../../../styles/TextSX";
 
 /** UI for the HomePage's meet section. */
 const Meet = () => {
@@ -13,7 +13,7 @@ const Meet = () => {
     <Container
       id="Meet"
       sx={(theme) => ({
-        borderRadius: "2%",
+        borderRadius: window.innerWidth <= mobileScreenInnerWidth ? 0 : "10%",
         [theme.getColorSchemeSelector("dark")]: {
           background: "linear-gradient(to right, #1e1e30, #172836)",
         },
@@ -22,20 +22,25 @@ const Meet = () => {
       {/* Section title. */}
       <SectionTitleText
         children="Meet the Developer"
-        width="40%"
-        paddingTop={verticalPadding}
-        sx={{ borderBottom: "2vh solid" }}
+        mb={window.innerWidth <= mobileScreenInnerWidth ? verticalPadding : 0}
+        paddingTop={window.innerWidth <= mobileScreenInnerWidth ? 0 : verticalPadding}
+        sx={{ width: "fit-content", mx: "auto", borderBottom: "1vh solid" }}
       />
 
       {/* Section content. */}
-      <Stack direction="row" justifyContent="center" gap="5vw" padding={`${verticalPadding} 0%`}>
+      <Stack
+        direction={window.innerWidth <= mobileScreenInnerWidth ? "column" : "row"}
+        justifyContent="center"
+        gap={5}
+        padding={`${verticalPadding} 0%`}
+      >
         {/* Section image. */}
         <AspectRatio
           ratio="6/5"
           variant="outlined"
           objectFit="fill"
           sx={{
-            minWidth: "25vw",
+            minWidth: "25%",
             borderRadius: "md",
             marginY: "auto",
           }}

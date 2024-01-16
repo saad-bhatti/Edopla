@@ -6,8 +6,12 @@ import EmailIcon from "@mui/icons-material/Email";
 import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import PhoneIcon from "@mui/icons-material/Phone";
 import { Container, Stack } from "@mui/joy";
-import { LargeBodyText, SectionTitleText } from "../../styles/Text";
-import { minPageWidth } from "../../styles/constants";
+import {
+  LargeBodyText,
+  SectionTitleText,
+  centerText,
+  mobileScreenInnerWidth,
+} from "../../../styles/TextSX";
 
 /** UI for the HomePage's contact section. */
 const Contact = () => {
@@ -15,9 +19,9 @@ const Contact = () => {
     <Container
       id="Contact"
       sx={(theme) => ({
-        minWidth: minPageWidth,
-        maxHeight: "75vh",
-        borderRadius: "40% 40% 0% 0%",
+        minWidth: "100%",
+        minHeight: "80%",
+        borderRadius: window.innerWidth <= mobileScreenInnerWidth ? 0 : "0 0 40% 40%",
         [theme.getColorSchemeSelector("dark")]: {
           background: "linear-gradient(to right, #280afe, #996bce)",
         },
@@ -25,20 +29,29 @@ const Contact = () => {
     >
       <Stack direction="column" alignItems="center" gap={5} paddingY="5%">
         {/* Section title. */}
-        <SectionTitleText children="Contact Us" />
+        <SectionTitleText children="Contact Us" sx={centerText} />
 
         {/* Description section. */}
 
         {/* Email section. */}
-        <LargeBodyText children="saad.bhatti.cs@gmail.com" startDecorator={<EmailIcon />} />
+        <LargeBodyText
+          children="saad.bhatti.cs@gmail.com"
+          startDecorator={<EmailIcon />}
+          sx={centerText}
+        />
 
         {/* Number section. */}
-        <LargeBodyText children="+1 (781) 692-9561" startDecorator={<PhoneIcon />} />
+        <LargeBodyText
+          children="+1 (781) 692-9561"
+          startDecorator={<PhoneIcon />}
+          sx={centerText}
+        />
 
         {/* LinkedIn section. */}
         <LargeBodyText
           children="https://www.linkedin.com/in/saad-bhatti/"
           startDecorator={<LinkedInIcon />}
+          sx={centerText}
         />
       </Stack>
     </Container>

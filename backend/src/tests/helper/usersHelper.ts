@@ -31,15 +31,29 @@ type ExpectedType = Types.ObjectId | string | number | boolean | Types.ObjectId[
  ****/
 
 /**
- * Function to prepare the details of a user profile.
+ * Function to prepare the request body for a user to authenticate using a form.
+ * @param isSignUp Whether the user is signing up or logging in.
+ * @param email The email of the user.
+ * @returns The prepared request body.
+ */
+export function prepareUserFormRequestBody(isSignUp: boolean, email: string) {
+  return {
+    isSignUp: isSignUp,
+    email: email,
+    password: "test123",
+  };
+}
+
+/**
+ * Function to prepare the details of a user profile created using a form.
  * @param email The email of the user.
  * @returns The prepared user details.
  *
  * Note: There is no includeSelected parameter because user does not have any 'select' fields.
  */
-export function prepareUserDetails(email: string): UserDetails {
+export function prepareUserFormDetails(email: string): UserDetails {
   return {
-    email: email,
+    identification: { email: email, googleId: null, gitHubId: null },
     password: "test123",
     _buyer: null,
     _vendor: null,
@@ -166,7 +180,7 @@ export function compareExisting<T extends Record<string, ExpectedType>>(
     // Comparing ObjectIds
     if (expectedValue instanceof Types.ObjectId)
       expect(expectedValue.equals(actualValue)).toBe(true);
-    // Comapring arrays
+    // Comparing arrays
     else if (Array.isArray(expectedValue))
       expect(arrayEqual(expectedValue, actualValue)).toBe(true);
     // Comparing other types

@@ -3,28 +3,30 @@
  * This page is used to display and change the user, buyer, and vendor profile information.       *
  **************************************************************************************************/
 
-import SentimentVeryDissatisfiedIcon from "@mui/icons-material/SentimentVeryDissatisfied";
-import { Container, LinearProgress, Stack } from "@mui/joy";
-import { SxProps, Theme } from "@mui/joy/styles/types";
+import { Button, Container, LinearProgress, Stack } from "@mui/joy";
 import { useContext, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import BuyerProfileCard from "../components/card/BuyerProfileCard";
 import UserProfileCard from "../components/card/UserProfileCard";
 import VendorProfileCard from "../components/card/VendorProfileCard";
 import CustomTabs from "../components/custom/CustomTabs";
 import { displayError } from "../errors/displayError";
 import { Buyer } from "../models/users/buyer";
+import { User } from "../models/users/user";
 import { Vendor } from "../models/users/vendor";
 import { getBuyer } from "../network/users/buyers_api";
 import { getVendor } from "../network/users/vendors_api";
-import { onlyBackgroundSx } from "../styles/PageSX";
-import { SectionTitleText } from "../styles/Text";
-import { minPageHeight, minPageWidth } from "../styles/constants";
-import { LoggedInUserContext, LoggedInUserContextProps } from "../utils/contexts";
+import { ErrorPageText, LargeBodyText, centerText } from "../styles/TextSX";
+import { SnackbarContext, UserContext, snackBarColor } from "../utils/contexts";
 
 /** UI for the profiles page, depending on user's login status. */
 const ProfilesPage = () => {
+  // Create a navigate object to move between pages
+  const navigate = useNavigate();
   // Retrieve the logged in user from the context
-  const { loggedInUser } = useContext<LoggedInUserContextProps | null>(LoggedInUserContext) || {};
+  const { user, setUser } = useContext(UserContext) || {};
+  // Retrieve the snackbar from the context
+  const { setSnackbar } = useContext(SnackbarContext) || {};
   // State to track whether the page data is being loaded.
   const [isLoading, setIsLoading] = useState(true);
   // State to show an error message if the vendors fail to load.
@@ -38,16 +40,16 @@ const ProfilesPage = () => {
   useEffect(() => {
     async function loadProfiles() {
       try {
-        if (loggedInUser) {
+        if (user) {
           setShowLoadingError(false);
-          setIsLoading(true); // Show the loading indicator
+          setIsLoading(true);
 
-          if (loggedInUser._buyer) {
+          if (user._buyer) {
             const buyer = await getBuyer();
             setBuyer(buyer);
           }
 
-          if (loggedInUser._vendor) {
+          if (user._vendor) {
             const vendor = await getVendor();
             setVendor(vendor);
           }
@@ -60,21 +62,59 @@ const ProfilesPage = () => {
       }
     }
     loadProfiles();
-  }, [loggedInUser]);
+  }, [user]);
 
-  /** Sx for when a loading error occurs. */
-  const errorSx: SxProps = (theme: Theme) => ({
-    ...onlyBackgroundSx(theme),
-    margin: 0,
-    minHeight: minPageHeight,
-  });
+  /** Function to update the user. */
+  function updateUser(user: User) {
+    setUser!(user);
+  }
 
-  /** Sx for the profiles page. */
-  const customSx: SxProps = {
-    py: 5,
-    minWidth: minPageWidth,
-    minHeight: minPageHeight,
-  };
+  /** Function to update the snackbar. */
+  function updateSnackbar(text: string, color: snackBarColor, visible: boolean) {
+    setSnackbar!({ text, color, visible });
+  }
+
+  /** UI layout for the content to be displayed in the buyer tab. */
+  const BuyerTab = buyer ? (
+    <BuyerProfileCard buyer={buyer} onBuyerUpdate={setBuyer} updateSnackbar={updateSnackbar} />
+  ) : (
+    <Stack direction="column" alignContent="center" gap={2}>
+      <LargeBodyText sx={centerText}>
+        You currently do not have a buyer profile.
+      </LargeBodyText>
+      <Button
+        color="primary"
+        variant="soft"
+        onClick={() => {
+          navigate("/profiles/create?role=buyer");
+        }}
+        sx={{ maxWidth: "50%", m: "auto" }}
+      >
+        Click here to create one
+      </Button>
+    </Stack>
+  );
+
+  /** UI layout for the content to be displayed in the vendor tab. */
+  const VendorTab = vendor ? (
+    <VendorProfileCard vendor={vendor} onVendorUpdate={setVendor} updateSnackbar={updateSnackbar} />
+  ) : (
+    <Stack direction="column" alignContent="center" gap={2}>
+      <LargeBodyText sx={centerText}>
+        You currently do not have a vendor profile.
+      </LargeBodyText>
+      <Button
+        color="primary"
+        variant="soft"
+        onClick={() => {
+          navigate("/profiles/create?role=vendor");
+        }}
+        sx={{ maxWidth: "50%", m: "auto" }}
+      >
+        Click here to create one
+      </Button>
+    </Stack>
+  );
 
   return (
     <>
@@ -83,42 +123,38 @@ const ProfilesPage = () => {
 
       {/* Display for when the profiles fail to load. */}
       {showLoadingError && (
-        <Stack
-          id="ProfilesPage"
-          direction="row"
-          justifyContent="center"
-          gap={5}
-          py={10}
-          sx={errorSx}
-        >
-          <SentimentVeryDissatisfiedIcon sx={{ fontSize: "20vh" }} />
-          <SectionTitleText>Something went wrong. Please try again.</SectionTitleText>
-        </Stack>
+        <ErrorPageText id="ProfilesPage">Something went wrong. Please try again.</ErrorPageText>
       )}
 
       {/* Display each profile's information. */}
-      {!isLoading && !showLoadingError && loggedInUser && (
-        <Container id="ProfilesPage" sx={customSx}>
+      {!isLoading && !showLoadingError && user && (
+        <Container id="ProfilesPage" sx={{ py: 5 }}>
           {/* Tabs for the profile page. */}
           <CustomTabs
             tabs={[
               // Display the user profile card.
-              { tab: "User", panel: loggedInUser && <UserProfileCard user={loggedInUser} /> },
+              {
+                tab: "User",
+                panel: user && (
+                  <UserProfileCard
+                    user={user}
+                    updateUser={updateUser}
+                    updateSnackbar={updateSnackbar}
+                  />
+                ),
+              },
               // Display the buyer profile card.
               {
-                tab: "Buyer",
-                panel: buyer && <BuyerProfileCard buyer={buyer} onBuyerUpdate={setBuyer} />,
+                tab: "Role: Buyer",
+                panel: BuyerTab,
               },
               // Display the vendor profile card.
               {
-                tab: "Vendor",
-                panel: vendor && (
-                  // Display the vendor profile card.
-                  <VendorProfileCard vendor={vendor} onVendorUpdate={setVendor} />
-                ),
+                tab: "Role: Vendor",
+                panel: VendorTab,
               },
             ]}
-            sx={{ marginBottom: "10px" }}
+            sx={{ mb: "10px" }}
           />
         </Container>
       )}

@@ -5,24 +5,24 @@
  **************************************************************************************************/
 
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
-import InfoOutlined from "@mui/icons-material/InfoOutlined";
 import { Button, Container, LinearProgress, Stack, Typography } from "@mui/joy";
 import { SxProps } from "@mui/joy/styles/types";
 import { useContext, useEffect, useState } from "react";
-import CartItemCard from "../../components/card/CartItemCard";
-import CustomDropdown from "../../components/custom/CustomDropdown";
-import CustomSearch from "../../components/custom/CustomSearch";
-import CustomSnackbar from "../../components/custom/CustomSnackbar";
-import { CartItem } from "../../models/items/cartItem";
-import * as CartsAPI from "../../network/items/carts_api";
-import { minPageHeight, minPageWidth } from "../../styles/constants";
-import { CartsContext, CartsContextProps } from "../../utils/contexts";
-import * as CartsManipulation from "./CartsManipulation";
+import CartItemCard from "../components/card/CartItemCard";
+import CustomDropdown from "../components/custom/CustomDropdown";
+import CustomSearch from "../components/custom/CustomSearch";
+import { CartItem } from "../models/items/cartItem";
+import * as CartsAPI from "../network/items/carts_api";
+import { centerText, mobileScreenInnerWidth } from "../styles/TextSX";
+import { CartsContext, SnackbarContext } from "../utils/contexts";
+import * as CartsManipulation from "./manipulation/CartsManipulation";
 
 /** UI for the cart page. */
 const CartPage = () => {
   // Retrieve the logged in user's cart from the context
-  const { carts, setCarts } = useContext<CartsContextProps | null>(CartsContext) || {};
+  const { carts, setCarts } = useContext(CartsContext) || {};
+  // Retrieve the snackbar from the context
+  const { setSnackbar } = useContext(SnackbarContext) || {};
   // State to track whether the cart is being seperated.
   const [isSeperating, setIsSeperating] = useState(true);
   // State to track the active carts.
@@ -34,36 +34,15 @@ const CartPage = () => {
   // State to track whether the carts are being searched.
   const [isSearching, setIsSearching] = useState(false);
 
-  // State to control the display of the snackbar.
-  const [snackbarVisible, setSnackbarVisible] = useState<boolean>(false);
-  // State to track the text and color of the snackbar.
-  type possibleColors = "primary" | "neutral" | "danger" | "success" | "warning";
-  const [snackbarFormat, setSnackbarFormat] = useState<{
-    text: string;
-    color: possibleColors;
-  }>({
-    text: "",
-    color: "primary",
-  });
-
   /** Seperate the cart by "savedForLater" only once before rendering the page. */
   useEffect(() => {
     function seperateCarts() {
       setIsSeperating(true);
 
-      // Load the carts from local storage if the carts context is empty.
-      if (!activeCarts?.length && !isSearching) {
-        const cartsFromLocalStorage = localStorage.getItem("carts");
-        if (cartsFromLocalStorage) setActiveCarts!(JSON.parse(cartsFromLocalStorage));
-      }
-
       // Seperate the carts by "savedForLater" if the carts are not empty.
       const [nowCarts, laterCarts] = CartsManipulation.seperateCarts(activeCarts);
       setNowCarts(nowCarts);
       setLaterCarts(laterCarts);
-
-      // Store the carts in local storage.
-      localStorage.setItem("carts", JSON.stringify(carts));
 
       setIsSeperating(false);
     }
@@ -94,24 +73,23 @@ const CartPage = () => {
   async function emptyAllCarts(): Promise<void> {
     try {
       await CartsAPI.emptyCarts();
-
-      // Store an empty carts in local storage.
-      localStorage.setItem("carts", JSON.stringify([]));
+      // Remove all carts from the carts context.
       setCarts!([]);
       setActiveCarts([]);
 
-      setSnackbarFormat({
+      // Show snackbar to indicate success.
+      setSnackbar!({
         text: "All carts emptied successfully!",
         color: "success",
+        visible: true,
       });
     } catch (error) {
       // Show snackbar to indicate failure.
-      setSnackbarFormat({
+      setSnackbar!({
         text: "Failed to empty all carts.",
         color: "danger",
+        visible: true,
       });
-    } finally {
-      setSnackbarVisible(true);
     }
   }
 
@@ -136,18 +114,18 @@ const CartPage = () => {
         : setNowCarts(nowCarts.filter((cartItem) => cartItem._id !== cartItemToEmpty._id));
 
       // Show snackbar to indicate success.
-      setSnackbarFormat({
+      setSnackbar!({
         text: "Cart emptied successfully!",
         color: "success",
+        visible: true,
       });
     } catch (error) {
       // Show snackbar to indicate failure.
-      setSnackbarFormat({
+      setSnackbar!({
         text: "Failed to empty cart.",
         color: "danger",
+        visible: true,
       });
-    } finally {
-      setSnackbarVisible(true);
     }
   }
 
@@ -183,18 +161,18 @@ const CartPage = () => {
       );
 
       // Show snackbar to indicate success.
-      setSnackbarFormat({
+      setSnackbar!({
         text: "Cart updated successfully!",
         color: "success",
+        visible: true,
       });
     } catch (error) {
       // Show snackbar to indicate failure.
-      setSnackbarFormat({
+      setSnackbar!({
         text: "Failed to update cart.",
         color: "danger",
+        visible: true,
       });
-    } finally {
-      setSnackbarVisible(true);
     }
   }
 
@@ -229,19 +207,19 @@ const CartPage = () => {
         );
 
         // Show snackbar to indicate success.
-        setSnackbarFormat({
+        setSnackbar!({
           text: "Item deleted successfully!",
           color: "success",
+          visible: true,
         });
       }
     } catch (error) {
       // Show snackbar to indicate failure.
-      setSnackbarFormat({
-        text: "Failed to delete item",
+      setSnackbar!({
+        text: "Failed to delete item.",
         color: "danger",
+        visible: true,
       });
-    } finally {
-      setSnackbarVisible(true);
     }
   }
 
@@ -272,19 +250,28 @@ const CartPage = () => {
       );
 
       // Show snackbar to indicate success.
-      setSnackbarFormat({
+      setSnackbar!({
         text: "Successfully updated the cart!",
         color: "success",
+        visible: true,
       });
     } catch (error) {
       // Show snackbar to indicate failure.
-      setSnackbarFormat({
+      setSnackbar!({
         text: "Failed to update cart.",
         color: "danger",
+        visible: true,
       });
-    } finally {
-      setSnackbarVisible(true);
     }
+  }
+
+  /** Function to handle checking out. */
+  function onCheckout() {
+    setSnackbar!({
+      text: "This feature is coming soon! Thank you for your patience.",
+      color: "primary",
+      visible: true,
+    });
   }
 
   /** Variable containing the display for all "now" cart items. */
@@ -299,11 +286,12 @@ const CartPage = () => {
             onUpdateCart={updateCart}
             onDeleteItem={deleteItem}
             onSaveForLater={saveForLater}
+            onCheckout={onCheckout}
           />
         ))}
       </Stack>
     ) : (
-      <Typography level="body-lg" sx={{ textAlign: "center" }}>
+      <Typography level="body-lg" sx={centerText}>
         You have no active carts.
       </Typography>
     );
@@ -320,49 +308,38 @@ const CartPage = () => {
             onUpdateCart={updateCart}
             onDeleteItem={deleteItem}
             onSaveForLater={saveForLater}
+            onCheckout={onCheckout}
           />
         ))}
       </Stack>
     ) : (
-      <Typography level="body-lg" sx={{ textAlign: "center" }}>
+      <Typography level="body-lg" sx={centerText}>
         You have no carts that are saved for later.
       </Typography>
     );
 
-  /** UI layout for the snackbar. */
-  const snackbar = (
-    <CustomSnackbar
-      content={snackbarFormat.text}
-      color={snackbarFormat.color}
-      open={snackbarVisible}
-      onClose={() => {
-        setSnackbarVisible(false);
-      }}
-      startDecorator={<InfoOutlined fontSize="small" />}
-    />
-  );
-
   /** Sx for the carts page. */
   const customSx: SxProps = {
     py: 5,
-    minWidth: minPageWidth,
-    minHeight: minPageHeight,
   };
 
   return (
     <Container id="CartsPage" sx={customSx}>
-      {/* Snackbar. */}
-      {snackbar}
+      {/* Search bar. */}
+      <CustomSearch
+        placeholder="Search by vendor or item"
+        initialValue=""
+        activeSearch={true}
+        onSearch={handleCartsSearch}
+        sx={{
+          maxWidth: window.innerWidth <= mobileScreenInnerWidth ? "100%" : "50%",
+          mx: "auto",
+          mb: window.innerWidth <= mobileScreenInnerWidth ? "3%" : "0%",
+        }}
+      />
 
-      <Stack
-        useFlexGap
-        direction="row"
-        spacing={{ xs: 0, sm: 2 }}
-        justifyContent={{ xs: "space-between" }}
-        flexWrap="wrap"
-        sx={{ minWidth: 0 }}
-        margin={{ xs: "0 0 5px 0" }}
-      >
+      {/* Sort options and empty all carts button. */}
+      <Stack useFlexGap direction="row" spacing={2} justifyContent="space-between" flexWrap="wrap">
         {/* Dropdown for the sort options. */}
         <CustomDropdown
           label="Sort by"
@@ -370,15 +347,6 @@ const CartPage = () => {
           onOptionClick={sortFunctions}
           variant="plain"
           color="primary"
-        />
-
-        {/* Search bar. */}
-        <CustomSearch
-          placeholder="Search by vendor or item"
-          initialValue=""
-          activeSearch={true}
-          onSearch={handleCartsSearch}
-          sx={{ width: "30%" }}
         />
 
         {/* Button to empty all carts. */}
@@ -403,13 +371,13 @@ const CartPage = () => {
       {!isSeperating && (
         <>
           {/* Display for the "now" carts. */}
-          <Typography level="h3" sx={{ mt: 3, mb: 2 }}>
+          <Typography level="h3" sx={{ mt: 1, mb: 2 }}>
             Active Carts
           </Typography>
           {nowCartsStack}
 
           {/* Display for the "later" carts. */}
-          <Typography level="h3" sx={{ mt: 3, mb: 2 }}>
+          <Typography level="h3" sx={{ mt: 1, mb: 2 }}>
             Saved for later
           </Typography>
           {laterCartsStack}

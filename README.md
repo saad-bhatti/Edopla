@@ -28,18 +28,23 @@ Order, pick up, and savor the taste of community with Edopla!
 
 ## Usage
 
-### Prerequisites
+- This application can be accessed at: [Edopla](https://edopla.onrender.com/)
+- Suggested browser: Chrome or Firefox
+- Suggested theme: Dark theme
+
+### Prerequisites for Locally Running Edopla
 
 - [Docker](https://docs.docker.com/get-docker/)
 - [Docker Compose](https://docs.docker.com/compose/install/)
+- .env files (provided on request)
 
-### Running the application (To Be Updated)
+### Running the application
 
 1. Clone the repository
 2. Navigate to the root directory of the repository 
 3. Run `./edopla-script.sh` to execute the script
 4. Enter `start` to run the application
-5.  Enter the ENV and DEBUG arguments
+5. Enter the ENV and DEBUG arguments
 6. Open a browser and navigate to `localhost:3000`
 
 *The frontend will be running on `localhost:3000`*
@@ -48,15 +53,16 @@ Order, pick up, and savor the taste of community with Edopla!
 
 ### Stopping the application
 
+Given the application is running:
 1. Navigate to the root directory of the repository
 2. Run `./edopla-script.sh` to execute the script
 3. Enter `stop` to stop the application
 
 ### Testing the backend
 
-1. Run the application
-1. Navigate to the backend directory of the repository
-2. Run `npm test` to run the tests or `npm run {test filename}` to run the tests in watch mode
+1. Run the application (as described above)
+2. Enter the backend container by running `docker exec -it edopla-backend bash`
+2. Run `npm test` to run all tests or `npm run {test filename}` to run the tests in a specific file
 
 * * *
 
@@ -69,6 +75,12 @@ Order, pick up, and savor the taste of community with Edopla!
 - #### `Animation`: React Spring is included for animation effects in the UI.
 
 - #### `Intersection Observer`: React Intersection Observer is employed for handling elements visibility in the viewport.
+
+- #### `Protected Routes`: React Router is used for protected routes, ensuring that only authenticated users can access certain pages.
+
+- #### `Address Autocomplete`: Google Places API is used for address autocomplete, allowing users to easily enter their address.
+
+- #### `OAuth Authentication`: Google & GitHub OAuth can be used for authentication, allowing users to sign in with third-party accounts.
 
 ### Backend
 
@@ -98,31 +110,29 @@ Order, pick up, and savor the taste of community with Edopla!
 
 ## Dependencies
 
-| Frontend Dependency         | Version        | Backend Dependency               | Version    |
-| --------------------------- | -------------- | -------------------------------- | ---------- |
-| @emotion/react              | ^11.11.1       | @types/bcrypt                    | ^5.0.0     |
-| @emotion/styled             | ^11.11.0       | @types/connect-mongo             | ^3.1.3     |
-| @mui/icons-material         | ^5.15.0        | @types/cors                      | ^2.8.17    |
-| @mui/joy                    | ^5.0.0-beta.18 | @types/express                   | ^4.17.17   |
-| @mui/system                 | ^5.15.3        | @types/express-session           | ^1.17.10   |
-| @types/react                | ^18.2.45       | @types/morgan                    | ^1.9.5     |
-| @types/react-dom            | ^18.2.18       | @types/supertest                 | ^2.0.16    |
-| react                       | ^18.2.0        | @typescript-eslint/eslint-plugin | ^6.4.1     |
-| react-dom                   | ^18.2.0        | @typescript-eslint/parser        | ^6.4.1     |
-| react-intersection-observer | ^9.5.3         | eslint                           | ^8.48.0    |
-| react-router-dom            | ^6.16.0        | jest                             | ^29.7.0    |
-| react-scripts               | 5.0.1          | nodemon                          | ^3.0.1     |
-| react-spring                | ^9.7.3         | ts-jest                          | ^29.1.1    |
-| typescript                  | ^4.9.5         | typescript                       | ^5.2.2     |
-| web-vitals                  | ^2.1.4         | bcrypt                           | ^5.1.1     |
-|                             |                | connect-mongo                    | ^5.1.0     |
-|                             |                | cors                             | ^2.8.5     |
-|                             |                | dotenv                           | ^16.3.1    |
-|                             |                | envalid                          | ^7.3.1     |
-|                             |                | express                          | ^4.18.2    |
-|                             |                | express-session                  | ^1.17.3    |
-|                             |                | mongoose                         | ^7.4.5     |
-|                             |                | morgan                           | ^1.10.0    |
+| Frontend Dependency              | Version        | Backend Dependency               | Version    |
+| -------------------------------- | -------------- | -------------------------------- | ---------- |
+| @emotion/react                   | ^11.11.1       | @types/bcrypt                    | ^5.0.0     |
+| @emotion/styled                  | ^11.11.0       | @types/connect-mongo             | ^3.1.3     |
+| @mui/icons-material              | ^5.15.0        | @types/cors                      | ^2.8.17    |
+| @mui/joy                         | ^5.0.0-beta.18 | @types/express                   | ^4.17.17   |
+| @mui/system                      | ^5.15.3        | @types/express-session           | ^1.17.10   |
+| @types/react                     | ^18.2.45       | @types/morgan                    | ^1.9.5     |
+| @types/react-dom                 | ^18.2.18       | @types/supertest                 | ^2.0.16    |
+| react                            | ^18.2.0        | @typescript-eslint/eslint-plugin | ^6.4.1     |
+| react-dom                        | ^18.2.0        | @typescript-eslint/parser        | ^6.4.1     |
+| react-intersection-observer      | ^9.5.3         | eslint                           | ^8.48.0    |
+| react-router-dom                 | ^6.16.0        | jest                             | ^29.7.0    |
+| react-scripts                    | 5.0.1          | nodemon                          | ^3.0.1     |
+| react-spring                     | ^9.7.3         | ts-jest                          | ^29.1.1    |
+| typescript                       | ^4.9.5         | typescript                       | ^5.2.2     |
+| web-vitals                       | ^2.1.4         | bcrypt                           | ^5.1.1     |
+| @react-google-maps/api           | ^2.19.2        | connect-mongo                    | ^5.1.0     |
+| @react-oauth/google              | ^0.12.1        | cors                             | ^2.8.5     |
+|                                  |                | express                          | ^4.18.2    |
+|                                  |                | express-session                  | ^1.17.3    |
+|                                  |                | mongoose                         | ^7.4.5     |
+|                                  |                | morgan                           | ^1.10.0    |
 
 * * *
 
@@ -182,6 +192,8 @@ Order, pick up, and savor the taste of community with Edopla!
 
     - ##### `pages/` - Contains all the code for the different pages of the frontend
 
+    - ##### `routes/` - Contains all the code for the different routes of the application
+
     - ##### `styles/` - Contains all the styling files for the frontend
 
     - ##### `utils/` - Contains utility functions used throughout the frontend
@@ -189,8 +201,6 @@ Order, pick up, and savor the taste of community with Edopla!
     - ##### `App.tsx` - Initializes the react frontend application
     
     - ##### `index.tsx` - Renders the react app by rendering App.js
-
-- #### `.env` - Defines environment variables for the frontend
 
 - #### `Dockerfile` - Commands for building a docker image for the frontend
 
@@ -211,8 +221,12 @@ Order, pick up, and savor the taste of community with Edopla!
 
 * * *
 
-## Learn About the Developer
+## Contact the Developer
 
-[Devloper's website](https://saad-bhatti.github.io/)
+- <b>Gmail</b>: saad.bhatti.cs@gmail.com
+- <b>Phone</b>: +1 (781) 692-9561
+- [LinkedIn](https://www.linkedin.com/in/saad-bhatti/)
+- [GitHub](https://github.com/saad-bhatti)
+- [Devloper's website](https://saad-bhatti.github.io/)
 
 * * *
