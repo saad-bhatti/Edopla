@@ -1,20 +1,23 @@
 import request from "supertest";
-import app from "../../app";
 
 /**
  * Function to get the authentication cookie for each user with the specified email.
  * @param emails The emails of the users to get the authentication cookie for.
  * @returns The authentication cookie for each user.
  */
-export default async function getCookies(emails: string[]): Promise<string[]> {
+export default async function getCookies(url: string, emails: string[]): Promise<string[]> {
   const cookieRetrievelPromises = emails.map(async (email) => {
+    // Prepare the user details
+    const requestBody = {
+      isSignUp: false,
+      email: email,
+      password: "test123",
+    };
+
     // Send the request
-    const response: request.Response = await request(app)
-      .post("/api/users/login")
-      .send({
-        email: email,
-        password: "test123",
-      });
+    const response: request.Response = await request(url)
+      .post("/api/users/authenticate/form")
+      .send(requestBody);
 
     // Get the authentication cookie
     const cookie = response.headers["set-cookie"];

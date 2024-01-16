@@ -53,7 +53,7 @@ export async function getLoggedInUser(): Promise<User> {
  * @returns A promise that resolves to the user object.
  */
 export async function authenticateForm(credentials: FormCredentials): Promise<User> {
-  const response = await fetchData(`${endpoint}//authenticate/form`, {
+  const response = await fetchData(`${endpoint}/authenticate/form`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

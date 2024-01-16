@@ -2,16 +2,15 @@ import { ObjectId } from "mongoose";
 
 /** An interface for the identification attribute of a user */
 export interface Identification {
-  email?: string;
-  googleId?: string;
-  gitHubId?: string;
+  email?: string | null;
+  googleId?: string | null;
+  gitHubId?: string | null;
 }
 
 /** Interface for a user object in the database. */
 export interface User {
   _id: ObjectId;
   identification: Identification;
-  thirdParty: boolean;
   password?: string;
   _buyer: null | ObjectId | Buyer;
   _vendor: null | ObjectId | Vendor;

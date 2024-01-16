@@ -1,47 +1,44 @@
-import { IncomingMessage, Server, ServerResponse } from "http";
 import request from "supertest";
-import testApp from "../testApp";
-import * as Interfaces from "../../util/interfaces";
-import env from "../../util/validateEnv";
-import * as Data from "../initialization/addUsersData";
-import * as Database from "../mongodbMemoryServer";
-import { compareExisting, prepareUserDetails, testNew } from "../helper/usersHelper";
+import { testEmails } from "../helper/databaseRequests";
+import {
+  compareExisting,
+  prepareUserFormDetails,
+  prepareUserFormRequestBody,
+  testNew,
+} from "../helper/usersHelper";
 
-/** The server instance. */
-let server: Server<typeof IncomingMessage, typeof ServerResponse> | undefined;
-
-/** Test data. */
-const emails = ["user001@test.com", "user002@test.com"];
-let users: Interfaces.User[];
+const url = "http://localhost:5001";
 let cookie: string;
 
-/** Connect to the database, add users to it, and create the server. */
+/** Initialize the database before all tests. */
 beforeAll(async () => {
-  await Database.connect();
-  users = await Data.addUsers(emails);
-  server = await testApp.listen(env.TEST_PORT);
+  const response: request.Response = await request(url).post("/api/database/initialize/profiles");
+  console.log(response.text);
 });
 
-/** Close the database connection and the server. */
+/** Clear the database after all tests. */
 afterAll(async () => {
-  await Database.close();
-  server?.close();
+  const response: request.Response = await request(url).delete("/api/database/clear/profiles");
+  console.log(response.text);
 });
 
-/** Tests for the signup route. */
-describe("POST /api/users/signup", () => {
-  /** Test for successful login. */
+/** Tests for the authentication route. */
+describe("POST /api/users/authenticate/form/", () => {
+  /** Test for successful sign up. */
   it("should be able to sign up successfully", async () => {
-    // Prepare the user details
-    const expectedUserDetails = prepareUserDetails("user003@gmail.com");
+    // Prepare the request body
+    const requestBody = prepareUserFormRequestBody(true, "newuser@test.com");
 
     // Send the request
-    const response: request.Response = await request(testApp)
-      .post("/api/users/signup")
-      .send(expectedUserDetails);
+    const response: request.Response = await request(url)
+      .post("/api/users/authenticate/form")
+      .send(requestBody);
 
     // Response status code check
     expect(response.statusCode).toBe(201);
+
+    // Prepare the user details
+    const expectedUserDetails = prepareUserFormDetails("newuser@test.com");
 
     // Response body check
     const actualUser = JSON.parse(response.text);
@@ -49,15 +46,15 @@ describe("POST /api/users/signup", () => {
   });
 
   /** Test for missing credentials. */
-  it("should not be able to log in with a missing credential", async () => {
+  it("should not be able to sign up with a missing credential", async () => {
     // Prepare the user details (but with missing credential)
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { password, ...missingUserDetails } = prepareUserDetails("user003@gmail.com");
+    const { password, ...missingRequestBody } = prepareUserFormRequestBody(true, "jest03@test.com");
 
     // Send the request
-    const response: request.Response = await request(testApp)
-      .post("/api/users/signup")
-      .send(missingUserDetails);
+    const response: request.Response = await request(url)
+      .post("/api/users/authenticate/form")
+      .send(missingRequestBody);
 
     // Response status code check
     expect(response.statusCode).toBe(400);
@@ -66,53 +63,53 @@ describe("POST /api/users/signup", () => {
   /** Test for existing user. */
   it("should not be able to sign up an existing user", async () => {
     // Prepare the user details
-    const expectedUserDetails = prepareUserDetails(users[0].email);
+    const requestBody = prepareUserFormRequestBody(true, testEmails[0]);
 
     // Send the request
-    const response: request.Response = await request(testApp)
-      .post("/api/users/signup")
-      .send(expectedUserDetails);
+    const response: request.Response = await request(url)
+      .post("/api/users/authenticate/form")
+      .send(requestBody);
 
     // Response status code check
     expect(response.statusCode).toBe(409);
   });
-});
 
-/** Tests for the login route. */
-describe("POST /api/users/login", () => {
-  /** Test for successful login. */
+  /** Test for successful log in. */
   it("should be able to log in successfully", async () => {
-    // Prepare the user details
-    const expectedUserDetails = prepareUserDetails(users[0].email);
+    // Prepare the request body
+    const requestBody = prepareUserFormRequestBody(false, testEmails[0]);
 
     // Send the request
-    const response: request.Response = await request(testApp)
-      .post("/api/users/login")
-      .send(expectedUserDetails);
+    const response: request.Response = await request(url)
+      .post("/api/users/authenticate/form")
+      .send(requestBody);
+    // Save the cookie
+    cookie = response.header["set-cookie"];
 
     // Response status code check
     expect(response.statusCode).toBe(200);
 
+    // Prepare the user details
+    const expectedUserDetails = prepareUserFormDetails(testEmails[0]);
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password, ...expectedUser } = expectedUserDetails;
+
     // Response body check
     const actualUser = JSON.parse(response.text);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { password, ...expectedUser } = users[0]; // Since password is never returned, remove it
     compareExisting(actualUser, expectedUser);
-
-    // Take the cookie for another test
-    cookie = response.headers["set-cookie"];
   });
 
   /** Test for missing credentials. */
   it("should not be able to log in with a missing credential", async () => {
     // Prepare the user details (but with missing credential)
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { password, ...missingUserDetails } = prepareUserDetails(users[0].email);
+    const { password, ...missingRequestBody } = prepareUserFormRequestBody(false, testEmails[0]);
 
     // Send the request
-    const response: request.Response = await request(testApp)
-      .post("/api/users/login")
-      .send(missingUserDetails);
+    const response: request.Response = await request(url)
+      .post("/api/users/authenticate/form")
+      .send(missingRequestBody);
 
     // Response status code check
     expect(response.statusCode).toBe(400);
@@ -121,12 +118,13 @@ describe("POST /api/users/login", () => {
   /** Test for incorrect credentials. */
   it("should not be able to log in with incorrect credentials", async () => {
     // Prepare the user details (but with incorrect email)
-    const incorrectUserDetails = prepareUserDetails("user005@test.com");
+    const requestBody = prepareUserFormRequestBody(false, "jest10@test.com");
+    requestBody.password = "incorrectPassword";
 
     // Send the request
-    const response: request.Response = await request(testApp)
-      .post("/api/users/login")
-      .send(incorrectUserDetails);
+    const response: request.Response = await request(url)
+      .post("/api/users/authenticate/form")
+      .send(requestBody);
 
     // Response status code check
     expect(response.statusCode).toBe(422);
@@ -134,14 +132,14 @@ describe("POST /api/users/login", () => {
 });
 
 /** Tests for the getAuthenticatedUser route. */
-describe("GET /api/users", () => {
+describe("GET /api/users/", () => {
   /**
    * Test for successful retrieval of an authenticated user. Note this test depends on the success
    * of the login test.
    */
   it("should be able to retrieve an authenticated user", async () => {
     // Send the request
-    const response: request.Response = await request(testApp).get("/api/users").set("Cookie", cookie);
+    const response: request.Response = await request(url).get("/api/users/").set("Cookie", cookie);
 
     // Response status code check
     expect(response.statusCode).toBe(200);
@@ -149,14 +147,14 @@ describe("GET /api/users", () => {
     // Response body check
     const actualUser = JSON.parse(response.text);
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { password, ...expectedUser } = users[0]; // Since password is never returned, remove it
+    const { password, ...expectedUser } = prepareUserFormDetails(testEmails[0]);
     compareExisting(actualUser, expectedUser);
   });
 
   /** Test for unauthenticated user. */
   it("should not be able to retrieve an unauthenticated user", async () => {
     // Send the request
-    const response: request.Response = await request(testApp).get("/api/users");
+    const response: request.Response = await request(url).get("/api/users/");
 
     // Response status code check
     expect(response.statusCode).toBe(401);
@@ -164,13 +162,13 @@ describe("GET /api/users", () => {
 });
 
 /** Tests for the logout route. */
-describe("POST /api/users/logout", () => {
+describe("POST /api/users/logout/", () => {
   /**
    * Test for successful logout. Note this test depends on the success of the login test.
    */
   it("should be able to log out successfully", async () => {
     // Send the request
-    const response: request.Response = await request(testApp)
+    const response: request.Response = await request(url)
       .post("/api/users/logout")
       .set("Cookie", cookie);
 
@@ -186,7 +184,7 @@ describe("POST /api/users/logout", () => {
   /** Test for unauthenticated user. */
   it("should not be able to log out an unauthenticated user", async () => {
     // Send the request
-    const response: request.Response = await request(testApp).post("/api/users/logout");
+    const response: request.Response = await request(url).post("/api/users/logout");
 
     // Response status code check
     expect(response.statusCode).toBe(401);

@@ -98,7 +98,7 @@ export const authenticationForm: RequestHandler<unknown, unknown, FormBody, unkn
       if (!searchedUser) throw new Http_Errors.InvalidField("email");
       const isValidPassword = await bcrypt.compare(passwordRaw, searchedUser.password!);
       if (!isValidPassword) throw new Http_Errors.InvalidField("password");
-      
+
       // Remove the password field from the user object
       searchedUser.password = undefined;
       returnUser = searchedUser;
@@ -108,7 +108,7 @@ export const authenticationForm: RequestHandler<unknown, unknown, FormBody, unkn
     req.session.userId = returnUser._id;
     req.session.buyerId = returnUser._buyer;
     req.session.vendorId = returnUser._vendor;
-    res.status(201).json(returnUser);
+    res.status(isSignUp ? 201 : 200).json(returnUser);
   } catch (error) {
     next(error);
   }
@@ -183,7 +183,7 @@ export const authenticationGoogle: RequestHandler<unknown, unknown, GoogleBody, 
     req.session.userId = returnUser._id;
     req.session.buyerId = returnUser._buyer;
     req.session.vendorId = returnUser._vendor;
-    res.status(201).json(returnUser);
+    res.status(isSignUp ? 201 : 200).json(returnUser);
   } catch (error) {
     next(error);
   }
@@ -249,7 +249,7 @@ export const authenticateGitHub: RequestHandler<unknown, unknown, GitHubBody, un
     const gitHubId = await getGitHubId(code);
     if (!gitHubId) throw new Http_Errors.InvalidField("code");
 
-    let returnUser;
+    let returnUser, returnStatus;
     // Part 4: Retrieve any user with a matching GitHub ID, create a new user if none exists
     const searchedUser = await UserModel.findOne({ "identification.gitHubId": gitHubId });
     if (!searchedUser) {
@@ -259,13 +259,17 @@ export const authenticateGitHub: RequestHandler<unknown, unknown, GitHubBody, un
         _buyer: null,
         _vendor: null,
       });
-    } else returnUser = searchedUser;
+      returnStatus = 201;
+    } else {
+      returnUser = searchedUser;
+      returnStatus = 200;
+    }
 
     // Part 5: Set up a session and return the user
     req.session.userId = returnUser._id;
     req.session.buyerId = returnUser._buyer;
     req.session.vendorId = returnUser._vendor;
-    res.status(201).json(returnUser);
+    res.status(returnStatus).json(returnUser);
   } catch (error) {
     next(error);
   }

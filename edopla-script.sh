@@ -17,8 +17,8 @@ while true; do
     if [[ "$choice" == "start" ]]; then
         # Ask the user for the environment variable
         while true; do
-            read -p "Enter the environment (dev/prod): " ENV
-            if [[ "$ENV" == "dev" || "$ENV" == "prod" ]]; then
+            read -p "Enter the environment (dev/prod/test): " ENV
+            if [[ "$ENV" == "dev" || "$ENV" == "prod" || "$ENV" == "test" ]]; then
                 break
             else
                 echo -e "$error_message"
