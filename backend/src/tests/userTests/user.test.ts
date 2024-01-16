@@ -1,11 +1,16 @@
 import { IncomingMessage, Server, ServerResponse } from "http";
 import request from "supertest";
-import testApp from "../testApp";
 import * as Interfaces from "../../util/interfaces";
 import env from "../../util/validateEnv";
+import {
+  compareExisting,
+  prepareUserFormDetails,
+  prepareUserFormRequestBody,
+  testNew,
+} from "../helper/usersHelper";
 import * as Data from "../initialization/addUsersData";
 import * as Database from "../mongodbMemoryServer";
-import { compareExisting, prepareUserDetails, testNew } from "../helper/usersHelper";
+import testApp from "../testApp";
 
 /** The server instance. */
 let server: Server<typeof IncomingMessage, typeof ServerResponse> | undefined;
@@ -25,23 +30,26 @@ beforeAll(async () => {
 /** Close the database connection and the server. */
 afterAll(async () => {
   await Database.close();
-  server?.close();
+  server!.close();
 });
 
 /** Tests for the signup route. */
-describe("POST /api/users/signup", () => {
+describe("POST /api/users/authenticate/form", () => {
   /** Test for successful login. */
   it("should be able to sign up successfully", async () => {
-    // Prepare the user details
-    const expectedUserDetails = prepareUserDetails("user003@gmail.com");
+    // Prepare the request body
+    const requestBody = prepareUserFormRequestBody(true, "user003@gmail.com");
 
     // Send the request
     const response: request.Response = await request(testApp)
-      .post("/api/users/signup")
-      .send(expectedUserDetails);
+      .post("/api/users/authenticate/form")
+      .send(requestBody);
 
     // Response status code check
     expect(response.statusCode).toBe(201);
+
+    // Prepare the user details
+    const expectedUserDetails = prepareUserFormDetails("user003@gmail.com");
 
     // Response body check
     const actualUser = JSON.parse(response.text);
@@ -52,12 +60,15 @@ describe("POST /api/users/signup", () => {
   it("should not be able to log in with a missing credential", async () => {
     // Prepare the user details (but with missing credential)
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { password, ...missingUserDetails } = prepareUserDetails("user003@gmail.com");
+    const { password, ...missingRequestBody } = prepareUserFormRequestBody(
+      true,
+      "user003@gmail.com"
+    );
 
     // Send the request
     const response: request.Response = await request(testApp)
-      .post("/api/users/signup")
-      .send(missingUserDetails);
+      .post("/api/users/authenticate/form")
+      .send(missingRequestBody);
 
     // Response status code check
     expect(response.statusCode).toBe(400);
@@ -66,12 +77,13 @@ describe("POST /api/users/signup", () => {
   /** Test for existing user. */
   it("should not be able to sign up an existing user", async () => {
     // Prepare the user details
-    const expectedUserDetails = prepareUserDetails(users[0].email);
+    const email = users[0].identification!.email || "";
+    const requestBody = prepareUserFormRequestBody(true, email);
 
     // Send the request
     const response: request.Response = await request(testApp)
-      .post("/api/users/signup")
-      .send(expectedUserDetails);
+      .post("/api/users/authenticate/form")
+      .send(requestBody);
 
     // Response status code check
     expect(response.statusCode).toBe(409);
@@ -83,12 +95,13 @@ describe("POST /api/users/login", () => {
   /** Test for successful login. */
   it("should be able to log in successfully", async () => {
     // Prepare the user details
-    const expectedUserDetails = prepareUserDetails(users[0].email);
+    const email = users[0].identification!.email || "";
+    const requestBody = prepareUserFormRequestBody(false, email);
 
     // Send the request
     const response: request.Response = await request(testApp)
-      .post("/api/users/login")
-      .send(expectedUserDetails);
+      .post("/api/users/authenticate/form")
+      .send(requestBody);
 
     // Response status code check
     expect(response.statusCode).toBe(200);
@@ -106,13 +119,14 @@ describe("POST /api/users/login", () => {
   /** Test for missing credentials. */
   it("should not be able to log in with a missing credential", async () => {
     // Prepare the user details (but with missing credential)
+    const email = users[0].identification!.email || "";
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { password, ...missingUserDetails } = prepareUserDetails(users[0].email);
+    const { password, ...missingRequestBody } = prepareUserFormRequestBody(false, email);
 
     // Send the request
     const response: request.Response = await request(testApp)
-      .post("/api/users/login")
-      .send(missingUserDetails);
+      .post("/api/users/authenticate/form")
+      .send(missingRequestBody);
 
     // Response status code check
     expect(response.statusCode).toBe(400);
@@ -121,12 +135,12 @@ describe("POST /api/users/login", () => {
   /** Test for incorrect credentials. */
   it("should not be able to log in with incorrect credentials", async () => {
     // Prepare the user details (but with incorrect email)
-    const incorrectUserDetails = prepareUserDetails("user005@test.com");
+    const incorrectRequestBody = prepareUserFormRequestBody(false, "user005@test.com");
 
     // Send the request
     const response: request.Response = await request(testApp)
-      .post("/api/users/login")
-      .send(incorrectUserDetails);
+      .post("/api/users/authenticate/form")
+      .send(incorrectRequestBody);
 
     // Response status code check
     expect(response.statusCode).toBe(422);
@@ -141,7 +155,9 @@ describe("GET /api/users", () => {
    */
   it("should be able to retrieve an authenticated user", async () => {
     // Send the request
-    const response: request.Response = await request(testApp).get("/api/users").set("Cookie", cookie);
+    const response: request.Response = await request(testApp)
+      .get("/api/users")
+      .set("Cookie", cookie);
 
     // Response status code check
     expect(response.statusCode).toBe(200);

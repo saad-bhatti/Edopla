@@ -1,15 +1,15 @@
 import { IncomingMessage, Server, ServerResponse } from "http";
 import request from "supertest";
-import testApp from "../testApp";
-import VendorModel from "../../models/users/vendor";
 import UserModel from "../../models/users/user";
+import VendorModel from "../../models/users/vendor";
 import * as Interfaces from "../../util/interfaces";
 import { isUser } from "../../util/typeGuard";
 import env from "../../util/validateEnv";
-import * as Data from "../initialization/addUsersData";
-import * as Database from "../mongodbMemoryServer";
 import getCookies from "../helper/getCookies";
 import { compareExisting, prepareVendorDetails, testNew } from "../helper/usersHelper";
+import * as Data from "../initialization/addUsersData";
+import * as Database from "../mongodbMemoryServer";
+import testApp from "../testApp";
 
 /*********************************************************************
  * Note: All tests in this file depend on the success of logging in. *
@@ -51,7 +51,8 @@ describe("GET /api/vendors", () => {
   /** Test for successful retrieval of a vendor profile. */
   it("should be able to retrieve a vendor profile successfully", async () => {
     // Prepare the vendor details without selected details for testing
-    const expectedVendor = prepareVendorDetails(users[0].email, false);
+    const email = users[0].identification.email || "";
+    const expectedVendor = prepareVendorDetails(email, false);
 
     // Send the request
     const response: request.Response = await request(testApp)
@@ -83,7 +84,8 @@ describe("POST /api/vendors/", () => {
   /** Test for successful creation of a vendor profile. */
   it("should be able to create a vendor profile successfully", async () => {
     // Prepare the vendor details without selected details for creation
-    const requestBody = prepareVendorDetails(users[1].email, false);
+    const email = users[1].identification.email || "";
+    const requestBody = prepareVendorDetails(email, false);
 
     // Send the request
     const response: request.Response = await request(testApp)
@@ -108,10 +110,13 @@ describe("POST /api/vendors/", () => {
   /** Test for missing authentication. */
   it("should not be able to create a vendor profile with missing authentication", async () => {
     // Prepare the vendor details without selected details for creation
-    const requestBody = prepareVendorDetails(users[2].email, false);
+    const email = users[2].identification.email || "";
+    const requestBody = prepareVendorDetails(email, false);
 
     // Send the request
-    const response: request.Response = await request(testApp).post("/api/vendors").send(requestBody);
+    const response: request.Response = await request(testApp)
+      .post("/api/vendors")
+      .send(requestBody);
 
     // Response status code check
     expect(response.statusCode).toBe(401);
@@ -120,8 +125,9 @@ describe("POST /api/vendors/", () => {
   /** Test for missing argument. */
   it("should not be able to create a vendor profile with a missing argument", async () => {
     // Prepare the vendor details without selected details for creation and without a vendor name
+    const email = users[2].identification.email || "";
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { vendorName, ...missingVendorDetails } = prepareVendorDetails(users[2].email, false);
+    const { vendorName, ...missingVendorDetails } = prepareVendorDetails(email, false);
 
     // Send the request
     const response: request.Response = await request(testApp)
@@ -136,7 +142,8 @@ describe("POST /api/vendors/", () => {
   /** Test for an existing vendor profile. */
   it("should not be able to create a vendor profile for a user with existing profile", async () => {
     // Prepare the buyer details without selected details for creation
-    const requestBody = prepareVendorDetails(users[0].email, false);
+    const email = users[0].identification.email || "";
+    const requestBody = prepareVendorDetails(email, false);
 
     // Send the request
     const response: request.Response = await request(testApp)
@@ -154,7 +161,8 @@ describe("PATCH /api/vendors/", () => {
   /** Test for successful update of a vendor profile. */
   it("should be able to update a vendor profile successfully", async () => {
     // Prepare the vendor details without selected details for modification & testing
-    const requestBody = prepareVendorDetails(`Updated ${users[0].email}`, false);
+    const email = users[0].identification.email || "";
+    const requestBody = prepareVendorDetails(`Updated ${email}`, false);
 
     // Send the request
     const response: request.Response = await request(testApp)
@@ -174,10 +182,13 @@ describe("PATCH /api/vendors/", () => {
   /** Test for missing authentication. */
   it("should not be able to update a vendor profile with missing authentication", async () => {
     // Prepare the vendor details without selected details for modification
-    const requestBody = prepareVendorDetails(`Updated ${users[0].email}`, false);
+    const email = users[0].identification.email || "";
+    const requestBody = prepareVendorDetails(`Updated ${email}`, false);
 
     // Send the request
-    const response: request.Response = await request(testApp).patch("/api/vendors").send(requestBody);
+    const response: request.Response = await request(testApp)
+      .patch("/api/vendors")
+      .send(requestBody);
 
     // Response status code check
     expect(response.statusCode).toBe(401);
@@ -186,11 +197,9 @@ describe("PATCH /api/vendors/", () => {
   /** Test for missing argument. */
   it("should not be able to update a vendor profile with a missing argument", async () => {
     // Prepare the request body
+    const email = users[0].identification.email || "";
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { vendorName, ...missingVendorDetails } = prepareVendorDetails(
-      `Updated ${users[0].email}`,
-      false
-    );
+    const { vendorName, ...missingVendorDetails } = prepareVendorDetails(`Updated ${email}`, false);
 
     // Send the request
     const response: request.Response = await request(testApp)
@@ -205,7 +214,8 @@ describe("PATCH /api/vendors/", () => {
   /** Test for a non-existent vendor profile. */
   it("should not be able to update a buyer profile for a user without a profile", async () => {
     // Prepare the request body
-    const requestBody = prepareVendorDetails(`Updated ${users[2].email}`, false);
+    const email = users[2].identification.email || "";
+    const requestBody = prepareVendorDetails(`Updated ${email}`, false);
 
     // Send the request
     const response: request.Response = await request(testApp)

@@ -5,8 +5,8 @@ import UserModel from "../../models/users/user";
 import VendorModel from "../../models/users/vendor";
 import * as Interfaces from "../../util/interfaces";
 import {
-  prepareUserDetails,
   prepareBuyerDetails,
+  prepareUserFormDetails,
   prepareVendorDetails,
 } from "../helper/usersHelper";
 
@@ -23,7 +23,8 @@ export const addUsers = async (emails: string[]): Promise<Interfaces.User[]> => 
     // Create the users in the database
     const userCreationPromises = emails.map(async (email) => {
       // Prepare the user details with all details for creation
-      const preparedDetails = prepareUserDetails(email);
+      const preparedDetails = prepareUserFormDetails(email);
+
       preparedDetails.password = hashPassword;
       const userDetails = { ...preparedDetails, _id: new mongoose.Types.ObjectId() };
 
@@ -53,7 +54,8 @@ export const addBuyers = async (users: Interfaces.User[]): Promise<Interfaces.Bu
   try {
     const buyerCreationPromises = users.map(async (user) => {
       // Prepare the buyer details with all details for creation
-      const preparedDetails = prepareBuyerDetails(user.email, true);
+      const email = user.identification.email || "";
+      const preparedDetails = prepareBuyerDetails(email, true);
       const buyerDetails = { ...preparedDetails, _id: new mongoose.Types.ObjectId() };
 
       // Create the buyers in the database
@@ -85,7 +87,8 @@ export const addVendors = async (users: Interfaces.User[]): Promise<Interfaces.V
   try {
     const vendorCreationPromises = users.map(async (user) => {
       // Prepare the vendor details with all details for creation
-      const preparedDetails = prepareVendorDetails(user.email, true);
+      const email = user.identification.email || "";
+      const preparedDetails = prepareVendorDetails(email, true);
       const vendorDetails = { ...preparedDetails, _id: new mongoose.Types.ObjectId() };
 
       // Create the vendors in the database

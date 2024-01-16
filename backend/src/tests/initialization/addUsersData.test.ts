@@ -39,11 +39,14 @@ it("should add users to the database", async () => {
   });
 
   // Check if users exist in the database
-  const usersInDatabase = await UserModel.find({ email: { $in: emails } }).select("+password");
+  const usersInDatabase = await UserModel.find({ "identification.email": { $in: emails } }).select(
+    "+password"
+  );
   expect(usersInDatabase).toHaveLength(emails.length);
 
   // Check if the passwords are hashed
   usersInDatabase.forEach((user) => {
+    if (!user.password) throw new Error("Password is not defined.");
     const isPasswordHashed = bcrypt.compareSync("test123", user.password);
     expect(isPasswordHashed).toBe(true);
   });

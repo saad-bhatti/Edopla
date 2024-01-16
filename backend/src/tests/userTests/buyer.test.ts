@@ -1,13 +1,10 @@
 import { IncomingMessage, Server, ServerResponse } from "http";
 import request from "supertest";
-import testApp from "../testApp";
 import BuyerModel from "../../models/users/buyer";
 import UserModel from "../../models/users/user";
 import * as Interfaces from "../../util/interfaces";
 import { isUser } from "../../util/typeGuard";
 import env from "../../util/validateEnv";
-import * as Data from "../initialization/addUsersData";
-import * as Database from "../mongodbMemoryServer";
 import getCookies from "../helper/getCookies";
 import {
   compareExisting,
@@ -15,6 +12,9 @@ import {
   prepareVendorDetails,
   testNew,
 } from "../helper/usersHelper";
+import * as Data from "../initialization/addUsersData";
+import * as Database from "../mongodbMemoryServer";
+import testApp from "../testApp";
 
 /********************************************************************
  * Note: All tests in this file depend on the success of logging in. *
@@ -59,7 +59,8 @@ describe("GET /api/buyers", () => {
   /** Test for successful retrieval of a buyer profile. */
   it("should be able to retrieve a buyer profile successfully", async () => {
     // Prepare the buyer details without selected details for testing
-    const expectedBuyer = prepareBuyerDetails(users[0].email, false);
+    const email = users[0].identification.email || "";
+    const expectedBuyer = prepareBuyerDetails(email, false);
 
     // Send the request
     const response: request.Response = await request(testApp)
@@ -100,7 +101,8 @@ describe("POST /api/buyers/", () => {
   /** Test for successful creation of a buyer profile. */
   it("should be able to create a buyer profile successfully", async () => {
     // Prepare the buyer details without selected details for creation
-    const requestBody = prepareBuyerDetails(users[1].email, false);
+    const email = users[1].identification.email || "";
+    const requestBody = prepareBuyerDetails(email, false);
 
     // Send the request
     const response: request.Response = await request(testApp)
@@ -125,7 +127,8 @@ describe("POST /api/buyers/", () => {
   /** Test for missing authentication. */
   it("should not be able to create a buyer profile with missing authentication", async () => {
     // Prepare the buyer details without selected details for creation
-    const requestBody = prepareBuyerDetails(users[0].email, false);
+    const email = users[0].identification.email || "";
+    const requestBody = prepareBuyerDetails(email, false);
 
     // Send the request
     const response: request.Response = await request(testApp).post("/api/buyers").send(requestBody);
@@ -137,8 +140,9 @@ describe("POST /api/buyers/", () => {
   /** Test for missing argument. */
   it("should not be able to create a buyer profile with a missing argument", async () => {
     // Prepare the buyer details without selected details for creation and without a buyer name
+    const email = users[2].identification.email || "";
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { buyerName, ...missingBuyerDetails } = prepareBuyerDetails(users[2].email, false);
+    const { buyerName, ...missingBuyerDetails } = prepareBuyerDetails(email, false);
 
     // Send the request
     const response: request.Response = await request(testApp)
@@ -153,7 +157,8 @@ describe("POST /api/buyers/", () => {
   /** Test for an existing buyer profile. */
   it("should not be able to create a buyer profile for a user with existing profile", async () => {
     // Prepare the buyer details without selected details for creation
-    const requestBody = prepareBuyerDetails(users[0].email, false);
+    const email = users[0].identification.email || "";
+    const requestBody = prepareBuyerDetails(email, false);
 
     // Send the request
     const response: request.Response = await request(testApp)
@@ -171,7 +176,8 @@ describe("PATCH /api/buyers/", () => {
   /** Test for successful update of a buyer profile. */
   it("should be able to update a buyer profile successfully", async () => {
     // Prepare the buyer details without selected details for modification & testing
-    const requestBody = prepareBuyerDetails(`Updated ${users[0].email}`, false);
+    const email = users[0].identification.email || "";
+    const requestBody = prepareBuyerDetails(`Updated ${email}`, false);
 
     // Send the request
     const response: request.Response = await request(testApp)
@@ -191,10 +197,13 @@ describe("PATCH /api/buyers/", () => {
   /** Test for missing authentication. */
   it("should not be able to update a buyer profile with missing authentication", async () => {
     // Prepare the buyer details without selected details for modification
-    const requestBody = prepareBuyerDetails(`Updated ${users[0].email}`, false);
+    const email = users[0].identification.email || "";
+    const requestBody = prepareBuyerDetails(`Updated ${email}`, false);
 
     // Send the request
-    const response: request.Response = await request(testApp).patch("/api/buyers").send(requestBody);
+    const response: request.Response = await request(testApp)
+      .patch("/api/buyers")
+      .send(requestBody);
 
     // Response status code check
     expect(response.statusCode).toBe(401);
@@ -203,11 +212,9 @@ describe("PATCH /api/buyers/", () => {
   /** Test for missing argument. */
   it("should not be able to update a buyer profile with a missing argument", async () => {
     // Prepare the request body
+    const email = users[0].identification.email || "";
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { buyerName, ...missingBuyerDetails } = prepareBuyerDetails(
-      `Updated ${users[0].email}`,
-      false
-    );
+    const { buyerName, ...missingBuyerDetails } = prepareBuyerDetails(`Updated ${email}`, false);
 
     // Send the request
     const response: request.Response = await request(testApp)
@@ -222,7 +229,8 @@ describe("PATCH /api/buyers/", () => {
   /** Test for a non-existent buyer profile. */
   it("should not be able to update a buyer profile for a user without a profile", async () => {
     // Prepare the request body
-    const requestBody = prepareBuyerDetails(`Updated ${users[2].email}`, false);
+    const email = users[2].identification.email || "";
+    const requestBody = prepareBuyerDetails(`Updated ${email}`, false);
 
     // Send the request
     const response: request.Response = await request(testApp)
